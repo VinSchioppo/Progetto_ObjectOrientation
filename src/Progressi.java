@@ -7,15 +7,17 @@ public class Progressi {
     String TestoDocumeto;
     LinkedList<Commento> Commenti = null;
 
-    Progressi(String testo)
-    {
+    Progressi(String testo) {
+        
         DataProgresso = new Date();
         TestoDocumeto = testo;
+    
     }
 
-    void AddCommento(Commento commento)
-    {
+    void AddCommento(Commento commento) {
+        
         if(Commenti == null) Commenti = new LinkedList<Commento>();
         Commenti.add(commento);
+    
     }
 }
