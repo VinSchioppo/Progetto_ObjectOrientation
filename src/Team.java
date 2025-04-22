@@ -6,6 +6,7 @@ public class Team {
 
     private static int NumTeam = 0;
 
+    String Nome;
     int idTeam;
     LinkedList<Utente> MembriTeam = null;
     LinkedList<Evento> EventiIscritti = null;
@@ -13,8 +14,9 @@ public class Team {
     LinkedList<Progressi> ProgressReport = null;
     LinkedList<Voto> Votazioni = null;
 
-    public Team()
+    public Team(String Nome)
     {
+        this.Nome = Nome;
         this.idTeam = NumTeam;
         NumTeam++;
     }

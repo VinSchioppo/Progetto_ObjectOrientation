@@ -5,7 +5,7 @@ public class Main {
 
         Organizzatore a = new Organizzatore("mario", "rossi");
         System.out.println(a.NomeUtente + a.PasswordUtente);
-        Team Lakers = a.CreaTeam();
-        System.out.println("Team id: " + Lakers.idTeam + "\nNumMembers: " + Lakers.GiveNumMembri());
+        Team Lakers = a.CreaTeam("Lakers");
+        System.out.println("Team id: " + Lakers.idTeam + "\nNome: " + Lakers.Nome + "\nNumMembers: " + Lakers.GiveNumMembri());
     }
 }

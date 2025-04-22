@@ -43,9 +43,9 @@ public class Utente {
         EventiIscritti.add(evento);
     }
 
-    public Team CreaTeam()
+    public Team CreaTeam(String Nome)
     {
-        Team new_team = new Team();
+        Team new_team = new Team(Nome);
         AddTeam(new_team);
         new_team.MembriTeam = new LinkedList<Utente>();
         new_team.MembriTeam.add(this);

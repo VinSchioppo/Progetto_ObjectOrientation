@@ -1,5 +1,3 @@
-import jdk.incubator.vector.VectorOperators;
-
 import java.util.Date;
 import java.util.LinkedList;
 
