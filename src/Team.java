@@ -8,6 +8,7 @@ public class Team {
 
     String Nome;
     int idTeam;
+    
     LinkedList<Utente> MembriTeam = null;
     LinkedList<Evento> EventiIscritti = null;
     private Queue<Utente> RichiestePartecipazione = null;
@@ -30,7 +31,9 @@ public class Team {
 
     public void AddEvento(Evento evento) {
         
-        if(EventiIscritti == null) EventiIscritti = new LinkedList<Evento>();
+        if(EventiIscritti == null) 
+            EventiIscritti = new LinkedList<Evento>();
+        
         EventiIscritti.add(evento);
     
     }
@@ -50,7 +53,9 @@ public class Team {
     public void EnqueueListaAttesa(Utente utente)
     {
     
-        if(RichiestePartecipazione == null) RichiestePartecipazione = new LinkedList<Utente>();
+        if(RichiestePartecipazione == null) 
+            RichiestePartecipazione = new LinkedList<Utente>();
+ 
         RichiestePartecipazione.add(utente);
     
     }
@@ -59,8 +64,9 @@ public class Team {
     {
     
         char answer;
-        if(RichiestePartecipazione != null) {
         
+        if(RichiestePartecipazione != null) {
+            
             Utente utente = RichiestePartecipazione.poll();
             utente.PrintDati();
             System.out.println("\n\nAccettare questo utente nel team?\n\n(Y/n)");
@@ -76,14 +82,18 @@ public class Team {
 
     void Aggiungi_ProgressReport(Progressi progressi) {
         
-        if(ProgressReport == null) ProgressReport = new LinkedList<Progressi>();
+        if(ProgressReport == null) 
+            ProgressReport = new LinkedList<Progressi>();
+        
         ProgressReport.add(progressi);
         
     }
 
     void AddVoto(Voto voto) {
         
-        if(Votazioni == null) Votazioni = new LinkedList<Voto>();
+        if(Votazioni == null) 
+            Votazioni = new LinkedList<Voto>();
+        
         Votazioni.add(voto);
     
     }
