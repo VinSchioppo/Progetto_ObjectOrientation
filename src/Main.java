@@ -7,5 +7,6 @@ public class Main {
         System.out.println(a.NomeUtente + a.PasswordUtente);
         Team Lakers = a.CreaTeam("Lakers");
         System.out.println("Team id: " + Lakers.idTeam + "\nNome: " + Lakers.Nome + "\nNumMembers: " + Lakers.GiveNumMembri());
+        
     }
 }
