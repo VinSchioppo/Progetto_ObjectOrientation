@@ -5,6 +5,7 @@ public class Progressi {
 
     Date DataProgresso;
     String TestoDocumeto;
+    
     LinkedList<Commento> Commenti = null;
 
     Progressi(String testo) {
@@ -16,7 +17,9 @@ public class Progressi {
 
     void AddCommento(Commento commento) {
         
-        if(Commenti == null) Commenti = new LinkedList<Commento>();
+        if(Commenti == null) 
+            Commenti = new LinkedList<Commento>();
+        
         Commenti.add(commento);
     
     }
