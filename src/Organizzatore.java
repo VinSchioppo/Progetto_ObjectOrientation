@@ -25,13 +25,23 @@ public class Organizzatore extends Utente {
     
     }
 
-    public void ApriPrenotazioni() {EventoOrganizzato.prenotazioni = true;}
+    public void ApriPrenotazioni() {
 
-    public void ChiudiPrenotazioni() {EventoOrganizzato.prenotazioni = false;}
+        EventoOrganizzato.prenotazioni = true;
+    
+    }
+
+    public void ChiudiPrenotazioni() {
+        
+        EventoOrganizzato.prenotazioni = false;
+    
+    }
 
     public Giudice SelezionaGiudice(Utente utente) {
         
-        if(EventoOrganizzato.Giudici == null) EventoOrganizzato.Giudici = new LinkedList<Giudice>();
+        if(EventoOrganizzato.Giudici == null) 
+            EventoOrganizzato.Giudici = new LinkedList<Giudice>();
+        
         Giudice giudice = new Giudice(utente.NomeUtente, utente.PasswordUtente);
         giudice = PromuoviUtente(giudice, utente);
         EventoOrganizzato.Giudici.add(giudice);
