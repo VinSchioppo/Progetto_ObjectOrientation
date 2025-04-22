@@ -14,57 +14,77 @@ public class Team {
     LinkedList<Progressi> ProgressReport = null;
     LinkedList<Voto> Votazioni = null;
 
-    public Team(String Nome)
-    {
+    public Team(String Nome) {
+        
         this.Nome = Nome;
         this.idTeam = NumTeam;
         NumTeam++;
+    
     }
 
-    public void IscriviEvento(Evento evento) {evento.EnqueueListaAttesaTeam(this);}
+    public void IscriviEvento(Evento evento) {
+        
+        evento.EnqueueListaAttesaTeam(this);
+    
+    }
 
-    public void AddEvento(Evento evento)
-    {
+    public void AddEvento(Evento evento) {
+        
         if(EventiIscritti == null) EventiIscritti = new LinkedList<Evento>();
         EventiIscritti.add(evento);
+    
     }
 
-    public int GiveNumMembri() {return MembriTeam.size();}
+    public int GiveNumMembri() {
+        
+        return MembriTeam.size();
+    
+    }
 
-    public static int GiveNumTeam() {return NumTeam;}
+    public static int GiveNumTeam() {
+        
+        return NumTeam;
+    
+    }
 
     public void EnqueueListaAttesa(Utente utente)
     {
+    
         if(RichiestePartecipazione == null) RichiestePartecipazione = new LinkedList<Utente>();
         RichiestePartecipazione.add(utente);
+    
     }
 
     private void DequeueListaAttesa()
     {
+    
         char answer;
         if(RichiestePartecipazione != null) {
+        
             Utente utente = RichiestePartecipazione.poll();
             utente.PrintDati();
             System.out.println("\n\nAccettare questo utente nel team?\n\n(Y/n)");
             Scanner scan = new Scanner(System.in);
             answer = scan.next().charAt(0);
+            
             if((answer == 'Y') || (answer == 'y')) {
                 MembriTeam.add(utente);
                 utente.AddTeam(this);
             }
         }
-
     }
 
-    void Aggiungi_ProgressReport(Progressi progressi)
-    {
+    void Aggiungi_ProgressReport(Progressi progressi) {
+        
         if(ProgressReport == null) ProgressReport = new LinkedList<Progressi>();
         ProgressReport.add(progressi);
+        
     }
 
-    void AddVoto(Voto voto)
-    {
+    void AddVoto(Voto voto) {
+        
         if(Votazioni == null) Votazioni = new LinkedList<Voto>();
         Votazioni.add(voto);
+    
     }
 }
