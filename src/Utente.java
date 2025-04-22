@@ -13,10 +13,11 @@ public class Utente {
     LinkedList<Evento> EventiIscritti = null;
     LinkedList<Team> TeamUniti = null;
 
-    public Utente(String NomeUtente, String PasswordUtente)
-    {
+    public Utente(String NomeUtente, String PasswordUtente) {
+        
         this.NomeUtente = NomeUtente;
         this.PasswordUtente = PasswordUtente;
+    
     }
 
     public void SetDati(String FNome, String MNome, String LNome, Date DataNascita) {
@@ -32,7 +33,10 @@ public class Utente {
         
         System.out.println("Nome Utente: " + this.NomeUtente);
         System.out.println("\nNome: " + this.FNome);
-        if(!this.MNome.isEmpty())System.out.println(" " + this.MNome);
+        
+        if(!this.MNome.isEmpty())
+            System.out.println(" " + this.MNome);
+
         System.out.println(" " + this.LNome);
         System.out.println("\nData di Nascita: " + this.DataNascita);
     
@@ -42,7 +46,9 @@ public class Utente {
 
     public void AddEvento(Evento evento) {
         
-        if(EventiIscritti == null) EventiIscritti = new LinkedList<Evento>();
+        if(EventiIscritti == null) 
+            EventiIscritti = new LinkedList<Evento>();
+        
         EventiIscritti.add(evento);
     
     }
@@ -57,11 +63,17 @@ public class Utente {
 
     }
 
-    public void JoinTeam(Team team) {team.EnqueueListaAttesa(this);}
+    public void JoinTeam(Team team) {
+        
+        team.EnqueueListaAttesa(this);
+    
+    }
 
     public void AddTeam(Team team) {
         
-        if(TeamUniti == null) TeamUniti = new LinkedList<Team>();
+        if(TeamUniti == null) 
+            TeamUniti = new LinkedList<Team>();
+        
         TeamUniti.add(team);
     
     }
