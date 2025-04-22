@@ -13,6 +13,7 @@ public class Evento {
     String DescrizioneProblema;
     Date DataInizioReg;
     Date DataFineReg;
+    
     Organizzatore organizzatore = null;
     LinkedList<Giudice> Giudici = null;
     Queue<Utente> RichiestePartecipazioneUtenti = null;
@@ -21,9 +22,17 @@ public class Evento {
     LinkedList<Team> TeamIscritti = null;
     boolean prenotazioni = false;
 
-    public Evento(String Titolo) {this.Titolo = Titolo;}
+    public Evento(String Titolo) {
+        
+        this.Titolo = Titolo;
+    
+    }
 
-    public void setSede(String sede) {this.Sede = sede;}
+    public void setSede(String sede) {
+        
+        this.Sede = sede;
+    
+    }
 
     public void setDate(Date Inizio, Date Fine) {
         
@@ -32,18 +41,26 @@ public class Evento {
     
     }
 
-    public void setMaxIscritti(int MaxIscritti) {this.MaxIscritti = MaxIscritti;}
+    public void setMaxIscritti(int MaxIscritti) {
+        
+        this.MaxIscritti = MaxIscritti;
+    
+    }
 
     public void EnqueueListaAttesaUtenti(Utente utente) {
         
-        if(RichiestePartecipazioneUtenti == null) RichiestePartecipazioneUtenti = new LinkedList<Utente>();
+        if(RichiestePartecipazioneUtenti == null) 
+            RichiestePartecipazioneUtenti = new LinkedList<Utente>();
+        
         RichiestePartecipazioneUtenti.add(utente);
     
     }
 
     public void AddPartecipante(Utente utente) {
         
-        if(Partecipanti == null) Partecipanti = new LinkedList<Utente>();
+        if(Partecipanti == null) 
+            Partecipanti = new LinkedList<Utente>();
+        
         Partecipanti.add(utente);
     
     }
@@ -62,14 +79,18 @@ public class Evento {
 
     public void EnqueueListaAttesaTeam(Team team) {
         
-        if(RichiestePartecipazioneTeam == null) RichiestePartecipazioneTeam = new LinkedList<Team>();
+        if(RichiestePartecipazioneTeam == null) 
+            RichiestePartecipazioneTeam = new LinkedList<Team>();
+        
         RichiestePartecipazioneTeam.add(team);
     
     }
 
     public void AddTeam(Team team) {
         
-        if( TeamIscritti == null) TeamIscritti = new LinkedList<Team>();
+        if( TeamIscritti == null) 
+            TeamIscritti = new LinkedList<Team>();
+        
         TeamIscritti.add(team);
     
     }
