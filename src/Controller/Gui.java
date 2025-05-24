@@ -5,15 +5,16 @@ import java.awt.event.*;
 
 
 public class Gui extends JDialog {
-    private JPanel contentPane;
+    private JPanel SignUpPanel;
     private JTextField NomeUtente;
     private JPasswordField PasswordUtente;
     private JButton logInButton;
     private JTextArea Messaggio;
 
     public Gui() {
-        setContentPane(contentPane);
+        setContentPane(SignUpPanel);
         setModal(true);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
 
         logInButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -22,6 +23,7 @@ public class Gui extends JDialog {
                 }
                 else{
                     JOptionPane.showMessageDialog(null, "Utente registrato con Successo!", "Comfirmation", JOptionPane.INFORMATION_MESSAGE);
+                    setVisible(false);
                 }
 
             }
@@ -32,6 +34,26 @@ public class Gui extends JDialog {
         Gui dialog = new Gui();
         dialog.pack();
         dialog.setVisible(true);
+        UserData userData = new UserData();
+        userData.pack();
+        userData.setVisible(true);
         System.exit(0);
+    }
+
+    public static class UserData extends JDialog {
+        private JPanel UserDataPanel;
+        private JButton TestButton;
+
+
+        UserData() {
+            setContentPane(UserDataPanel);
+            setModal(true);
+            setDefaultCloseOperation(HIDE_ON_CLOSE);
+            TestButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("Ciao\n");
+                }
+            });
+        }
     }
 }
