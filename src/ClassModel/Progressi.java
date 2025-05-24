@@ -1,3 +1,5 @@
+package ClassModel;
+
 import java.util.Date;
 import java.util.LinkedList;
 

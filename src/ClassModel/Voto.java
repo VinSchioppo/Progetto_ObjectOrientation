@@ -1,3 +1,5 @@
+package ClassModel;
+
 public class Voto {
 
     int Valore;

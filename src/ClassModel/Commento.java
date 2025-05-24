@@ -1,3 +1,5 @@
+package ClassModel;
+
 public class Commento {
 
     String Testo;

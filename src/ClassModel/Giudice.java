@@ -1,3 +1,5 @@
+package ClassModel;
+
 public class Giudice extends Utente {
 
     Evento evento;

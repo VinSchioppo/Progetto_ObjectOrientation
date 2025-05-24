@@ -1,3 +1,5 @@
+package ClassModel;
+
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -31,7 +33,7 @@ public class Utente {
 
     public void PrintDati() {
         
-        System.out.println("Nome Utente: " + this.NomeUtente);
+        System.out.println("Nome ClassModel.Utente: " + this.NomeUtente);
         System.out.println("\nNome: " + this.FNome);
         
         if(!this.MNome.isEmpty())
