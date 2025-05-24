@@ -42,7 +42,11 @@ public class Utente {
     
     }
 
-    public void IscriviEvento(Evento evento) {evento.EnqueueListaAttesaUtenti(this);}
+    public void IscriviEvento(Evento evento) {
+
+        evento.EnqueueListaAttesaUtenti(this);
+
+    }
 
     public void AddEvento(Evento evento) {
         
@@ -66,7 +70,7 @@ public class Utente {
     public void JoinTeam(Team team) {
         
         team.EnqueueListaAttesa(this);
-    
+
     }
 
     public void AddTeam(Team team) {
