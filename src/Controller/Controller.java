@@ -2,6 +2,7 @@ package Controller;
 import ClassModel.*;
 
 import javax.xml.crypto.Data;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.time.LocalDate;
@@ -32,19 +33,24 @@ public class Controller {
 
     public boolean InserisciDatiUtente(String FNome, String MNome, String LNome, String DataString){
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate DataConvertita = LocalDate.parse(DataString, formatter);
-
-        UtenteCorrente.SetDati(FNome, MNome, LNome, DataConvertita);
+        LocalDate DataConvertita;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            DataConvertita = LocalDate.parse(DataString, formatter);
+        }
+        catch (DateTimeParseException e) {
+            return false;
+        }
 
         if((FNome.length() < 3) || (LNome.length() < 3))
         {
-
             return false;
-
         }
-
-        return true;
+        else {
+            UtenteCorrente.SetDati(FNome, MNome, LNome, DataConvertita);
+            UtenteCorrente.PrintDati();
+            return true;
+        }
     }
 
 }
