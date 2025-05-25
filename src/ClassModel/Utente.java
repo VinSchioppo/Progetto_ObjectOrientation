@@ -1,5 +1,6 @@
 package ClassModel;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -10,7 +11,7 @@ public class Utente {
     String FNome;
     String MNome;
     String LNome;
-    Date DataNascita;
+    LocalDate DataNascita;
     
     LinkedList<Evento> EventiIscritti = null;
     LinkedList<Team> TeamUniti = null;
@@ -22,7 +23,7 @@ public class Utente {
     
     }
 
-    public void SetDati(String FNome, String MNome, String LNome, Date DataNascita) {
+    public void SetDati(String FNome, String MNome, String LNome, LocalDate DataNascita) {
 
         this.FNome = FNome;
         this.MNome = MNome;
