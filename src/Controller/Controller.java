@@ -1,21 +1,26 @@
 package Controller;
-
 import ClassModel.*;
-
 import java.util.LinkedList;
 
 public class Controller {
 
-    private static LinkedList<Utente> UtenteRegistrato = new LinkedList<>();
+    private Utente UtenteCorrente;
+    private static LinkedList<Utente> UtentiRegistrati = new LinkedList<>();
 
-    public static boolean TrovaUtente(String NomeUtente, String PasswordUtente)
+    public boolean TrovaUtente(String NomeUtente, String PasswordUtente)
     {
         if(NomeUtente.length() < 5  || PasswordUtente.length() < 8) {
                 return false;
         }
         else {
             Utente UtenteTmp = new Utente(NomeUtente, PasswordUtente);
-            UtenteRegistrato.addLast(UtenteTmp);
+            for(Utente u : UtentiRegistrati) {
+                if(UtenteTmp.equals(u)) {
+                    return false;
+                }
+            }
+            UtentiRegistrati.addLast(UtenteTmp);
+            UtenteCorrente = UtenteTmp;
             return true;
         }
     }

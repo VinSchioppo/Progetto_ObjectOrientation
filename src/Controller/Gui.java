@@ -11,14 +11,14 @@ public class Gui extends JDialog {
     private JButton logInButton;
     private JTextArea Messaggio;
 
-    public Gui() {
+    public Gui(Controller controller) {
         setContentPane(SignUpPanel);
         setModal(true);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
 
         logInButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (!Controller.TrovaUtente(NomeUtente.getText(), PasswordUtente.getText())) {
+                if (!controller.TrovaUtente(NomeUtente.getText(), PasswordUtente.getText())) {
                     JOptionPane.showMessageDialog(null, "Impossibile registrare l'Utente!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 else{
@@ -31,10 +31,11 @@ public class Gui extends JDialog {
     }
 
     public static void main(String[] args) {
-        Gui dialog = new Gui();
+        Controller controller = new Controller();
+        Gui dialog = new Gui(controller);
         dialog.pack();
         dialog.setVisible(true);
-        UserData userData = new UserData();
+        UserData userData = new UserData(controller);
         userData.pack();
         userData.setVisible(true);
         System.exit(0);
@@ -45,7 +46,7 @@ public class Gui extends JDialog {
         private JButton TestButton;
 
 
-        UserData() {
+        UserData(Controller controller) {
             setContentPane(UserDataPanel);
             setModal(true);
             setDefaultCloseOperation(HIDE_ON_CLOSE);
