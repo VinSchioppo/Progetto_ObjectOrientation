@@ -45,43 +45,4 @@ public class Utente {
     
     }
 
-    public void IscriviEvento(Evento evento) {
-
-        evento.EnqueueListaAttesaUtenti(this);
-
-    }
-
-    public void AddEvento(Evento evento) {
-        
-        if(EventiIscritti == null) 
-            EventiIscritti = new LinkedList<Evento>();
-        
-        EventiIscritti.add(evento);
-    
-    }
-
-    public Team CreaTeam(String Nome) {
-        
-        Team new_team = new Team(Nome);
-        AddTeam(new_team);
-        new_team.MembriTeam = new LinkedList<Utente>();
-        new_team.MembriTeam.add(this);
-        return new_team;
-
-    }
-
-    public void JoinTeam(Team team) {
-        
-        team.EnqueueListaAttesa(this);
-
-    }
-
-    public void AddTeam(Team team) {
-        
-        if(TeamUniti == null) 
-            TeamUniti = new LinkedList<Team>();
-        
-        TeamUniti.add(team);
-    
-    }
 }

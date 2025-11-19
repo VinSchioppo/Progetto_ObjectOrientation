@@ -18,9 +18,9 @@ public class Evento {
     
     Organizzatore organizzatore = null;
     LinkedList<Giudice> Giudici = null;
-    Queue<Utente> RichiestePartecipazioneUtenti = null;
+    Queue<Partecipante> RichiestePartecipazioneUtenti = null;
     Queue<Team> RichiestePartecipazioneTeam = null;
-    LinkedList<Utente> Partecipanti = null;
+    LinkedList<Partecipante> Partecipanti = null;
     LinkedList<Team> TeamIscritti = null;
     boolean prenotazioni = false;
 
@@ -49,19 +49,19 @@ public class Evento {
     
     }
 
-    public void EnqueueListaAttesaUtenti(Utente utente) {
+    public void EnqueueListaAttesaUtenti(Partecipante utente) {
         
         if(RichiestePartecipazioneUtenti == null) 
-            RichiestePartecipazioneUtenti = new LinkedList<Utente>();
+            RichiestePartecipazioneUtenti = new LinkedList<Partecipante>();
         
         RichiestePartecipazioneUtenti.add(utente);
     
     }
 
-    public void AddPartecipante(Utente utente) {
+    public void AddPartecipante(Partecipante utente) {
         
         if(Partecipanti == null) 
-            Partecipanti = new LinkedList<Utente>();
+            Partecipanti = new LinkedList<Partecipante>();
         
         Partecipanti.add(utente);
     
@@ -70,7 +70,7 @@ public class Evento {
     public void DequeueListaAttesaUtenti() {
         
         if(RichiestePartecipazioneUtenti != null) {
-            Utente utente = RichiestePartecipazioneUtenti.remove();
+            Partecipante utente = RichiestePartecipazioneUtenti.remove();
             if ((Partecipanti == null) || (Partecipanti.size() < MaxIscritti)) {
                 AddPartecipante(utente);
                 utente.AddEvento(this);

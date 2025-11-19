@@ -13,7 +13,7 @@ public class Team {
     
     LinkedList<Utente> MembriTeam = null;
     LinkedList<Evento> EventiIscritti = null;
-    private Queue<Utente> RichiestePartecipazione = null;
+    private Queue<Partecipante> RichiestePartecipazione = null;
     LinkedList<Progressi> ProgressReport = null;
     LinkedList<Voto> Votazioni = null;
 
@@ -52,11 +52,11 @@ public class Team {
     
     }
 
-    public void EnqueueListaAttesa(Utente utente)
+    public void EnqueueListaAttesa(Partecipante utente)
     {
     
         if(RichiestePartecipazione == null) 
-            RichiestePartecipazione = new LinkedList<Utente>();
+            RichiestePartecipazione = new LinkedList<Partecipante>();
  
         RichiestePartecipazione.add(utente);
     
@@ -69,7 +69,7 @@ public class Team {
         
         if(RichiestePartecipazione != null) {
             
-            Utente utente = RichiestePartecipazione.poll();
+            Partecipante utente = RichiestePartecipazione.poll();
             utente.PrintDati();
             System.out.println("\n\nAccettare questo utente nel team?\n\n(Y/n)");
             Scanner scan = new Scanner(System.in);
