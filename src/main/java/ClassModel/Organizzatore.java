@@ -20,11 +20,9 @@ public class Organizzatore extends Utente {
     
     }
 
-    public void setDateReg(Date Inizio, Date Fine) {
-        
-        EventoOrganizzato.DataInizioReg = Inizio;
-        EventoOrganizzato.DataFineReg = Fine;
-    
+    public void finalizeDateReg(Date Inizio, Date Fine) {
+
+        EventoOrganizzato.setDateReg(Inizio, Fine);
     }
 
     public void ApriPrenotazioni() {

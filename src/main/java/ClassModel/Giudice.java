@@ -12,7 +12,7 @@ public class Giudice extends Utente {
 
     public void PubblicaProblema(String Problema) {
         
-        evento.DescrizioneProblema = Problema;
+        evento.setDescrizioneProblema(Problema);
     }
 
     private void CommentaProgresso(Progressi progresso, String commento) {
