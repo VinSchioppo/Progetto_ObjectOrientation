@@ -2,32 +2,36 @@ package ClassModel;
 
 public class Giudice extends Utente {
 
-    Evento evento;
+    private Evento EventoGiudicato;
 
     public Giudice(String NomeUtente, String PasswordUtente) {
-        
+
         super(NomeUtente, PasswordUtente);
-    
+
     }
 
-    public void PubblicaProblema(String Problema) {
-        
-        evento.setDescrizioneProblema(Problema);
+    public void setEvento(Evento evento) {this.EventoGiudicato = evento;}
+
+    public int getIdEventoGiudicato() {return EventoGiudicato.getIdEvento();}
+
+    public void pubblicaProblema(String Problema) {
+
+        EventoGiudicato.setDescrizioneProblema(Problema);
     }
 
-    private void CommentaProgresso(Progressi progresso, String commento) {
-        
+    private void commentaProgresso(Progresso progresso, String commento) {
+
         Commento CommentoProgresso = new Commento(commento);
-        CommentoProgresso.Giudice = this.NomeUtente;
-        progresso.AddCommento(CommentoProgresso);
-    
+        CommentoProgresso.setGiudice(this.NomeUtente);
+        progresso.addCommento(CommentoProgresso);
+
     }
 
-    private void DaiVoto(Team team, int valore) {
-        
+    private void daiVoto(Team team, int valore) {
+
         Voto voto = new Voto(valore);
-        voto.Giudice = this.NomeUtente;
-        team.AddVoto(voto);
-    
+        voto.setGiudice(this.NomeUtente);
+        team.addVoto(voto);
+
     }
 }

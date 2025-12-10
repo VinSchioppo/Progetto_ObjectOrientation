@@ -1,6 +1,8 @@
 package DAO;
 
 import ClassModel.Evento;
+import ClassModel.Giudice;
+import ClassModel.Organizzatore;
 import ClassModel.Utente;
 import Database.ConnessioneDatabase;
 import java.sql.Connection;
@@ -29,7 +31,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addEvento(String Titolo, String Indirizzo, int NCivico) throws SQLException{
+    public void addEventoDB(String Titolo, String Indirizzo, int NCivico) throws SQLException{
         try {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede) VALUES('" + Titolo + "','" + Indirizzo + "'," + NCivico + ");");
             ps.executeUpdate();
@@ -39,10 +41,10 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addAllEventi(ArrayList<Evento> eventi) throws SQLException {
+    public void addAllEventiDB(ArrayList<Evento> eventi) throws SQLException {
         for(Evento currentEvento : eventi){
             try {
-                addEvento(currentEvento.getTitolo(), currentEvento.getIndirizzoSede(), currentEvento.getNCivicoSede());
+                addEventoDB(currentEvento.getTitolo(), currentEvento.getIndirizzoSede(), currentEvento.getNCivicoSede());
             }
             catch (SQLException e) {
                 throw e;
@@ -50,7 +52,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addPartecipante(String NomeUtente, String Password) throws SQLException{
+    public void addPartecipanteDB(String NomeUtente, String Password) throws SQLException{
         try {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password) VALUES('" + NomeUtente + "','" + Password + "');");
             ps.executeUpdate();
@@ -60,10 +62,10 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addAllPartecipanti(ArrayList<Utente> utenti) throws SQLException{
+    public void addAllPartecipantiDB(ArrayList<Utente> utenti) throws SQLException{
         for(Utente currentPartecipante : utenti){
             try {
-                addPartecipante(currentPartecipante.getNomeUtente(), currentPartecipante.getPassword());
+                addPartecipanteDB(currentPartecipante.getNomeUtente(), currentPartecipante.getPasswordUtente());
             }
             catch (SQLException e) {
                 throw e;
@@ -71,6 +73,49 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+
+    public void addOrganizzatoreDB(String NomeUtente, String Password, int idEvento) throws SQLException{
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO Organizzatore(NomeUtente, Password, idEvento) VALUES('" + NomeUtente + "','" + Password + "'," + idEvento + " );");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addAllOrganizzatoriDB(ArrayList<Organizzatore> organizzatori) throws SQLException{
+        for(Organizzatore currentOrganizzatore : organizzatori){
+            try {
+                addOrganizzatoreDB(currentOrganizzatore.getNomeUtente(), currentOrganizzatore.getPasswordUtente(), currentOrganizzatore.getIdEventoOrganizzato());
+            }
+            catch (SQLException e) {
+                throw e;
+            }
+        }
+    }
+
+    public void addGiudiceDB(String NomeUtente, String Password, int idEvento) throws SQLException{
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO Giudice(NomeUtente, Password) VALUES('" + NomeUtente + "','" + Password + "');");
+            ps.executeUpdate();
+            ps = connection.prepareStatement("INSERT INTO GiudiceEvento(NomeUtente, idEvento) VALUES('" + NomeUtente + "'," + idEvento + ");");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+    public void addAllGiudiciDB(ArrayList<Giudice> giudici) throws SQLException{
+        for(Giudice currentGiudice : giudici){
+            try {
+                addGiudiceDB(currentGiudice.getNomeUtente(), currentGiudice.getPasswordUtente(), currentGiudice.getIdEventoGiudicato());
+            }
+            catch (SQLException e) {
+                throw e;
+            }
+        }
+    }
 
     public void printEventi() {
         PreparedStatement leggiEventi;

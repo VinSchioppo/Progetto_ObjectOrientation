@@ -6,6 +6,7 @@ import java.util.Queue;
 
 public class Evento {
 
+    private int IdEvento;
     private String Titolo;
     private String IndirizzoSede;
     private int NCivicoSede;
@@ -16,7 +17,7 @@ public class Evento {
     private String DescrizioneProblema;
     private Date DataInizioReg;
     private Date DataFineReg;
-    
+
     Organizzatore organizzatore = null;
     LinkedList<Giudice> Giudici = null;
     Queue<Partecipante> RichiestePartecipazioneUtenti = null;
@@ -26,6 +27,7 @@ public class Evento {
     boolean prenotazioni = false;
 
     public Evento(String Titolo) {this.Titolo = Titolo;}
+    public void setIdEvento(int idEvento) {IdEvento = idEvento;}
     public void setIndirizzoSede(String sede) {this.IndirizzoSede = sede;}
     public void setNCivicoSede(int sede) {this.NCivicoSede = sede;}
     public void setMaxIscritti(int MaxIscritti) {this.MaxIscritti = MaxIscritti;}
@@ -47,6 +49,7 @@ public class Evento {
         }
     }
 
+    public int getIdEvento() {return IdEvento;}
     public String getTitolo() {return Titolo;}
     public String getIndirizzoSede() {return IndirizzoSede;}
     public int getNCivicoSede() {return NCivicoSede;}
@@ -58,61 +61,61 @@ public class Evento {
     public Date getDateReg() {return DataInizioReg;}
     public Date getDateFineReg() {return DataFineReg;}
 
-    public void EnqueueListaAttesaUtenti(Partecipante utente) {
-        
-        if(RichiestePartecipazioneUtenti == null) 
+    public void enqueueListaAttesaUtenti(Partecipante utente) {
+
+        if(RichiestePartecipazioneUtenti == null)
             RichiestePartecipazioneUtenti = new LinkedList<Partecipante>();
-        
+
         RichiestePartecipazioneUtenti.add(utente);
-    
+
     }
 
-    public void AddPartecipante(Partecipante utente) {
-        
-        if(Partecipanti == null) 
+    public void addPartecipante(Partecipante utente) {
+
+        if(Partecipanti == null)
             Partecipanti = new LinkedList<Partecipante>();
-        
+
         Partecipanti.add(utente);
-    
+
     }
 
     public void DequeueListaAttesaUtenti() {
-        
+
         if(RichiestePartecipazioneUtenti != null) {
             Partecipante utente = RichiestePartecipazioneUtenti.remove();
             if ((Partecipanti == null) || (Partecipanti.size() < MaxIscritti)) {
-                AddPartecipante(utente);
-                utente.AddEvento(this);
-        
+                addPartecipante(utente);
+                utente.addEvento(this);
+
             }
         }
     }
 
-    public void EnqueueListaAttesaTeam(Team team) {
-        
-        if(RichiestePartecipazioneTeam == null) 
+    public void enqueueListaAttesaTeam(Team team) {
+
+        if(RichiestePartecipazioneTeam == null)
             RichiestePartecipazioneTeam = new LinkedList<Team>();
-        
+
         RichiestePartecipazioneTeam.add(team);
-    
+
     }
 
-    public void AddTeam(Team team) {
-        
-        if( TeamIscritti == null) 
+    public void addTeam(Team team) {
+
+        if( TeamIscritti == null)
             TeamIscritti = new LinkedList<Team>();
-        
+
         TeamIscritti.add(team);
-    
+
     }
 
-    public void DequeueListaAttesaTeam() {
-        
+    public void dequeueListaAttesaTeam() {
+
         Team team = RichiestePartecipazioneTeam.remove();
         if((TeamIscritti == null) || (TeamIscritti.size() < MaxTeam)) {
-            AddTeam(team);
-            team.AddEvento(this);
-        
+            addTeam(team);
+            team.addEvento(this);
+
         }
     }
 }

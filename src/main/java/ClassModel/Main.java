@@ -16,7 +16,7 @@ public class Main {
             eventi.add(evento);
         }
         try {
-            d.addAllEventi(eventi);
+            d.addAllEventiDB(eventi);
             d.printEventi();
             d.disconnect();
         }

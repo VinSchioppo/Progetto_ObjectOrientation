@@ -1,48 +1,58 @@
 package ClassModel;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.LinkedList;
 
 public class Utente {
 
-    String NomeUtente;
-    String PasswordUtente;
-    String FNome;
-    String MNome;
-    String LNome;
-    LocalDate DataNascita;
-    
-    LinkedList<Evento> EventiIscritti = null;
-    LinkedList<Team> TeamUniti = null;
+    protected String NomeUtente;
+    protected String PasswordUtente;
+    protected String FNome;
+    protected String MNome;
+    protected String LNome;
+    protected LocalDate DataNascita;
 
     public Utente(String NomeUtente, String PasswordUtente) {
-        
+
         this.NomeUtente = NomeUtente;
         this.PasswordUtente = PasswordUtente;
-    
+
     }
 
-    public void SetDati(String FNome, String MNome, String LNome, LocalDate DataNascita) {
+    public void setDati(String FNome, String MNome, String LNome, LocalDate DataNascita) {
 
         this.FNome = FNome;
         this.MNome = MNome;
         this.LNome = LNome;
         this.DataNascita = DataNascita;
-    
+
     }
 
-    public void PrintDati() {
-        
+    public void setNomeUtente(String NomeUtente) {this.NomeUtente = NomeUtente;}
+    public void setPasswordUtente(String PasswordUtente) {this.PasswordUtente = PasswordUtente;}
+    public void setFnome(String FNome) {this.FNome = FNome;}
+    public void setMnome(String MNome) {this.MNome = MNome;}
+    public void setLnome(String LNome) {this.LNome = LNome;}
+    public void setDataNascita(LocalDate DataNascita) {this.DataNascita = DataNascita;}
+
+    public String getNomeUtente() {return this.NomeUtente;}
+    public String getPasswordUtente() {return this.PasswordUtente;}
+    public String getFNome() {return this.FNome;}
+    public String getMNome() {return this.MNome;}
+    public String getLNome() {return this.LNome;}
+    public LocalDate getDataNascita() {return this.DataNascita;}
+
+    public void printDati() {
+
         System.out.println("Nome ClassModel.Utente: " + this.NomeUtente);
         System.out.println("\nNome: " + this.FNome);
-        
+
         if(!this.MNome.isEmpty())
             System.out.println(" " + this.MNome);
 
         System.out.println(" " + this.LNome);
         System.out.println("\nData di Nascita: " + this.DataNascita);
-    
+
     }
 
 }
