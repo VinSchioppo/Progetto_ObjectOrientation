@@ -1,14 +1,10 @@
 package DAO;
 
-import ClassModel.Evento;
-import ClassModel.Giudice;
-import ClassModel.Organizzatore;
-import ClassModel.Utente;
+import ClassModel.*;
 import Database.ConnessioneDatabase;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class ImplementazioneDAO implements InterfacciaDAO {
@@ -33,7 +29,32 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void addEventoDB(String Titolo, String Indirizzo, int NCivico) throws SQLException{
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede) VALUES('" + Titolo + "','" + Indirizzo + "'," + NCivico + ");");
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede) VALUES('"
+                            + Titolo + "','" + Indirizzo + "'," + NCivico + ");");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addEventoDB(String Titolo, String Indirizzo, int NCivico, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede, DataInizio, DataFine," +
+                            " MaxIscritti, MaxTeam, DataInizioReg, DataFineReg, DescrizioneProb)" +
+                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+            ps.setString(1, Titolo);
+            ps.setString(2, Indirizzo);
+            ps.setInt(3, NCivico);
+            ps.setObject(4, DataInizio);
+            ps.setObject(5, DataFine);
+            ps.setInt(6, MaxIscritti);
+            ps.setInt(7, MaxTeam);
+            ps.setObject(8, DataInizioReg);
+            ps.setObject(9, DataFineReg);
+            ps.setString(10, DescrizioneProb);
             ps.executeUpdate();
         }
         catch (SQLException e) {
@@ -44,7 +65,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public void addAllEventiDB(ArrayList<Evento> eventi) throws SQLException {
         for(Evento currentEvento : eventi){
             try {
-                addEventoDB(currentEvento.getTitolo(), currentEvento.getIndirizzoSede(), currentEvento.getNCivicoSede());
+                addEventoDB(currentEvento.getTitolo(), currentEvento.getIndirizzoSede(), currentEvento.getNCivicoSede(), currentEvento.getDataInizio(), currentEvento.getDataFine(), currentEvento.getMaxIscritti(), currentEvento.getMaxTeam(), currentEvento.getDataInizioReg(), currentEvento.getDataFineReg(), currentEvento.getDescrizioneProblema());
             }
             catch (SQLException e) {
                 throw e;
@@ -52,9 +73,11 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addPartecipanteDB(String NomeUtente, String Password) throws SQLException{
+    public void addUtenteDB(String NomeUtente, String Password) throws SQLException{
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password) VALUES('" + NomeUtente + "','" + Password + "');");
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password) VALUES('"
+                            + NomeUtente + "','" + Password + "');");
             ps.executeUpdate();
         }
         catch (SQLException e) {
@@ -62,10 +85,10 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addAllPartecipantiDB(ArrayList<Utente> utenti) throws SQLException{
-        for(Utente currentPartecipante : utenti){
+    public void addAllUtentiDB(ArrayList<Utente> utenti) throws SQLException{
+        for(Utente currentUtente : utenti){
             try {
-                addPartecipanteDB(currentPartecipante.getNomeUtente(), currentPartecipante.getPasswordUtente());
+                addUtenteDB(currentUtente.getNomeUtente(), currentUtente.getPasswordUtente());
             }
             catch (SQLException e) {
                 throw e;
@@ -73,10 +96,35 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void addPartecipanteDB(String NomeUtente, String Password, int idEvento) throws SQLException {
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password) VALUES('"
+                            + NomeUtente + "','" + Password + "');CALL IscriviEvento('" + NomeUtente + "'," +
+                            + idEvento + ");");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addAllPartecipanteDB(ArrayList<Utente> partecipanti, int idEvento) throws SQLException {
+        for(Utente currentPartecipante : partecipanti){
+            try {
+                addPartecipanteDB(currentPartecipante.getNomeUtente(), currentPartecipante.getPasswordUtente(), idEvento);
+            }
+            catch (SQLException e) {
+                throw e;
+            }
+        }
+    }
 
     public void addOrganizzatoreDB(String NomeUtente, String Password, int idEvento) throws SQLException{
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO Organizzatore(NomeUtente, Password, idEvento) VALUES('" + NomeUtente + "','" + Password + "'," + idEvento + " );");
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Organizzatore(NomeUtente, Password, idEvento) VALUES('"
+                            + NomeUtente + "','" + Password + "'," + idEvento + " );");
             ps.executeUpdate();
         }
         catch (SQLException e) {
@@ -97,9 +145,10 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void addGiudiceDB(String NomeUtente, String Password, int idEvento) throws SQLException{
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO Giudice(NomeUtente, Password) VALUES('" + NomeUtente + "','" + Password + "');");
-            ps.executeUpdate();
-            ps = connection.prepareStatement("INSERT INTO GiudiceEvento(NomeUtente, idEvento) VALUES('" + NomeUtente + "'," + idEvento + ");");
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Giudice(NomeUtente, Password) VALUES('"
+                            + NomeUtente + "','" + Password + "');INSERT INTO GiudiceEvento(NomeUtente, idEvento) VALUES('"
+                            + NomeUtente + "'," + idEvento + ");");
             ps.executeUpdate();
         }
         catch (SQLException e) {
@@ -114,6 +163,75 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             catch (SQLException e) {
                 throw e;
             }
+        }
+    }
+
+    public void addTeamDB(String NomeUtente, int idEvento) throws SQLException {
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("CALL CreaTeam('" + NomeUtente + "'," + idEvento + ");");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addCompTeamDB(String NomeUtente, int idTeam) throws SQLException {
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("CALL JoinTeam('" + NomeUtente + "'," + idTeam + ");");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addAllCompTeamDB(ArrayList<Partecipante> partecipanti, int idTeam) throws SQLException {
+        for(Partecipante currentPartecipante : partecipanti){
+            try {
+                addCompTeamDB(currentPartecipante.getNomeUtente(), idTeam);
+            }
+            catch (SQLException e) {
+                throw e;
+            }
+        }
+    }
+
+    public void addProgressoDB(int idTeam, String testo) throws SQLException {
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Progresso(idTeam, Testo) VALUES("
+                            + idTeam + ",'" + testo + "');");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addCommentoDB(String NomeGiudice, int idProgresso, String testo) throws SQLException {
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Commento(NomeGiudice, idProgresso, Testo) VALUES('"
+                            + NomeGiudice + "'," + idProgresso + ",'" + testo + "');");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addVotoDB(String NomeGiudice, int idTeam, int valore) throws SQLException {
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Voto(NomeGiudice, idTeam, Valore) VALUES('"
+                            + NomeGiudice + "'," + idTeam + "," + valore + ");");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
         }
     }
 

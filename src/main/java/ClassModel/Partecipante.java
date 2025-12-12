@@ -1,12 +1,12 @@
 package ClassModel;
 
 import java.time.LocalDate;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 public class Partecipante extends Utente {
 
-    private LinkedList<Evento> EventiIscritti = null;
-    private LinkedList<Team> TeamUniti = null;
+    private ArrayList<Evento> EventiIscritti = null;
+    private ArrayList<Team> TeamUniti = null;
 
     public Partecipante(String NomeUtente, String PasswordUtente) {
         super(NomeUtente, PasswordUtente);
@@ -21,7 +21,7 @@ public class Partecipante extends Utente {
     public void addEvento(Evento evento) {
 
         if(EventiIscritti == null)
-            EventiIscritti = new LinkedList<Evento>();
+            EventiIscritti = new ArrayList<Evento>();
 
         EventiIscritti.add(evento);
 
@@ -29,11 +29,11 @@ public class Partecipante extends Utente {
 
     public Team creaTeam(String Nome) {
 
-        Team new_team = new Team(Nome);
-        addTeam(new_team);
-        new_team.MembriTeam = new LinkedList<>();
-        new_team.MembriTeam.add(this);
-        return new_team;
+        Team newTeam = new Team(Nome);
+        addTeam(newTeam);
+        newTeam.MembriTeam = new ArrayList<Partecipante>();
+        newTeam.MembriTeam.add(this);
+        return newTeam;
 
     }
 
@@ -46,7 +46,7 @@ public class Partecipante extends Utente {
     public void addTeam(Team team) {
 
         if(TeamUniti == null)
-            TeamUniti = new LinkedList<Team>();
+            TeamUniti = new ArrayList<Team>();
 
         TeamUniti.add(team);
 

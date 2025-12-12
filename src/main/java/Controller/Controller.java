@@ -2,7 +2,6 @@ package Controller;
 import ClassModel.*;
 
 import javax.xml.crypto.Data;
-import java.util.Date;
 import java.util.LinkedList;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -46,7 +45,7 @@ public class Controller {
 
             } else {
 
-                UtenteCorrente.SetDati(FNome, MNome, LNome, DataConvertita);
+                //UtenteCorrente.SetDati(FNome, MNome, LNome, DataConvertita);
 
             }
 

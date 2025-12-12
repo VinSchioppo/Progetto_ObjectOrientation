@@ -1,7 +1,7 @@
 package ClassModel;
 
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.time.LocalDate;
 
 public class Organizzatore extends Utente {
 
@@ -16,13 +16,13 @@ public class Organizzatore extends Utente {
     public void selezionaEvento(Evento evento) {
 
         EventoOrganizzato = evento;
-        evento.organizzatore = this;
+        evento.setOrganizzatore(this);
 
     }
 
     public int getIdEventoOrganizzato() {return EventoOrganizzato.getIdEvento();}
 
-    public void finalizeDateReg(Date Inizio, Date Fine) {
+    public void finalizeDateReg(LocalDate Inizio, LocalDate Fine) {
 
         EventoOrganizzato.setDateReg(Inizio, Fine);
     }
@@ -42,7 +42,7 @@ public class Organizzatore extends Utente {
     public Giudice selezionaGiudice(Utente utente) {
 
         if(EventoOrganizzato.Giudici == null)
-            EventoOrganizzato.Giudici = new LinkedList<Giudice>();
+            EventoOrganizzato.Giudici = new ArrayList<Giudice>();
 
         Giudice giudice = new Giudice(utente.NomeUtente, utente.PasswordUtente);
         giudice = promuoviUtente(giudice, utente);

@@ -1,5 +1,6 @@
 package ClassModel;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
@@ -11,17 +12,12 @@ public class Team {
     private String Nome;
     private int idTeam;
 
-    LinkedList<Utente> MembriTeam = null;
-    LinkedList<Evento> EventiIscritti = null;
+
+    ArrayList<Partecipante> MembriTeam = null;
+    private Evento EventoIscritto = null;
     private Queue<Partecipante> RichiestePartecipazione = null;
-    LinkedList<Progresso> ProgressReport = null;
-    LinkedList<Voto> Votazioni = null;
-
-    public void setNome(String Nome) {this.Nome = Nome;}
-    public void setIdTeam(int idTeam) {this.idTeam = idTeam;}
-
-    public String getNome() {return this.Nome;}
-    public int getIdTeam() {return this.idTeam;}
+    ArrayList<Progresso> ProgressReport = null;
+    ArrayList<Voto> Votazioni = null;
 
     public Team(String Nome) {
 
@@ -31,18 +27,19 @@ public class Team {
 
     }
 
+    public void setNome(String Nome) {this.Nome = Nome;}
+    public void setIdTeam(int idTeam) {this.idTeam = idTeam;}
+    public void setEventoIscritto(Evento EventoIscritto) {this.EventoIscritto = EventoIscritto;}
+
+
+    public String getNome() {return this.Nome;}
+    public int getIdTeam() {return this.idTeam;}
+    public Evento getEventoIscritto() {return this.EventoIscritto;}
+    public int getidEvento() {return EventoIscritto.getIdEvento();}
+
     public void iscriviEvento(Evento evento) {
 
         evento.enqueueListaAttesaTeam(this);
-
-    }
-
-    public void addEvento(Evento evento) {
-
-        if(EventiIscritti == null)
-            EventiIscritti = new LinkedList<Evento>();
-
-        EventiIscritti.add(evento);
 
     }
 
@@ -91,7 +88,7 @@ public class Team {
     void aggiungi_ProgressReport(Progresso progressi) {
 
         if(ProgressReport == null)
-            ProgressReport = new LinkedList<Progresso>();
+            ProgressReport = new ArrayList<Progresso>();
 
         ProgressReport.add(progressi);
 
@@ -100,7 +97,7 @@ public class Team {
     void addVoto(Voto voto) {
 
         if(Votazioni == null)
-            Votazioni = new LinkedList<Voto>();
+            Votazioni = new ArrayList<Voto>();
 
         Votazioni.add(voto);
 

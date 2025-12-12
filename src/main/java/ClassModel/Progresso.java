@@ -1,24 +1,24 @@
 package ClassModel;
 
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.time.LocalDate;
 
 public class Progresso {
 
-    private Date DataProgresso;
+    private LocalDate DataProgresso;
     private String TestoDocumeto;
 
-    public void setDataProgresso(Date dataProgresso) {this.DataProgresso = dataProgresso;}
+    public void setDataProgresso(LocalDate dataProgresso) {this.DataProgresso = dataProgresso;}
     public void setTestoDocumeto(String TestoDocumento) {this.TestoDocumeto = TestoDocumento;}
 
-    public Date getDataProgresso() {return this.DataProgresso;}
+    public LocalDate getDataProgresso() {return this.DataProgresso;}
     public String getTestoDocumeto() {return this.TestoDocumeto;}
 
-    LinkedList<Commento> Commenti = null;
+    ArrayList<Commento> Commenti = null;
 
     Progresso(String testo) {
 
-        DataProgresso = new Date();
+        DataProgresso = LocalDate.now();
         TestoDocumeto = testo;
 
     }
@@ -26,7 +26,7 @@ public class Progresso {
     void addCommento(Commento commento) {
 
         if(Commenti == null)
-            Commenti = new LinkedList<Commento>();
+            Commenti = new ArrayList<Commento>();
 
         Commenti.add(commento);
 
