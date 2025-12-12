@@ -6,10 +6,10 @@ public class Utente {
 
     protected String NomeUtente;
     protected String PasswordUtente;
-    protected String FNome;
-    protected String MNome;
-    protected String LNome;
-    protected LocalDate DataNascita;
+    protected String FNome = null;
+    protected String MNome = null;
+    protected String LNome = null;
+    protected LocalDate DataNascita = null;
 
     public Utente(String NomeUtente, String PasswordUtente) {
 

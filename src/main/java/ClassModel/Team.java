@@ -9,15 +9,14 @@ public class Team {
 
     private static int NumTeam = 0;
 
-    private String Nome;
     private int idTeam;
+    private String Nome;
 
-
-    ArrayList<Partecipante> MembriTeam = null;
+    private ArrayList<Partecipante> MembriTeam = null;
     private Evento EventoIscritto = null;
     private Queue<Partecipante> RichiestePartecipazione = null;
-    ArrayList<Progresso> ProgressReport = null;
-    ArrayList<Voto> Votazioni = null;
+    private ArrayList<Progresso> ProgressReport = null;
+    private ArrayList<Voto> Votazioni = null;
 
     public Team(String Nome) {
 
@@ -41,6 +40,13 @@ public class Team {
 
         evento.enqueueListaAttesaTeam(this);
 
+    }
+
+    public void addMembroTeam(Partecipante part) {
+
+        if(MembriTeam == null)
+            MembriTeam = new ArrayList<Partecipante>();
+        MembriTeam.add(part);
     }
 
     public int giveNumMembri() {
@@ -91,7 +97,6 @@ public class Team {
             ProgressReport = new ArrayList<Progresso>();
 
         ProgressReport.add(progressi);
-
     }
 
     void addVoto(Voto voto) {
@@ -100,6 +105,5 @@ public class Team {
             Votazioni = new ArrayList<Voto>();
 
         Votazioni.add(voto);
-
     }
 }

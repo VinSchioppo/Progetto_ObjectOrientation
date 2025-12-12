@@ -1,6 +1,5 @@
 package ClassModel;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Partecipante extends Utente {
@@ -31,16 +30,13 @@ public class Partecipante extends Utente {
 
         Team newTeam = new Team(Nome);
         addTeam(newTeam);
-        newTeam.MembriTeam = new ArrayList<Partecipante>();
-        newTeam.MembriTeam.add(this);
+        newTeam.addMembroTeam(this);
         return newTeam;
-
     }
 
     public void joinTeam(Team team) {
 
         team.enqueueListaAttesa(this);
-
     }
 
     public void addTeam(Team team) {

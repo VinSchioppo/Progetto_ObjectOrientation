@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 public class Organizzatore extends Utente {
 
-    private Evento EventoOrganizzato;
+    private Evento EventoOrganizzato = null;
 
     public Organizzatore(String NomeUtente, String PasswordUtente) {
 

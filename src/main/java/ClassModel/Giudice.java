@@ -2,7 +2,7 @@ package ClassModel;
 
 public class Giudice extends Utente {
 
-    private Evento EventoGiudicato;
+    private Evento EventoGiudicato = null;
 
     public Giudice(String NomeUtente, String PasswordUtente) {
 
@@ -21,7 +21,7 @@ public class Giudice extends Utente {
 
     private void commentaProgresso(Progresso progresso, String commento) {
 
-        Commento CommentoProgresso = new Commento(commento);
+        Commento CommentoProgresso = new Commento(progresso.getIdProgresso(),commento, this.getNomeUtente());
         CommentoProgresso.setGiudice(this.NomeUtente);
         progresso.addCommento(CommentoProgresso);
 
@@ -29,7 +29,7 @@ public class Giudice extends Utente {
 
     private void daiVoto(Team team, int valore) {
 
-        Voto voto = new Voto(valore);
+        Voto voto = new Voto(team.getIdTeam(), valore, this.getNomeUtente());
         voto.setGiudice(this.NomeUtente);
         team.addVoto(voto);
 

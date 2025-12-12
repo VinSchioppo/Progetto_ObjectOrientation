@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class ImplementazioneDAO implements InterfacciaDAO {
     private Connection connection = null;
 
-    public ImplementazioneDAO(){
+    public ImplementazioneDAO() {
         try {
             connection = ConnessioneDatabase.getInstance().connection;
         } catch (SQLException e) {
@@ -21,9 +21,17 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public void disconnect() {
         try {
             connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addEventoDB(Evento evento) throws SQLException {
+        try {
+            addEventoDB(evento.getTitolo(), evento.getIndirizzoSede(), evento.getNCivicoSede(), evento.getDataInizio(), evento.getDataFine(), evento.getMaxIscritti(), evento.getMaxTeam(), evento.getDataInizioReg(), evento.getDataFineReg(), evento.getDescrizioneProblema());
         }
         catch (SQLException e) {
-            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -65,11 +73,20 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public void addAllEventiDB(ArrayList<Evento> eventi) throws SQLException {
         for(Evento currentEvento : eventi){
             try {
-                addEventoDB(currentEvento.getTitolo(), currentEvento.getIndirizzoSede(), currentEvento.getNCivicoSede(), currentEvento.getDataInizio(), currentEvento.getDataFine(), currentEvento.getMaxIscritti(), currentEvento.getMaxTeam(), currentEvento.getDataInizioReg(), currentEvento.getDataFineReg(), currentEvento.getDescrizioneProblema());
+                addEventoDB(currentEvento);
             }
             catch (SQLException e) {
                 throw e;
             }
+        }
+    }
+
+    public void addUtenteDB(Utente utente) throws SQLException{
+        try {
+            addUtenteDB(utente.getNomeUtente(), utente.getPasswordUtente(), utente.getFNome(), utente.getMNome(), utente.getLNome(), utente.getDataNascita());
+        }
+        catch (SQLException e) {
+            throw e;
         }
     }
 
@@ -85,10 +102,29 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void addUtenteDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password," +
+                            " FNome, MNome, LNome, DataNascita" +
+                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+            ps.setString(1, NomeUtente);
+            ps.setString(2, Password);
+            ps.setString(3, FNome);
+            ps.setString(4, MNome);
+            ps.setString(5, LNome);
+            ps.setObject(6, DataNascita);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
     public void addAllUtentiDB(ArrayList<Utente> utenti) throws SQLException{
         for(Utente currentUtente : utenti){
             try {
-                addUtenteDB(currentUtente.getNomeUtente(), currentUtente.getPasswordUtente());
+                addUtenteDB(currentUtente);
             }
             catch (SQLException e) {
                 throw e;
@@ -96,11 +132,20 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void addPartecipanteDB(Partecipante partecipante, int idEvento) throws SQLException{
+        try {
+            addPartecipanteDB(partecipante.getNomeUtente(), partecipante.getPasswordUtente(), partecipante.getFNome(), partecipante.getMNome(), partecipante.getLNome(), partecipante.getDataNascita(), idEvento);
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
     public void addPartecipanteDB(String NomeUtente, String Password, int idEvento) throws SQLException {
         try {
             PreparedStatement ps =
                     connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password) VALUES('"
-                            + NomeUtente + "','" + Password + "');CALL IscriviEvento('" + NomeUtente + "'," +
+                            + NomeUtente + "','" + Password + "');CALL IscriviEvento('" + NomeUtente + "',"
                             + idEvento + ");");
             ps.executeUpdate();
         }
@@ -109,14 +154,44 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addAllPartecipanteDB(ArrayList<Utente> partecipanti, int idEvento) throws SQLException {
-        for(Utente currentPartecipante : partecipanti){
+    public void addPartecipanteDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita, int idEvento) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password," +
+                            " FNome, MNome, LNome, DataNascita" +
+                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+            ps.setString(1, NomeUtente);
+            ps.setString(2, Password);
+            ps.setString(3, FNome);
+            ps.setString(4, MNome);
+            ps.setString(5, LNome);
+            ps.setObject(6, DataNascita);
+            ps.executeUpdate();
+            ps = connection.prepareStatement("CALL IscriviEvento('" + NomeUtente + "'," + idEvento + ");");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addAllPartecipanteDB(ArrayList<Partecipante> partecipanti, int idEvento) throws SQLException {
+        for(Partecipante currentPartecipante : partecipanti){
             try {
-                addPartecipanteDB(currentPartecipante.getNomeUtente(), currentPartecipante.getPasswordUtente(), idEvento);
+                addPartecipanteDB(currentPartecipante, idEvento);
             }
             catch (SQLException e) {
                 throw e;
             }
+        }
+    }
+
+    public void addOrganizzatoreDB(Organizzatore organizzatore) throws SQLException{
+        try {
+            addOrganizzatoreDB(organizzatore.getNomeUtente(), organizzatore.getPasswordUtente(), organizzatore.getFNome(), organizzatore.getMNome(), organizzatore.getLNome(), organizzatore.getDataNascita(), organizzatore.getIdEventoOrganizzato());
+        }
+        catch (SQLException e) {
+            throw e;
         }
     }
 
@@ -132,14 +207,42 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void addOrganizzatoreDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita, int idEvento) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Organizzatore(NomeUtente, Password, FNome, MNome, LNome, DataNascita, idEvento)" +
+                            "VALUES(?, ?, ?, ?, ?, ?, ?);");
+            ps.setString(1, NomeUtente);
+            ps.setString(2, Password);
+            ps.setString(3, FNome);
+            ps.setString(4, MNome);
+            ps.setString(5, LNome);
+            ps.setObject(6, DataNascita);
+            ps.setObject(7, idEvento);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
     public void addAllOrganizzatoriDB(ArrayList<Organizzatore> organizzatori) throws SQLException{
         for(Organizzatore currentOrganizzatore : organizzatori){
             try {
-                addOrganizzatoreDB(currentOrganizzatore.getNomeUtente(), currentOrganizzatore.getPasswordUtente(), currentOrganizzatore.getIdEventoOrganizzato());
+                addOrganizzatoreDB(currentOrganizzatore);
             }
             catch (SQLException e) {
                 throw e;
             }
+        }
+    }
+
+    public void addGiudiceDB(Giudice giudice) throws SQLException{
+        try {
+            addGiudiceDB(giudice.getNomeUtente(), giudice.getPasswordUtente(), giudice.getFNome(), giudice.getMNome(), giudice.getLNome(), giudice.getDataNascita(), giudice.getIdEventoGiudicato());
+        }
+        catch (SQLException e) {
+            throw e;
         }
     }
 
@@ -155,10 +258,30 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             throw e;
         }
     }
+
+    public void addGiudiceDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita, int idEvento) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("INSERT INTO Organizzatore(NomeUtente, Password, FNome, MNome, LNome, DataNascita, idEvento)" +
+                            "VALUES(?, ?, ?, ?, ?, ?, ?);");
+            ps.setString(1, NomeUtente);
+            ps.setString(2, Password);
+            ps.setString(3, FNome);
+            ps.setString(4, MNome);
+            ps.setString(5, LNome);
+            ps.setObject(6, DataNascita);
+            ps.setObject(7, idEvento);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
     public void addAllGiudiciDB(ArrayList<Giudice> giudici) throws SQLException{
         for(Giudice currentGiudice : giudici){
             try {
-                addGiudiceDB(currentGiudice.getNomeUtente(), currentGiudice.getPasswordUtente(), currentGiudice.getIdEventoGiudicato());
+                addGiudiceDB(currentGiudice);
             }
             catch (SQLException e) {
                 throw e;
@@ -199,6 +322,15 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void addProgressoDB(Progresso progresso) throws SQLException{
+        try{
+            addProgressoDB(progresso.getIdTeam(), progresso.getTestoDocumeto());
+        }
+        catch(SQLException e){
+            throw e;
+        }
+    }
+
     public void addProgressoDB(int idTeam, String testo) throws SQLException {
         try {
             PreparedStatement ps =
@@ -211,6 +343,15 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void addCommentoDB(Commento commento) throws SQLException{
+        try{
+            addCommentoDB(commento.getGiudice(), commento.getIdProgresso(), commento.getTesto());
+        }
+        catch(SQLException e){
+            throw e;
+        }
+    }
+
     public void addCommentoDB(String NomeGiudice, int idProgresso, String testo) throws SQLException {
         try {
             PreparedStatement ps =
@@ -219,6 +360,15 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             ps.executeUpdate();
         }
         catch (SQLException e) {
+            throw e;
+        }
+    }
+
+    public void addVotoDB(Voto voto) throws SQLException{
+        try{
+            addVotoDB(voto.getGiudice(), voto.getIdTeam(), voto.getValore());
+        }
+        catch(SQLException e){
             throw e;
         }
     }
