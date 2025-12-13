@@ -11,6 +11,8 @@ public class Utente {
     protected String LNome = null;
     protected LocalDate DataNascita = null;
 
+    public Utente(){}
+
     public Utente(String NomeUtente, String PasswordUtente) {
 
         this.NomeUtente = NomeUtente;

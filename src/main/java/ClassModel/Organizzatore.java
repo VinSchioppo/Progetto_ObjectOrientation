@@ -7,6 +7,8 @@ public class Organizzatore extends Utente {
 
     private Evento EventoOrganizzato = null;
 
+    public Organizzatore(){}
+
     public Organizzatore(String NomeUtente, String PasswordUtente) {
 
         super(NomeUtente, PasswordUtente);

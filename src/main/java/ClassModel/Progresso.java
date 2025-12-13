@@ -12,7 +12,8 @@ public class Progresso {
 
     private ArrayList<Commento> Commenti = null;
 
-    Progresso(String testo, int idTeam) {
+    public Progresso(int idProgresso) {this.idProgresso = idProgresso;}
+    public Progresso(String testo, int idTeam) {
 
         DataProgresso = LocalDate.now();
         TestoDocumeto = testo;
@@ -20,6 +21,8 @@ public class Progresso {
 
     }
 
+    public void setIdProgresso(int idProgresso) {this.idProgresso = idProgresso;}
+    public void setIdTeam(int idTeam) {this.idTeam = idTeam;}
     public void setDataProgresso(LocalDate dataProgresso) {this.DataProgresso = dataProgresso;}
     public void setTestoDocumeto(String TestoDocumento) {this.TestoDocumeto = TestoDocumento;}
 

@@ -7,8 +7,6 @@ import java.util.Scanner;
 
 public class Team {
 
-    private static int NumTeam = 0;
-
     private int idTeam;
     private String Nome;
 
@@ -18,23 +16,25 @@ public class Team {
     private ArrayList<Progresso> ProgressReport = null;
     private ArrayList<Voto> Votazioni = null;
 
-    public Team(String Nome) {
+    public Team(int idTeam) {this.idTeam = idTeam;}
+
+    public Team(String Nome, Evento EventoIscritto) {
 
         this.Nome = Nome;
-        this.idTeam = NumTeam;
-        NumTeam++;
-
     }
 
     public void setNome(String Nome) {this.Nome = Nome;}
     public void setIdTeam(int idTeam) {this.idTeam = idTeam;}
-    public void setEventoIscritto(Evento EventoIscritto) {this.EventoIscritto = EventoIscritto;}
+    public void setEventoIscritto(Evento EventoIscritto) {
+        this.EventoIscritto = EventoIscritto;
+        EventoIscritto.addTeam(this);
+    }
 
 
     public String getNome() {return this.Nome;}
     public int getIdTeam() {return this.idTeam;}
-    public Evento getEventoIscritto() {return this.EventoIscritto;}
     public int getidEvento() {return EventoIscritto.getIdEvento();}
+    public Evento getEventoIscritto() {return this.EventoIscritto;}
 
     public void iscriviEvento(Evento evento) {
 
@@ -52,12 +52,6 @@ public class Team {
     public int giveNumMembri() {
 
         return MembriTeam.size();
-
-    }
-
-    public static int giveNumTeam() {
-
-        return NumTeam;
 
     }
 
@@ -105,5 +99,13 @@ public class Team {
             Votazioni = new ArrayList<Voto>();
 
         Votazioni.add(voto);
+    }
+
+
+    public void printMembri() {
+        for(Partecipante p : MembriTeam)
+        {
+            System.out.println(p.getNomeUtente());
+        }
     }
 }

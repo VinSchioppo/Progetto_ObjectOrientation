@@ -8,7 +8,7 @@ import java.util.Queue;
 public class Evento {
 
     private int IdEvento = -1;
-    private String Titolo;
+    private String Titolo = null;
     private String IndirizzoSede = null;
     private int NCivicoSede = -1;
     private LocalDate DataInizio = null;
@@ -20,14 +20,21 @@ public class Evento {
     private LocalDate DataFineReg = null;
 
     private Organizzatore organizzatore = null;
+    private ArrayList<Partecipante> Partecipanti = null;
+    private ArrayList<Team> TeamIscritti = null;
     protected ArrayList<Giudice> Giudici = null;
     private Queue<Partecipante> RichiestePartecipazioneUtenti = null;
     private Queue<Team> RichiestePartecipazioneTeam = null;
-    private ArrayList<Partecipante> Partecipanti = null;
-    private ArrayList<Team> TeamIscritti = null;
     boolean prenotazioni = false;
 
-    public Evento(String Titolo) {this.Titolo = Titolo;}
+    public Evento(int IdEvento) {this.IdEvento = IdEvento;}
+    public Evento(String Titolo, String Indirizzo, int NCivico) {
+        this.Titolo = Titolo;
+        this.IndirizzoSede = Indirizzo;
+        this.NCivicoSede = NCivico;
+    }
+
+    public void setTitolo(String Titolo) {this.Titolo = Titolo;}
     public void setIndirizzoSede(String sede) {this.IndirizzoSede = sede;}
     public void setNCivicoSede(int sede) {this.NCivicoSede = sede;}
     public void setMaxIscritti(int MaxIscritti) {this.MaxIscritti = MaxIscritti;}
@@ -119,5 +126,13 @@ public class Evento {
             addTeam(team);
 
         }
+    }
+
+    public void addGiudice(Giudice giudice) {
+
+        if( Giudici == null)
+            Giudici = new ArrayList<Giudice>();
+
+        Giudici.add(giudice);
     }
 }

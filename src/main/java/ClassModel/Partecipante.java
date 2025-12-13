@@ -7,6 +7,8 @@ public class Partecipante extends Utente {
     private ArrayList<Evento> EventiIscritti = null;
     private ArrayList<Team> TeamUniti = null;
 
+    public Partecipante() {}
+
     public Partecipante(String NomeUtente, String PasswordUtente) {
         super(NomeUtente, PasswordUtente);
     }
@@ -26,9 +28,9 @@ public class Partecipante extends Utente {
 
     }
 
-    public Team creaTeam(String Nome) {
+    public Team creaTeam(String Nome, Evento EventoIscritto) {
 
-        Team newTeam = new Team(Nome);
+        Team newTeam = new Team(Nome, EventoIscritto);
         addTeam(newTeam);
         newTeam.addMembroTeam(this);
         return newTeam;

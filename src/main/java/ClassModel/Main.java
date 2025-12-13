@@ -10,8 +10,8 @@ import java.time.LocalDate;
 public class Main {
     public static void main(String[] args) {
         ImplementazioneDAO d = new ImplementazioneDAO();
-        Evento eventi = new Evento("Sans");
-        /*ArrayList<Evento> eventi = new ArrayList<>();
+        /*Evento eventi = new Evento("Sans", "Sans Street", 34);
+        ArrayList<Evento> eventi = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             Evento evento = new Evento("Sans");
             evento.setIndirizzoSede("Sede");
@@ -19,9 +19,16 @@ public class Main {
             eventi.add(evento);
         }*/
         try {
-            d.addEventoDB("Sans", "Sans Street", 34, LocalDate.parse("2025-12-11"), LocalDate.parse("2025-12-15"), 100, 10, null, null, "Inventare il viaggio nel tempo.");
+            /*
+            Evento e = d.getEventoDB(1);
+            Giudice g = d.getGiudiceDB("jud1", e);
+            //int result = d.addEventoDB("Sans", "Sans Street", 34, LocalDate.parse("2025-12-11"), LocalDate.parse("2025-12-15"), 100, 10, null, null, "Inventare il viaggio nel tempo.");
             //d.addAllEventiDB(eventi);
-            d.printEventi();
+            //d.printEventi();
+            System.out.println(g.getNomeUtente() + "\n" + g.getPasswordUtente() + "\n" + g.getFNome() + "\n" + g.getMNome() + "\n" + g.getIdEventoGiudicato());
+            */
+            Team t = d.getTeamDB(1);
+            t.printMembri();
             d.disconnect();
         }
         catch(SQLException e)

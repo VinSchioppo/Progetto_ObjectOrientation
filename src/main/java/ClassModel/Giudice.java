@@ -4,13 +4,18 @@ public class Giudice extends Utente {
 
     private Evento EventoGiudicato = null;
 
+    public Giudice() {}
+
     public Giudice(String NomeUtente, String PasswordUtente) {
 
         super(NomeUtente, PasswordUtente);
 
     }
 
-    public void setEvento(Evento evento) {this.EventoGiudicato = evento;}
+    public void setEvento(Evento evento) {
+        this.EventoGiudicato = evento;
+        evento.addGiudice(this);
+    }
 
     public int getIdEventoGiudicato() {return EventoGiudicato.getIdEvento();}
 
