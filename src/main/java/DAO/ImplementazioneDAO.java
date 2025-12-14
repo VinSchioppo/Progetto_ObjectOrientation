@@ -5,7 +5,6 @@ import Database.ConnessioneDatabase;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ImplementazioneDAO implements InterfacciaDAO {
@@ -78,11 +77,11 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     connection.prepareStatement("INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede) VALUES('"
                             + Titolo + "','" + Indirizzo + "'," + NCivico + ");");
             ps.executeUpdate();
+            return getIdEventoDB();
         }
         catch (SQLException e) {
             throw e;
         }
-        return getIdEventoDB();
     }
 
     public int addEventoDB(String Titolo, String Indirizzo, int NCivico, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException{
@@ -117,6 +116,26 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             catch (SQLException e) {
                 throw e;
             }
+        }
+    }
+
+    public void updateEventoDB(int IdEvento, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("UPDATE Evento SET DataInizio = ?, DataFine = ?," +
+                            " MaxIscritti = ?, MaxTeam = ?, DataInizioReg = ?, DataFineReg = ?, DescrizioneProb = ?" +
+                            " WHERE IdEvento = " + IdEvento + ";");
+            ps.setObject(1, DataInizio);
+            ps.setObject(2, DataFine);
+            ps.setInt(3, MaxIscritti);
+            ps.setInt(4, MaxTeam);
+            ps.setObject(5, DataInizioReg);
+            ps.setObject(6, DataFineReg);
+            ps.setString(7, DescrizioneProb);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
         }
     }
 
@@ -270,6 +289,22 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void updatePartecipanteDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("UPDATE Partecipante SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
+                            " WHERE NomeUtente = " + NomeUtente + ";");
+            ps.setString(1, FNome);
+            ps.setString(2, MNome);
+            ps.setString(3, LNome);
+            ps.setObject(4, DataNascita);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+    }
+
     public Organizzatore getOrganizzatoreDB(Evento evento) throws SQLException{
         Organizzatore organizzatore = new Organizzatore();
         try {
@@ -340,6 +375,22 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             catch (SQLException e) {
                 throw e;
             }
+        }
+    }
+
+    public void updateOrganizzatoreDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("UPDATE Organizzatore SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
+                            " WHERE NomeUtente = " + NomeUtente + ";");
+            ps.setString(1, FNome);
+            ps.setString(2, MNome);
+            ps.setString(3, LNome);
+            ps.setObject(4, DataNascita);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
         }
     }
 
@@ -415,6 +466,22 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             catch (SQLException e) {
                 throw e;
             }
+        }
+    }
+
+    public void updateGiudiceDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("UPDATE Giudice SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
+                            " WHERE NomeUtente = " + NomeUtente + ";");
+            ps.setString(1, FNome);
+            ps.setString(2, MNome);
+            ps.setString(3, LNome);
+            ps.setObject(4, DataNascita);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
         }
     }
 
@@ -509,7 +576,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         ArrayList<Progresso> progressi = null;
         try {
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Progresso WHERE IdTeam = " + idTeam + ";");
+                    connection.prepareStatement("SELECT * FROM Progresso WHERE idTeam = " + idTeam + ";");
             ResultSet rs = ps.executeQuery();
             while(rs.next()) {
                 Progresso progresso = new Progresso(rs.getInt("idprogresso"));
@@ -563,6 +630,42 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return getIdProgressoDB();
     }
 
+    public Commento getCommentoDB(int idProgresso, String Giudice) throws SQLException{
+        Commento commento = new Commento(idProgresso, Giudice);
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Commento WHERE idProgresso = " + idProgresso +
+                            "AND NomeGiudice = '" + Giudice + "';");
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            commento.setTesto(rs.getString("testo"));
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return commento;
+    }
+
+    public ArrayList<Commento> getAllCommentoDB(int idProgresso) throws SQLException{
+        ArrayList<Commento> commenti = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Commento WHERE idProgresso = " + idProgresso + ";");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Commento commento = new Commento(idProgresso, rs.getString("nomegiudice"), rs.getString("testo"));
+                if(commenti == null){
+                    commenti = new ArrayList<Commento>();
+                }
+                commenti.add(commento);
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return commenti;
+    }
+
     public void addCommentoDB(Commento commento) throws SQLException{
         try{
             addCommentoDB(commento.getGiudice(), commento.getIdProgresso(), commento.getTesto());
@@ -584,6 +687,42 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public Voto getVotoDB(int idTeam, String Giudice) throws SQLException {
+        Voto voto = new Voto(idTeam, Giudice);
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Voto WHERE idTeam = " + idTeam +
+                            "AND NomeGiudice = '" + Giudice + "';");
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            voto.setValore(rs.getInt("valore"));
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return voto;
+    }
+
+    public ArrayList<Voto> getAllVotoDB(int idTeam) throws SQLException{
+        ArrayList<Voto> voti = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Voto WHERE idTeam = " + idTeam + ";");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Voto voto = new Voto(idTeam, rs.getInt("valore"), rs.getString("nomegiudice"));
+                if(voti == null){
+                    voti = new ArrayList<Voto>();
+                }
+                voti.add(voto);
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return voti;
+    }
+
     public void addVotoDB(Voto voto) throws SQLException{
         try{
             addVotoDB(voto.getGiudice(), voto.getIdTeam(), voto.getValore());
@@ -602,22 +741,6 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
         catch (SQLException e) {
             throw e;
-        }
-    }
-
-    public void printEventi() {
-        PreparedStatement leggiEventi;
-        ResultSet rs = null;
-        try {
-            leggiEventi = connection.prepareStatement("SELECT * FROM Evento");
-            rs = leggiEventi.executeQuery();
-            while(rs.next()) {
-                System.out.println(rs.getString("titolo"));
-            }
-            rs.close();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 }

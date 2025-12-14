@@ -14,6 +14,7 @@ public interface InterfacciaDAO {
     int addEventoDB(String Titolo, String Indirizzo, int NCivico) throws SQLException;
     int addEventoDB(String Titolo, String Indirizzo, int NCivico, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException;
     void addAllEventiDB(ArrayList<Evento> eventi) throws SQLException;
+    void updateEventoDB(int IdEvento, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException;
 
     Utente getUtenteDB(String NomeUtente) throws SQLException;
     void addUtenteDB(Utente utente) throws SQLException;
@@ -26,18 +27,21 @@ public interface InterfacciaDAO {
     void addPartecipanteDB(String NomeUtente, String Password, int idEvento) throws SQLException;
     void addPartecipanteDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita, int idEvento) throws SQLException;
     void addAllPartecipanteDB(ArrayList<Partecipante> partecipanti, int idEvento) throws SQLException;
+    void updatePartecipanteDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
 
     Organizzatore getOrganizzatoreDB(Evento evento) throws SQLException;
     void addOrganizzatoreDB(Organizzatore organizzatore) throws SQLException;
     void addOrganizzatoreDB(String NomeUtente, String Password, int idEvento) throws SQLException;
     void addOrganizzatoreDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita, int idEvento) throws SQLException;
     void addAllOrganizzatoriDB(ArrayList<Organizzatore> organizzatori) throws SQLException;
+    void updateOrganizzatoreDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
 
     Giudice getGiudiceDB(String NomeUtente, Evento evento) throws SQLException;
     void addGiudiceDB(Giudice giudice) throws SQLException;
     void addGiudiceDB(String NomeUtente, String Password, int idEvento) throws SQLException;
     void addGiudiceDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita, int idEvento) throws SQLException;
     void addAllGiudiciDB(ArrayList<Giudice> giudici) throws SQLException;
+    void updateGiudiceDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
 
     Team getTeamDB(int IdTeam) throws SQLException;
     int getIdTeamDB() throws SQLException;
@@ -51,11 +55,13 @@ public interface InterfacciaDAO {
     void addProgressoDB(Progresso progresso) throws SQLException;
     int addProgressoDB(int idTeam, String testo) throws SQLException;
 
+    Commento getCommentoDB(int idProgresso, String Giudice) throws SQLException;
+    ArrayList<Commento> getAllCommentoDB(int idProgresso) throws SQLException;
     void addCommentoDB(Commento commento) throws SQLException;
     void addCommentoDB(String NomeGiudice, int idProgresso, String testo) throws SQLException;
 
+    Voto getVotoDB(int idTeam, String Giudice) throws SQLException;
+    ArrayList<Voto> getAllVotoDB(int idTeam) throws SQLException;
     void addVotoDB(Voto voto) throws SQLException;
     void addVotoDB(String NomeGiudice, int idTeam, int valore) throws SQLException;
-
-    void printEventi();
 }

@@ -6,7 +6,12 @@ public class Voto {
     private int Valore;
     private String Giudice;
 
-    Voto(int idTeam, int valore, String Giudice) {
+    public Voto(int idTeam, String Giudice){
+        this.idTeam = idTeam;
+        this.Giudice = Giudice;
+    }
+
+    public Voto(int idTeam, int valore, String Giudice) {
         this.idTeam = idTeam;
         this.Valore = valore;
         this.Giudice = Giudice;
