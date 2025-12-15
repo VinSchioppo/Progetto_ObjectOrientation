@@ -8,6 +8,8 @@ import java.util.ArrayList;
 public interface InterfacciaDAO {
     void disconnect();
 
+    void getAllRuoliDB(Utente utente, Partecipante partecipante, Giudice giudice, Organizzatore organizzatore) throws SQLException;
+
     Evento getEventoDB(int IdEvento) throws SQLException;
     int getIdEventoDB() throws SQLException;
     void addEventoDB(Evento evento) throws SQLException;
@@ -22,6 +24,7 @@ public interface InterfacciaDAO {
     void addUtenteDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
     void addAllUtentiDB(ArrayList<Utente> utenti) throws SQLException;
 
+    Partecipante getPartecipanteDB(String NomePartecipante) throws SQLException;
     Partecipante getPartecipanteDB(String NomePartecipante, Evento evento) throws SQLException;
     void addPartecipanteDB(Partecipante partecipante, int idEvento) throws SQLException;
     void addPartecipanteDB(String NomeUtente, String Password, int idEvento) throws SQLException;
@@ -29,6 +32,7 @@ public interface InterfacciaDAO {
     void addAllPartecipanteDB(ArrayList<Partecipante> partecipanti, int idEvento) throws SQLException;
     void updatePartecipanteDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
 
+    Organizzatore getOrganizzatoreDB(String NomeUtente) throws SQLException;
     Organizzatore getOrganizzatoreDB(Evento evento) throws SQLException;
     void addOrganizzatoreDB(Organizzatore organizzatore) throws SQLException;
     void addOrganizzatoreDB(String NomeUtente, String Password, int idEvento) throws SQLException;
@@ -36,6 +40,7 @@ public interface InterfacciaDAO {
     void addAllOrganizzatoriDB(ArrayList<Organizzatore> organizzatori) throws SQLException;
     void updateOrganizzatoreDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
 
+    Giudice getGiudiceDB(String NomeUtente) throws SQLException;
     Giudice getGiudiceDB(String NomeUtente, Evento evento) throws SQLException;
     void addGiudiceDB(Giudice giudice) throws SQLException;
     void addGiudiceDB(String NomeUtente, String Password, int idEvento) throws SQLException;

@@ -22,17 +22,19 @@ public class Main {
             /*
             Evento e = d.getEventoDB(1);
             Giudice g = d.getGiudiceDB("jud1", e);
-            */
             int result = d.addEventoDB("Sans", "Sans Street", 34);
             d.updateEventoDB(20, LocalDate.parse("2025-12-11"), LocalDate.parse("2025-12-15"), 100, 10, LocalDate.parse("2025-10-11"), LocalDate.parse("2025-11-11"), "Inventare il viaggio nel tempo.");
-            /*
             d.addAllEventiDB(eventi);
             d.printEventi();
             System.out.println(g.getNomeUtente() + "\n" + g.getPasswordUtente() + "\n" + g.getFNome() + "\n" + g.getMNome() + "\n" + g.getIdEventoGiudicato());
             Team t = d.getTeamDB(1);
             t.printMembri();
-             */
+            Evento evento = d.getEventoDB(11);
+            if (evento == null) System.out.println("Evento non trovato");
             d.disconnect();
+             */
+            if(d.checkLogin("org1", "orgpass1")) System.out.println("Login correto.");
+            else System.out.println("Login errato.");
         }
         catch(SQLException e)
         {

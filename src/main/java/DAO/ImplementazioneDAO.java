@@ -26,35 +26,77 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public boolean checkLogin(String NomeUtente, String Password) throws SQLException{
+        boolean check = true;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT NomeUtente, Password FROM Partecipante" +
+                            " WHERE NomeUtente = '" + NomeUtente + "' AND Password = '" + Password +"';");
+            ResultSet rs = ps.executeQuery();
+            if (!rs.isBeforeFirst()) {
+                ps = connection.prepareStatement("SELECT NomeUtente, Password FROM Giudice" +
+                                " WHERE NomeUtente = '" + NomeUtente + "' AND Password = '" + Password +"';");
+                rs = ps.executeQuery();
+                if (!rs.isBeforeFirst()) {
+                    ps = connection.prepareStatement("SELECT NomeUtente, Password FROM Organizzatore" +
+                            " WHERE NomeUtente = '" + NomeUtente + "' AND Password = '" + Password +"';");
+                    rs = ps.executeQuery();
+                    if (!rs.isBeforeFirst()) {
+                        check = false;
+                    }
+                }
+            }
+            rs.close();
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return check;
+    }
+
+    public void getAllRuoliDB(Utente utente, Partecipante partecipante, Giudice giudice, Organizzatore organizzatore) throws SQLException{
+        String NomeUtente = utente.getNomeUtente();
+        partecipante = getPartecipanteDB(NomeUtente);
+        organizzatore = getOrganizzatoreDB(NomeUtente);
+        giudice = getGiudiceDB(NomeUtente);
+    }
+
     public int getIdEventoDB() throws SQLException{
+        int result;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT MAX(IdEvento) FROM Evento;");
             ResultSet rs = ps.executeQuery();
             rs.next();
-            return rs.getInt(1);
+            result =  rs.getInt(1);
+            rs.close();
         }
         catch (SQLException e) {
             throw e;
         }
+        return result;
     }
 
     public Evento getEventoDB(int IdEvento) throws SQLException{
-        Evento evento = new Evento(IdEvento);
+        Evento evento = null;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Evento WHERE IdEvento =" + IdEvento + ";");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            evento.setTitolo(rs.getString("titolo"));
-            evento.setIndirizzoSede(rs.getString("indirizzosede"));
-            evento.setNCivicoSede(rs.getInt("ncivicosede"));
-            evento.setMaxIscritti(rs.getInt("maxiscritti"));
-            evento.setMaxTeam(rs.getInt("maxteam"));
-            evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-            evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
-            evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-            getOrganizzatoreDB(evento);
+            if (rs.isBeforeFirst()) {
+                evento = new Evento(IdEvento);
+                rs.next();
+                evento.setTitolo(rs.getString("titolo"));
+                evento.setIndirizzoSede(rs.getString("indirizzosede"));
+                evento.setNCivicoSede(rs.getInt("ncivicosede"));
+                evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                evento.setMaxTeam(rs.getInt("maxteam"));
+                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                rs.close();
+                getOrganizzatoreDB(evento);
+            }
         }
         catch(SQLException e) {
             throw e;
@@ -72,16 +114,18 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public int addEventoDB(String Titolo, String Indirizzo, int NCivico) throws SQLException{
+        int id;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede) VALUES('"
                             + Titolo + "','" + Indirizzo + "'," + NCivico + ");");
             ps.executeUpdate();
-            return getIdEventoDB();
+            id = getIdEventoDB();
         }
         catch (SQLException e) {
             throw e;
         }
+        return id;
     }
 
     public int addEventoDB(String Titolo, String Indirizzo, int NCivico, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException{
@@ -140,20 +184,25 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public Utente getUtenteDB(String NomeUtente) throws SQLException{
-        Utente utente = new Utente();
+        Utente utente = null;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Partecipante WHERE NomeUtente = '"
                             + NomeUtente + "' AND NomeUtente NOT IN(" +
                             "SELECT NomePartecipante FROM PartecipantiEvento WHERE NomePartecipante = '" + NomeUtente + "');");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            utente.setNomeUtente(rs.getString("nomeutente"));
-            utente.setPasswordUtente(rs.getString("password"));
-            utente.setFnome(rs.getString("fNome"));
-            utente.setMnome(rs.getString("mNome"));
-            utente.setLnome(rs.getString("lNome"));
-            utente.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+            if(rs.isBeforeFirst()){
+                utente = new Utente();
+                rs.next();
+                utente.setNomeUtente(rs.getString("nomeutente"));
+                utente.setPasswordUtente(rs.getString("password"));
+                utente.setFnome(rs.getString("fNome"));
+                utente.setMnome(rs.getString("mNome"));
+                utente.setLnome(rs.getString("lNome"));
+                utente.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                rs.close();
+            }
+
         }
         catch(SQLException e) {
             throw e;
@@ -212,22 +261,55 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public Partecipante getPartecipanteDB(String NomePartecipante) throws SQLException{
+        Partecipante partecipante = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante" +
+                            " WHERE NomeUtente = '" + NomePartecipante + "';");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                partecipante = new Partecipante();
+                rs.next();
+                partecipante.setNomeUtente(rs.getString("nomeutente"));
+                partecipante.setPasswordUtente(rs.getString("password"));
+                partecipante.setFnome(rs.getString("fNome"));
+                partecipante.setMnome(rs.getString("mNome"));
+                partecipante.setLnome(rs.getString("lNome"));
+                partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
+                while(rs.next()){
+                    partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
+                }
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return partecipante;
+    }
+
     public Partecipante getPartecipanteDB(String NomePartecipante, Evento evento) throws SQLException{
-        Partecipante partecipante = new Partecipante();
+        Partecipante partecipante = null;
         try {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante" +
                             " WHERE NomeUtente = '" + NomePartecipante + "' AND idEvento = " + idEvento + ";");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            partecipante.setNomeUtente(rs.getString("nomeutente"));
-            partecipante.setPasswordUtente(rs.getString("password"));
-            partecipante.setFnome(rs.getString("fNome"));
-            partecipante.setMnome(rs.getString("mNome"));
-            partecipante.setLnome(rs.getString("lNome"));
-            partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
-            partecipante.addEvento(evento);
+            if(rs.isBeforeFirst()){
+                partecipante = new Partecipante();
+                rs.next();
+                partecipante.setNomeUtente(rs.getString("nomeutente"));
+                partecipante.setPasswordUtente(rs.getString("password"));
+                partecipante.setFnome(rs.getString("fNome"));
+                partecipante.setMnome(rs.getString("mNome"));
+                partecipante.setLnome(rs.getString("lNome"));
+                partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                rs.close();
+                partecipante.addEvento(evento);
+            }
         }
         catch(SQLException e) {
             throw e;
@@ -305,21 +387,49 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public Organizzatore getOrganizzatoreDB(String NomeUtente) throws SQLException {
+        Organizzatore organizzatore = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Organizzatore WHERE NomeUtente = '" + NomeUtente + "';");
+            ResultSet rs = ps.executeQuery();
+            if (rs.isBeforeFirst()) {
+                organizzatore = new Organizzatore();
+                rs.next();
+                organizzatore.setNomeUtente(rs.getString("nomeutente"));
+                organizzatore.setPasswordUtente(rs.getString("password"));
+                organizzatore.setFnome(rs.getString("fNome"));
+                organizzatore.setMnome(rs.getString("mNome"));
+                organizzatore.setLnome(rs.getString("lNome"));
+                organizzatore.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                organizzatore.selezionaEvento(getEventoDB(rs.getInt("idevento")));
+                rs.close();
+            }
+        } catch (SQLException e) {
+            throw e;
+        }
+        return organizzatore;
+    }
+
     public Organizzatore getOrganizzatoreDB(Evento evento) throws SQLException{
-        Organizzatore organizzatore = new Organizzatore();
+        Organizzatore organizzatore = null;
         try {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Organizzatore WHERE idEvento =" + idEvento + ";");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            organizzatore.setNomeUtente(rs.getString("nomeutente"));
-            organizzatore.setPasswordUtente(rs.getString("password"));
-            organizzatore.setFnome(rs.getString("fNome"));
-            organizzatore.setMnome(rs.getString("mNome"));
-            organizzatore.setLnome(rs.getString("lNome"));
-            organizzatore.setDataNascita(rs.getObject("datanascita", LocalDate.class));
-            organizzatore.selezionaEvento(evento);
+            if(rs.isBeforeFirst()){
+                organizzatore = new Organizzatore();
+                rs.next();
+                organizzatore.setNomeUtente(rs.getString("nomeutente"));
+                organizzatore.setPasswordUtente(rs.getString("password"));
+                organizzatore.setFnome(rs.getString("fNome"));
+                organizzatore.setMnome(rs.getString("mNome"));
+                organizzatore.setLnome(rs.getString("lNome"));
+                organizzatore.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                rs.close();
+                organizzatore.selezionaEvento(evento);
+            }
         }
         catch(SQLException e) {
             throw e;
@@ -394,22 +504,52 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public Giudice getGiudiceDB(String NomeUtente) throws SQLException {
+        Giudice giudice = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Giudice JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
+                            " WHERE NomeUtente = '" + NomeUtente + "';");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                giudice = new Giudice();
+                rs.next();
+                giudice.setNomeUtente(rs.getString("nomeutente"));
+                giudice.setPasswordUtente(rs.getString("password"));
+                giudice.setFnome(rs.getString("fNome"));
+                giudice.setMnome(rs.getString("mNome"));
+                giudice.setLnome(rs.getString("lNome"));
+                giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                giudice.setEvento(getEventoDB(rs.getInt("idevento")));
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return giudice;
+    }
+
     public Giudice getGiudiceDB(String NomeUtente, Evento evento) throws SQLException {
-        Giudice giudice = new Giudice();
+        Giudice giudice = null;
         try {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Giudice JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
                             " WHERE NomeUtente = '" + NomeUtente + "' AND idEvento =" + idEvento + ";");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            giudice.setNomeUtente(rs.getString("nomeutente"));
-            giudice.setPasswordUtente(rs.getString("password"));
-            giudice.setFnome(rs.getString("fNome"));
-            giudice.setMnome(rs.getString("mNome"));
-            giudice.setLnome(rs.getString("lNome"));
-            giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
-            giudice.setEvento(evento);
+            if(rs.isBeforeFirst()){
+                giudice = new Giudice();
+                rs.next();
+                giudice.setNomeUtente(rs.getString("nomeutente"));
+                giudice.setPasswordUtente(rs.getString("password"));
+                giudice.setFnome(rs.getString("fNome"));
+                giudice.setMnome(rs.getString("mNome"));
+                giudice.setLnome(rs.getString("lNome"));
+                giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                rs.close();
+                giudice.setEvento(evento);
+            }
         }
         catch(SQLException e) {
             throw e;
@@ -486,21 +626,25 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public Team getTeamDB(int IdTeam) throws SQLException{
-        Team team = new Team(IdTeam);
+        Team team = null;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
                             "WHERE t.IdTeam = " + IdTeam + ";");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            Evento evento = getEventoDB(rs.getInt("idevento"));
-            Partecipante part = getPartecipanteDB(rs.getString("nomepartecipante"), evento);
-            team.addMembroTeam(part);
-            while(rs.next()) {
-                part = getPartecipanteDB(rs.getString("nomepartecipante"), evento);
+            if(rs.isBeforeFirst()){
+                team = new Team(IdTeam);
+                rs.next();
+                Evento evento = getEventoDB(rs.getInt("idevento"));
+                Partecipante part = getPartecipanteDB(rs.getString("nomepartecipante"), evento);
                 team.addMembroTeam(part);
+                while(rs.next()) {
+                    part = getPartecipanteDB(rs.getString("nomepartecipante"), evento);
+                    team.addMembroTeam(part);
+                }
+                rs.close();
+                team.setEventoIscritto(evento);
             }
-            team.setEventoIscritto(evento);
         }
         catch(SQLException e) {
             throw e;
@@ -509,16 +653,18 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public int getIdTeamDB() throws SQLException{
+        int id;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT MAX(IdTeam) FROM Team;");
             ResultSet rs = ps.executeQuery();
             rs.next();
-            return rs.getInt(1);
+            id = rs.getInt(1);
         }
         catch (SQLException e) {
             throw e;
         }
+        return id;
     }
 
     public int addTeamDB(String NomeUtente, int idEvento) throws SQLException {
@@ -556,15 +702,19 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public Progresso getProgressoDB(int IdProgresso) throws SQLException{
-        Progresso progresso = new Progresso(IdProgresso);
+        Progresso progresso = null;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Progresso WHERE IdProgresso = " + IdProgresso + ";");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            progresso.setIdTeam(rs.getInt("idteam"));
-            progresso.setDataProgresso(rs.getObject("datapubblicazione", LocalDate.class));
-            progresso.setTestoDocumeto(rs.getString("testo"));
+            if(rs.isBeforeFirst()){
+                progresso = new Progresso(IdProgresso);
+                rs.next();
+                progresso.setIdTeam(rs.getInt("idteam"));
+                progresso.setDataProgresso(rs.getObject("datapubblicazione", LocalDate.class));
+                progresso.setTestoDocumeto(rs.getString("testo"));
+                rs.close();
+            }
         }
         catch(SQLException e) {
             throw e;
@@ -596,16 +746,18 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public int getIdProgressoDB() throws SQLException{
+        int id = -1;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT MAX(IdProgresso) FROM Progresso;");
             ResultSet rs = ps.executeQuery();
             rs.next();
-            return rs.getInt(1);
+            id = rs.getInt(1);
         }
         catch (SQLException e) {
             throw e;
         }
+        return id;
     }
 
     public void addProgressoDB(Progresso progresso) throws SQLException{
@@ -631,14 +783,18 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public Commento getCommentoDB(int idProgresso, String Giudice) throws SQLException{
-        Commento commento = new Commento(idProgresso, Giudice);
+        Commento commento = null;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Commento WHERE idProgresso = " + idProgresso +
                             "AND NomeGiudice = '" + Giudice + "';");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            commento.setTesto(rs.getString("testo"));
+            if(rs.isBeforeFirst()){
+                commento = new Commento(idProgresso, Giudice);
+                rs.next();
+                commento.setTesto(rs.getString("testo"));
+                rs.close();
+            }
         }
         catch(SQLException e) {
             throw e;
@@ -688,14 +844,18 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public Voto getVotoDB(int idTeam, String Giudice) throws SQLException {
-        Voto voto = new Voto(idTeam, Giudice);
+        Voto voto = null;
         try {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Voto WHERE idTeam = " + idTeam +
                             "AND NomeGiudice = '" + Giudice + "';");
             ResultSet rs = ps.executeQuery();
-            rs.next();
-            voto.setValore(rs.getInt("valore"));
+            if(rs.isBeforeFirst()){
+                voto = new Voto(idTeam, Giudice);
+                rs.next();
+                voto.setValore(rs.getInt("valore"));
+                rs.close();
+            }
         }
         catch(SQLException e) {
             throw e;
