@@ -32,9 +32,14 @@ public class Main {
             Evento evento = d.getEventoDB(11);
             if (evento == null) System.out.println("Evento non trovato");
             d.disconnect();
-             */
             if(d.checkLogin("org1", "orgpass1")) System.out.println("Login correto.");
             else System.out.println("Login errato.");
+            */
+            Utente u = new Utente("alice123", "pwd1");
+            ArrayList<Utente> ruoli = d.getAllRuoliDB(u);
+            if(ruoli.size() >= 1 && ruoli.get(0) != null){System.out.println("Partecipante.");}
+            if(ruoli.size() >= 2 && ruoli.get(1) != null){System.out.println("Giudice.");}
+            if(ruoli.size() >= 3 && ruoli.get(2) != null){System.out.println("Organizzatore.");}
         }
         catch(SQLException e)
         {

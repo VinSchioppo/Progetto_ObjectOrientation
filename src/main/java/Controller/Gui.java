@@ -18,13 +18,13 @@ public class Gui extends JDialog {
 
         logInButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (!controller.TrovaUtente(NomeUtente.getText(), PasswordUtente.getText())) {
+                /*if (!controller.TrovaUtente(NomeUtente.getText(), PasswordUtente.getText())) {
                     JOptionPane.showMessageDialog(null, "Impossibile registrare l'Utente!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 else{
                     JOptionPane.showMessageDialog(null, "Utente registrato con Successo!", "Comfirmation", JOptionPane.INFORMATION_MESSAGE);
                     setVisible(false);
-                }
+                }*/
 
             }
         });

@@ -8,7 +8,9 @@ import java.util.ArrayList;
 public interface InterfacciaDAO {
     void disconnect();
 
-    void getAllRuoliDB(Utente utente, Partecipante partecipante, Giudice giudice, Organizzatore organizzatore) throws SQLException;
+    boolean checkLoginDB(String NomeUtente, String Password) throws SQLException;
+    boolean checkRegisteredDB(String NomeUtente) throws SQLException;
+    ArrayList<Utente> getAllRuoliDB(Utente utente) throws SQLException;
 
     Evento getEventoDB(int IdEvento) throws SQLException;
     int getIdEventoDB() throws SQLException;

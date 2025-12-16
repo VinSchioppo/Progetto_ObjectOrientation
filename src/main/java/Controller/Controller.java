@@ -1,7 +1,10 @@
 package Controller;
 import ClassModel.*;
+import DAO.*;
+import Database.ConnessioneDatabase;
 
 import javax.xml.crypto.Data;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -9,27 +12,39 @@ import java.time.format.DateTimeParseException;
 
 public class Controller {
 
-    private Utente UtenteCorrente;
-    private static LinkedList<Utente> UtentiRegistrati = new LinkedList<>();
+    private Utente UtenteCorrente = null;
+    private static ImplementazioneDAO dao = new ImplementazioneDAO();
 
-    public boolean TrovaUtente(String NomeUtente, String PasswordUtente)
-    {
-        if(NomeUtente.length() < 5  || PasswordUtente.length() < 8) {
-                return false;
+    //Questo metodo verifica i dati di login inseriti e restituisce true se va a buon fine, altrimenti false.
+
+    public boolean logInUtente(String NomeUtente, String Password) {
+        boolean check = false;
+        try {
+            check = dao.checkLoginDB(NomeUtente, Password);
+            if (check) UtenteCorrente = dao.getUtenteDB(NomeUtente);
         }
-        else {
-            Utente UtenteTmp = new Utente(NomeUtente, PasswordUtente);
-            for(Utente u : UtentiRegistrati) {
-                if(UtenteTmp.equals(u)) {
-                    return false;
-                }
-            }
-            UtentiRegistrati.addLast(UtenteTmp);
-            UtenteCorrente = UtenteTmp;
-            return true;
+        catch(SQLException e){
+            e.printStackTrace();
         }
+        return check;
     }
 
+    //Questo metodo verifica che il nome utente scelto durante la registrazione non sia già presente nel Database.
+    //Restituisce true se la registrazione viene completata con successo, altrimenti restituisce false.
+
+    public boolean registerUtente(String NomeUtente, String Password) {
+        boolean check = false;
+        try {
+            if(!dao.checkRegisteredDB(NomeUtente)) {
+                UtenteCorrente = new Utente(NomeUtente, Password);
+                check = true;
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return check;
+    }
 
     public boolean InserisciDatiUtente(String FNome, String MNome, String LNome, String DataString){
 

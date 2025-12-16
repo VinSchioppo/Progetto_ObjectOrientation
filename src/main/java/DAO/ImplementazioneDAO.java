@@ -26,7 +26,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public boolean checkLogin(String NomeUtente, String Password) throws SQLException{
+    public boolean checkLoginDB(String NomeUtente, String Password) throws SQLException{
         boolean check = true;
         try {
             PreparedStatement ps =
@@ -54,11 +54,47 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return check;
     }
 
-    public void getAllRuoliDB(Utente utente, Partecipante partecipante, Giudice giudice, Organizzatore organizzatore) throws SQLException{
+    public boolean checkRegisteredDB(String NomeUtente) throws SQLException{
+        boolean check = true;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT NomeUtente, Password FROM Partecipante" +
+                            " WHERE NomeUtente = '" + NomeUtente + "';");
+            ResultSet rs = ps.executeQuery();
+            if (!rs.isBeforeFirst()) {
+                ps = connection.prepareStatement("SELECT NomeUtente, Password FROM Giudice" +
+                        " WHERE NomeUtente = '" + NomeUtente + "';");
+                rs = ps.executeQuery();
+                if (!rs.isBeforeFirst()) {
+                    ps = connection.prepareStatement("SELECT NomeUtente, Password FROM Organizzatore" +
+                            " WHERE NomeUtente = '" + NomeUtente + "';");
+                    rs = ps.executeQuery();
+                    if (!rs.isBeforeFirst()) {
+                        check = false;
+                    }
+                }
+            }
+            rs.close();
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return check;
+    }
+
+    public ArrayList<Utente> getAllRuoliDB(Utente utente) throws SQLException{
+        ArrayList<Utente> ruoli = null;
         String NomeUtente = utente.getNomeUtente();
-        partecipante = getPartecipanteDB(NomeUtente);
-        organizzatore = getOrganizzatoreDB(NomeUtente);
-        giudice = getGiudiceDB(NomeUtente);
+        Partecipante partecipante = getPartecipanteDB(NomeUtente);
+        Organizzatore organizzatore = getOrganizzatoreDB(NomeUtente);
+        Giudice giudice = getGiudiceDB(NomeUtente);
+        if(partecipante != null || organizzatore != null || giudice != null) {
+            ruoli = new ArrayList<Utente>();
+            if (partecipante != null) ruoli.add(partecipante);
+            if (organizzatore != null) ruoli.add(organizzatore);
+            if (giudice != null) ruoli.add(giudice);
+        }
+        return ruoli;
     }
 
     public int getIdEventoDB() throws SQLException{
