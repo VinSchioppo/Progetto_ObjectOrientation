@@ -2,8 +2,6 @@ package ClassModel;
 
 public class Giudice extends Utente {
 
-    private Evento EventoGiudicato = null;
-
     public Giudice() {}
 
     public Giudice(String NomeUtente, String PasswordUtente) {
@@ -12,16 +10,14 @@ public class Giudice extends Utente {
 
     }
 
-    public void setEvento(Evento evento) {
-        this.EventoGiudicato = evento;
+    public void addEvento(Evento evento) {
+        super.addEvento(evento);
         evento.addGiudice(this);
     }
 
-    public int getIdEventoGiudicato() {return EventoGiudicato.getIdEvento();}
-
     public void pubblicaProblema(String Problema) {
 
-        EventoGiudicato.setDescrizioneProblema(Problema);
+        getEvento().setDescrizioneProblema(Problema);
     }
 
     private void commentaProgresso(Progresso progresso, String commento) {

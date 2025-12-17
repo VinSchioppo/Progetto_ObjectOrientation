@@ -1,11 +1,8 @@
 package ClassModel;
 
-import java.util.ArrayList;
 import java.time.LocalDate;
 
 public class Organizzatore extends Utente {
-
-    private Evento EventoOrganizzato = null;
 
     public Organizzatore(){}
 
@@ -15,51 +12,56 @@ public class Organizzatore extends Utente {
 
     }
 
-    public void selezionaEvento(Evento evento) {
+    public void addEvento(Evento evento) {
 
-        EventoOrganizzato = evento;
+        super.addEvento(evento);
         evento.setOrganizzatore(this);
-
     }
-
-    public int getIdEventoOrganizzato() {return EventoOrganizzato.getIdEvento();}
 
     public void finalizeDateReg(LocalDate Inizio, LocalDate Fine) {
 
-        EventoOrganizzato.setDateReg(Inizio, Fine);
+        Evento EventoOrganizzato = getEvento();
+        if (EventoOrganizzato != null) {
+            EventoOrganizzato.setDateReg(Inizio, Fine);
+        }
     }
 
     public void apriPrenotazioni() {
 
-        EventoOrganizzato.prenotazioni = true;
-
+        Evento EventoOrganizzato = getEvento();
+        if (EventoOrganizzato != null) {
+            EventoOrganizzato.setPrenotazioni(true);
+        }
     }
 
     public void chiudiPrenotazioni() {
 
-        EventoOrganizzato.prenotazioni = false;
+        Evento EventoOrganizzato = getEvento();
+        if (EventoOrganizzato != null) {
+            EventoOrganizzato.setPrenotazioni(false);
+        }
 
     }
 
     public Giudice selezionaGiudice(Utente utente) {
 
-        if(EventoOrganizzato.Giudici == null)
-            EventoOrganizzato.Giudici = new ArrayList<Giudice>();
-
-        Giudice giudice = new Giudice(utente.NomeUtente, utente.PasswordUtente);
-        giudice = promuoviUtente(giudice, utente);
-        EventoOrganizzato.Giudici.add(giudice);
-        giudice.setEvento(EventoOrganizzato);
+        Evento EventoOrganizzato = getEvento();
+        Giudice giudice = null;
+        if (EventoOrganizzato != null) {
+            giudice = new Giudice(utente.getNomeUtente(), utente.getPasswordUtente());
+            giudice = promuoviUtente(giudice, utente);
+            EventoOrganizzato.addGiudice(giudice);
+            giudice.addEvento(EventoOrganizzato);
+        }
         return giudice;
-
     }
 
     public Giudice promuoviUtente(Giudice giudice, Utente utente) {
 
-        giudice.FNome = utente.FNome;
-        giudice.MNome = utente.MNome;
-        giudice.LNome = utente.LNome;
-        giudice.DataNascita = utente.DataNascita;
+        giudice.setFnome(utente.getFNome());
+        giudice.setMnome(utente.getMNome());
+        giudice.setLnome(utente.getLNome());
+        giudice.setDataNascita(utente.getDataNascita());
         return giudice;
 
     }

@@ -1,6 +1,7 @@
 package ClassModel;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class Utente {
 
@@ -10,6 +11,9 @@ public class Utente {
     protected String MNome = null;
     protected String LNome = null;
     protected LocalDate DataNascita = null;
+
+    private int currentEvento = -1;
+    private ArrayList<Evento> Eventi = null;
 
     public Utente(){}
 
@@ -42,6 +46,75 @@ public class Utente {
     public String getMNome() {return this.MNome;}
     public String getLNome() {return this.LNome;}
     public LocalDate getDataNascita() {return this.DataNascita;}
+
+    public void addEvento(Evento evento) {
+        if(Eventi == null) {
+            Eventi = new ArrayList<>();
+            currentEvento = 0;
+        }
+        Eventi.add(evento);
+    }
+
+    public void removeEvento(int idEvento){
+        Evento evento = firstEvento();
+        while(evento != null){
+            if(evento.getIdEvento() == idEvento){
+                Eventi.remove(currentEvento);
+            }
+            else evento = nextEvento();
+        }
+    }
+
+    public int getIdCurrentEvento() {
+        Evento evento = getEvento();
+        if(evento != null){
+            return evento.getIdEvento();
+        }
+        else return -1;
+    }
+
+    public Evento getEvento(){
+        if(currentEvento >= 0 && currentEvento < Eventi.size()){
+            return Eventi.get(currentEvento);
+        }
+        return null;
+    }
+
+    public Evento firstEvento(){
+        currentEvento = 0;
+        return getEvento();
+    }
+
+    public Evento previousEvento(){
+        if(currentEvento >= 0) {
+            currentEvento--;
+        }
+        return getEvento();
+    }
+
+    public Evento nextEvento(){
+        if(currentEvento < Eventi.size()) {
+            currentEvento++;
+        }
+        return getEvento();
+    }
+
+    public Evento lastEvento(){
+        currentEvento = Eventi.size() - 1;
+        return getEvento();
+    }
+
+    public Evento seekEvento(int idEvento) {
+        Evento evento = firstEvento();
+        while(evento != null){
+            if(evento.getIdEvento() == idEvento) {
+                return evento;
+            }
+            else evento = nextEvento();
+        }
+        return null;
+    }
+
 
     public void printDati() {
 

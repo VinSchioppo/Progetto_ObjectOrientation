@@ -3,8 +3,6 @@ package ClassModel;
 import DAO.ImplementazioneDAO;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.time.LocalDate;
 
 
 public class Main {
@@ -26,20 +24,32 @@ public class Main {
             d.updateEventoDB(20, LocalDate.parse("2025-12-11"), LocalDate.parse("2025-12-15"), 100, 10, LocalDate.parse("2025-10-11"), LocalDate.parse("2025-11-11"), "Inventare il viaggio nel tempo.");
             d.addAllEventiDB(eventi);
             d.printEventi();
-            System.out.println(g.getNomeUtente() + "\n" + g.getPasswordUtente() + "\n" + g.getFNome() + "\n" + g.getMNome() + "\n" + g.getIdEventoGiudicato());
+            System.out.println(g.getNomeUtente() + "\n" + g.getPasswordUtente() + "\n" + g.getFNome() + "\n" + g.getMNome() + "\n" + g.getIdCurrentEvento());
             Team t = d.getTeamDB(1);
             t.printMembri();
+            */
+            Giudice g = new Giudice("gino", "esposito");
+            g.addEvento(new Evento(1));
+            g.addEvento(new Evento(2));
+            System.out.println("Evento: " + g.getIdCurrentEvento());
+            g.nextEvento();
+            System.out.println("Evento: " + g.getIdCurrentEvento());
+            g.previousEvento();
+            System.out.println("Evento: " + g.getIdCurrentEvento());
+            if(g.previousEvento() == null) throw new SQLException();
+            /*
             Evento evento = d.getEventoDB(11);
             if (evento == null) System.out.println("Evento non trovato");
             d.disconnect();
             if(d.checkLogin("org1", "orgpass1")) System.out.println("Login correto.");
             else System.out.println("Login errato.");
-            */
+
             Utente u = new Utente("alice123", "pwd1");
             ArrayList<Utente> ruoli = d.getAllRuoliDB(u);
             if(ruoli.size() >= 1 && ruoli.get(0) != null){System.out.println("Partecipante.");}
             if(ruoli.size() >= 2 && ruoli.get(1) != null){System.out.println("Giudice.");}
             if(ruoli.size() >= 3 && ruoli.get(2) != null){System.out.println("Organizzatore.");}
+             */
         }
         catch(SQLException e)
         {
