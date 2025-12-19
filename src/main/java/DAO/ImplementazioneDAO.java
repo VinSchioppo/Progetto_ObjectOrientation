@@ -360,6 +360,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 while(rs.next()){
                     partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
                 }
+                partecipante.setTeamUniti(getAllTeamDB(partecipante));
                 rs.close();
             }
         }
@@ -388,6 +389,37 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 rs.close();
                 partecipante.addEvento(evento);
+                partecipante.setTeamUniti(getAllTeamDB(partecipante));
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return partecipante;
+    }
+
+    public Partecipante getPartecipanteDB(String NomePartecipante, Team team) throws SQLException{
+        Partecipante partecipante = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante" +
+                            " WHERE NomeUtente = '" + NomePartecipante + "';");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                partecipante = new Partecipante();
+                rs.next();
+                partecipante.setNomeUtente(rs.getString("nomeutente"));
+                partecipante.setPasswordUtente(rs.getString("password"));
+                partecipante.setFnome(rs.getString("fnome"));
+                partecipante.setMnome(rs.getString("mnome"));
+                partecipante.setLnome(rs.getString("lnome"));
+                partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
+                while(rs.next()){
+                    partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
+                }
+                partecipante.addTeam(team);
+                rs.close();
             }
         }
         catch(SQLException e) {
@@ -823,6 +855,42 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     }
                     partecipante = evento.seekPartecipante(rs.getString("nomepartecipante"));
                     team.addMembroTeam(partecipante);
+                }
+                teams.add(team);
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return teams;
+    }
+
+    public ArrayList<Team> getAllTeamDB(Partecipante partecipante) throws SQLException{
+        ArrayList<Team> teams = null;
+        try {
+            String nomeUtente = partecipante.getNomeUtente();
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                            "WHERE ct.NomePartecipante <> '" + nomeUtente + "' AND " +
+                            "ct.idTeam IN(SELECT idTeam FROM CompTeam WHERE NomePartecipante = '" + nomeUtente + "');");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                teams = new ArrayList<Team>();
+                rs.next();
+                int idTeam = rs.getInt("idteam");
+                Team team = new Team(idTeam);
+                Partecipante newPartecipante = getPartecipanteDB(rs.getString("nomepartecipante"), team);
+                team.addMembroTeam(partecipante);
+                team.addMembroTeam(newPartecipante);
+                while(rs.next()) {
+                    if(idTeam != rs.getInt("idteam")) {
+                        teams.add(team);
+                        team = new Team(rs.getInt("idteam"));
+                        team.addMembroTeam(partecipante);
+                    }
+                    newPartecipante = getPartecipanteDB(rs.getString("nomepartecipante"), team);
+                    team.addMembroTeam(newPartecipante);
                 }
                 teams.add(team);
                 rs.close();

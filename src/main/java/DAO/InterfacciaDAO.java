@@ -30,6 +30,7 @@ public interface InterfacciaDAO {
 
     Partecipante getPartecipanteDB(String NomePartecipante) throws SQLException;
     Partecipante getPartecipanteDB(String NomePartecipante, Evento evento) throws SQLException;
+    Partecipante getPartecipanteDB(String NomePartecipante, Team team) throws SQLException;
     ArrayList<Partecipante> getAllPartecipantiDB(Evento evento) throws SQLException;
     void addPartecipanteDB(Partecipante partecipante, int idEvento) throws SQLException;
     void addPartecipanteDB(String NomeUtente, String Password, int idEvento) throws SQLException;
@@ -56,6 +57,7 @@ public interface InterfacciaDAO {
 
     Team getTeamDB(int IdTeam) throws SQLException;
     ArrayList<Team> getAllTeamDB(Evento evento) throws SQLException;
+    ArrayList<Team> getAllTeamDB(Partecipante partecipante) throws SQLException;
     int getIdTeamDB() throws SQLException;
     int addTeamDB(String NomeUtente, int idEvento) throws SQLException;
     void addCompTeamDB(String NomeUtente, int idTeam) throws SQLException;
