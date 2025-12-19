@@ -268,9 +268,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         Utente utente = null;
         try {
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Partecipante WHERE NomeUtente = '"
-                            + NomeUtente + "' AND NomeUtente NOT IN(" +
-                            "SELECT NomePartecipante FROM PartecipantiEvento WHERE NomePartecipante = '" + NomeUtente + "');");
+                    connection.prepareStatement("SELECT * FROM Partecipante WHERE NomeUtente = '" + NomeUtente + "';");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 utente = new Utente();
@@ -531,7 +529,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         try {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Organizzatore WHERE idEvento =" + idEvento + ";");
+                    connection.prepareStatement("SELECT * FROM Organizzatore JOIN OrganizzatoreEvento ON NomeUtente = NomeOrganizzatore " +
+                            "WHERE idEvento =" + idEvento + ";");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 organizzatore = new Organizzatore();
@@ -554,7 +553,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void addOrganizzatoreDB(Organizzatore organizzatore) throws SQLException{
         try {
-            addOrganizzatoreDB(organizzatore.getNomeUtente(), organizzatore.getPasswordUtente(), organizzatore.getFNome(), organizzatore.getMNome(), organizzatore.getLNome(), organizzatore.getDataNascita(), organizzatore.getIdCurrentEvento());
+            addOrganizzatoreDB(organizzatore.getNomeUtente(), organizzatore.getPasswordUtente(), organizzatore.getFNome(), organizzatore.getMNome(), organizzatore.getLNome(), organizzatore.getDataNascita(), organizzatore.getEvento().getIdEvento());
         }
         catch (SQLException e) {
             throw e;
@@ -709,7 +708,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void addGiudiceDB(Giudice giudice) throws SQLException{
         try {
-            addGiudiceDB(giudice.getNomeUtente(), giudice.getPasswordUtente(), giudice.getFNome(), giudice.getMNome(), giudice.getLNome(), giudice.getDataNascita(), giudice.getIdCurrentEvento());
+            addGiudiceDB(giudice.getNomeUtente(), giudice.getPasswordUtente(), giudice.getFNome(), giudice.getMNome(), giudice.getLNome(), giudice.getDataNascita(), giudice.getEvento().getIdEvento());
         }
         catch (SQLException e) {
             throw e;

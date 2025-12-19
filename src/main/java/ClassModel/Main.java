@@ -1,8 +1,10 @@
 package ClassModel;
 
+import Controller.*;
 import DAO.ImplementazioneDAO;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 
 public class Main {
@@ -15,9 +17,9 @@ public class Main {
             evento.setIndirizzoSede("Sede");
             evento.setNCivicoSede(10);
             eventi.add(evento);
-        }*/
+        }*//*
         try {
-            /*
+
             Evento e = d.getEventoDB(1);
             Giudice g = d.getGiudiceDB("jud1", e);
             int result = d.addEventoDB("Sans", "Sans Street", 34);
@@ -27,16 +29,17 @@ public class Main {
             System.out.println(g.getNomeUtente() + "\n" + g.getPasswordUtente() + "\n" + g.getFNome() + "\n" + g.getMNome() + "\n" + g.getIdCurrentEvento());
             Team t = d.getTeamDB(1);
             t.printMembri();
-            */
+
             Giudice g = new Giudice("gino", "esposito");
             g.addEvento(new Evento(1));
             g.addEvento(new Evento(2));
-            System.out.println("Evento: " + g.getIdCurrentEvento());
+            System.out.println("Evento: " + g.getEvento().getIdEvento());
             g.nextEvento();
-            System.out.println("Evento: " + g.getIdCurrentEvento());
+            System.out.println("Evento: " + g.getEvento().getIdEvento());
             g.previousEvento();
-            System.out.println("Evento: " + g.getIdCurrentEvento());
+            System.out.println("Evento: " + g.getEvento().getIdEvento());
             if(g.previousEvento() == null) throw new SQLException();
+            */
             /*
             Evento evento = d.getEventoDB(11);
             if (evento == null) System.out.println("Evento non trovato");
@@ -49,11 +52,19 @@ public class Main {
             if(ruoli.size() >= 1 && ruoli.get(0) != null){System.out.println("Partecipante.");}
             if(ruoli.size() >= 2 && ruoli.get(1) != null){System.out.println("Giudice.");}
             if(ruoli.size() >= 3 && ruoli.get(2) != null){System.out.println("Organizzatore.");}
-             */
+
         }
         catch(SQLException e)
         {
             e.printStackTrace();
+        }
+        */
+
+        Controller controller = new Controller();
+        if(controller.logInUtente("alice", "pwd1")) System.out.println("Utente loggato");
+        ArrayList<String> list = controller.listaEventiUtente();
+        for(String s : list){
+            System.out.println(s);
         }
     }
 }

@@ -1,6 +1,7 @@
 package ClassModel;
 
 import java.util.ArrayList;
+import RecordList.*;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -21,11 +22,9 @@ public class Evento {
     private boolean prenotazioni = false;
 
     private Organizzatore organizzatore = null;
-    private int currentGiudice = -1;
-    private ArrayList<Giudice> Giudici = null;
-    private int currentPartecipante = -1;
-    private ArrayList<Partecipante> Partecipanti = null;
-    private ArrayList<Team> TeamIscritti = null;
+    private RecordList<Giudice> Giudici = null;
+    private RecordList<Partecipante> Partecipanti = null;
+    private RecordList<Team> TeamIscritti = null;
     private Queue<Partecipante> RichiestePartecipazioneUtenti = null;
     private Queue<Team> RichiestePartecipazioneTeam = null;
 
@@ -45,9 +44,21 @@ public class Evento {
     public void setIdEvento(int IdEvento) {this.IdEvento = IdEvento;}
     public void setPrenotazioni(boolean prenotazioni){this.prenotazioni = prenotazioni;}
     public void setOrganizzatore(Organizzatore organizzatore) {this.organizzatore = organizzatore;}
-    public void setGiudici(ArrayList<Giudice> giudici) {Giudici = giudici;}
-    public void setPartecipanti(ArrayList<Partecipante> partecipanti) {Partecipanti = partecipanti;}
-    public void setTeamIscritti(ArrayList<Team> team){TeamIscritti = team;}
+    public void setGiudici(ArrayList<Giudice> giudici) {
+        if(Giudici == null)
+            Giudici = new RecordList<Giudice>();
+        Giudici.setRecords(giudici);
+    }
+    public void setPartecipanti(ArrayList<Partecipante> partecipanti) {
+        if(Partecipanti == null)
+            Partecipanti = new RecordList<Partecipante>();
+        Partecipanti.setRecords(partecipanti);
+    }
+    public void setTeamIscritti(ArrayList<Team> team){
+        if(TeamIscritti == null)
+            TeamIscritti = new RecordList<Team>();
+        TeamIscritti.setRecords(team);
+    }
     public void setDate(LocalDate Inizio, LocalDate Fine) {
 
         if(Inizio.isBefore(Fine)) {
@@ -88,60 +99,66 @@ public class Evento {
 
     }
 
-    public void addPartecipante(Partecipante utente) {
+    public void DequeueListaAttesaUtenti() {
 
-        if(Partecipanti == null)
-            Partecipanti = new ArrayList<Partecipante>();
-        Partecipanti.add(utente);
-    }
+        if(RichiestePartecipazioneUtenti != null) {
+            Partecipante utente = RichiestePartecipazioneUtenti.remove();
+            if ((Partecipanti == null) || (Partecipanti.size() < MaxIscritti)) {
+                addPartecipante(utente);
+                utente.addEvento(this);
 
-    public void removePartecipante(String nomeUtente){
-        Partecipante partecipante = firstPartecipante();
-        while(partecipante != null){
-            if(partecipante.getNomeUtente().equals(nomeUtente)){
-                Partecipanti.remove(currentPartecipante);
             }
-            else partecipante = nextPartecipante();
         }
     }
 
-    public String getNomePartecipanteCorrente() {
-        Partecipante partecipante = getPartecipante();
-        if(partecipante != null){
-            return partecipante.getNomeUtente();
+    public void addPartecipante(Partecipante utente) {
+        if(Partecipanti == null)
+            Partecipanti = new RecordList<Partecipante>();
+        Partecipanti.addRecord(utente);
+    }
+
+    public boolean removePartecipante(String nomeUtente){
+        if(Partecipanti != null){
+            seekPartecipante(nomeUtente);
+            Partecipanti.removeRecord();
+            return true;
         }
-        else return null;
+        return false;
     }
 
     public Partecipante getPartecipante(){
-        if(currentPartecipante >= 0 && currentPartecipante < Partecipanti.size()){
-            return Partecipanti.get(currentPartecipante);
+        if(Partecipanti != null){
+            return Partecipanti.getRecord();
         }
         return null;
     }
 
     public Partecipante firstPartecipante(){
-        currentPartecipante = 0;
-        return getPartecipante();
+        if(Partecipanti != null){
+            return Partecipanti.firstRecord();
+        }
+        return null;
     }
 
     public Partecipante previousPartecipante(){
-        if(currentPartecipante >= 0) {
-            currentPartecipante--;
+        if(Partecipanti != null){
+            return Partecipanti.previousRecord();
         }
-        return getPartecipante();
+        return null;
     }
 
     public Partecipante nextPartecipante(){
-        if(currentPartecipante < Partecipanti.size()) {
-            currentPartecipante++;
+        if(Partecipanti != null){
+            return Partecipanti.nextRecord();
         }
-        return getPartecipante();
+        return null;
     }
 
     public Partecipante lastPartecipante(){
-        currentPartecipante = Partecipanti.size() - 1;
-        return getPartecipante();
+        if(Partecipanti != null){
+            return Partecipanti.lastRecord();
+        }
+        return null;
     }
 
     public Partecipante seekPartecipante(String nomeUtente){
@@ -155,16 +172,65 @@ public class Evento {
         return null;
     }
 
-    public void DequeueListaAttesaUtenti() {
+    public void addGiudice(Giudice giudice) {
+        if(Giudici == null)
+            Giudici = new RecordList<Giudice>();
+        Giudici.addRecord(giudice);
+    }
 
-        if(RichiestePartecipazioneUtenti != null) {
-            Partecipante utente = RichiestePartecipazioneUtenti.remove();
-            if ((Partecipanti == null) || (Partecipanti.size() < MaxIscritti)) {
-                addPartecipante(utente);
-                utente.addEvento(this);
-
-            }
+    public boolean removeGiudice(String nomeUtente){
+        if(Giudici != null){
+            seekGiudice(nomeUtente);
+            Giudici.removeRecord();
+            return true;
         }
+        return false;
+    }
+
+    public Giudice getGiudice(){
+        if(Giudici != null){
+            return Giudici.getRecord();
+        }
+        return null;
+    }
+
+    public Giudice firstGiudice(){
+        if(Giudici != null){
+            return Giudici.firstRecord();
+        }
+        return null;
+    }
+
+    public Giudice previousGiudice(){
+        if(Giudici != null){
+            return Giudici.previousRecord();
+        }
+        return null;
+    }
+
+    public Giudice nextGiudice(){
+        if(Giudici != null){
+            return Giudici.nextRecord();
+        }
+        return null;
+    }
+
+    public Giudice lastGiudice(){
+        if(Giudici != null){
+            return Giudici.lastRecord();
+        }
+        return null;
+    }
+
+    public Giudice seekGiudice(String nomeUtente){
+        Giudice giudice = firstGiudice();
+        while(giudice != null){
+            if(giudice.getNomeUtente().equals(nomeUtente)) {
+                return giudice;
+            }
+            else giudice = nextGiudice();
+        }
+        return null;
     }
 
     public void enqueueListaAttesaTeam(Team team) {
@@ -173,15 +239,6 @@ public class Evento {
             RichiestePartecipazioneTeam = new LinkedList<Team>();
 
         RichiestePartecipazioneTeam.add(team);
-
-    }
-
-    public void addTeam(Team team) {
-
-        if( TeamIscritti == null)
-            TeamIscritti = new ArrayList<Team>();
-
-        TeamIscritti.add(team);
 
     }
 
@@ -194,70 +251,65 @@ public class Evento {
         }
     }
 
-    public void addGiudice(Giudice giudice) {
+    public void addTeam(Team team) {
 
-        if( Giudici == null)
-            Giudici = new ArrayList<Giudice>();
+        if(TeamIscritti == null)
+            TeamIscritti = new RecordList<Team>();
+        TeamIscritti.addRecord(team);
 
-        Giudici.add(giudice);
     }
 
-    public void removeGiudice(String nomeUtente){
-        Giudice giudice = firstGiudice();
-        while(giudice != null){
-            if(giudice.getNomeUtente().equals(nomeUtente)){
-                Giudici.remove(currentGiudice);
-            }
-            else giudice = nextGiudice();
+    public boolean removeTeam(int idTeam) {
+        if(TeamIscritti != null){
+            seekTeam(idTeam);
+            TeamIscritti.removeRecord();
+            return true;
         }
+        return false;
     }
 
-    public String getNomeGiudiceCorrente() {
-        Giudice giudice = getGiudice();
-        if(giudice != null){
-            return giudice.getNomeUtente();
-        }
-        else return null;
-    }
-
-    public Giudice getGiudice(){
-        if(currentGiudice >= 0 && currentGiudice < Giudici.size()){
-            return Giudici.get(currentGiudice);
+    public Team getTeam(){
+        if(TeamIscritti != null){
+            return TeamIscritti.getRecord();
         }
         return null;
     }
 
-    public Giudice firstGiudice(){
-        currentGiudice = 0;
-        return getGiudice();
-    }
-
-    public Giudice previousGiudice(){
-        if(currentGiudice >= 0) {
-            currentGiudice--;
+    public Team firstTeam(){
+        if(TeamIscritti != null){
+            return TeamIscritti.firstRecord();
         }
-        return getGiudice();
+        return null;
     }
 
-    public Giudice nextGiudice(){
-        if(currentGiudice < Giudici.size()) {
-            currentGiudice++;
+    public Team previousTeam(){
+        if(TeamIscritti != null){
+            return TeamIscritti.previousRecord();
         }
-        return getGiudice();
+        return null;
     }
 
-    public Giudice lastGiudice(){
-        currentGiudice = Giudici.size() - 1;
-        return getGiudice();
+    public Team nextTeam(){
+        if(TeamIscritti != null){
+            return TeamIscritti.nextRecord();
+        }
+        return null;
     }
 
-    public Giudice seekGiudice(String nomeUtente){
-        Giudice giudice = firstGiudice();
-        while(giudice != null){
-            if(giudice.getNomeUtente().equals(nomeUtente)) {
-                return giudice;
+    public Team lastTeam(){
+        if(TeamIscritti != null){
+            return TeamIscritti.lastRecord();
+        }
+        return null;
+    }
+
+    public Team seekTeam(int idTeam) {
+        Team team = firstTeam();
+        while(team != null){
+            if(team.getIdTeam() == idTeam) {
+                return team;
             }
-            else giudice = nextGiudice();
+            else team = nextTeam();
         }
         return null;
     }

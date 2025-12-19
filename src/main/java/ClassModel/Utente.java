@@ -1,5 +1,6 @@
 package ClassModel;
 
+import RecordList.RecordList;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -12,8 +13,7 @@ public class Utente {
     protected String LNome = null;
     protected LocalDate DataNascita = null;
 
-    private int currentEvento = -1;
-    private ArrayList<Evento> Eventi = null;
+    private RecordList<Evento> Eventi = null;
 
     public Utente(){}
 
@@ -39,6 +39,11 @@ public class Utente {
     public void setMnome(String MNome) {this.MNome = MNome;}
     public void setLnome(String LNome) {this.LNome = LNome;}
     public void setDataNascita(LocalDate DataNascita) {this.DataNascita = DataNascita;}
+    public void setEventi(ArrayList<Evento> eventi){
+        if(Eventi == null)
+            Eventi = new RecordList<Evento>();
+        Eventi.setRecords(eventi);
+    }
 
     public String getNomeUtente() {return this.NomeUtente;}
     public String getPasswordUtente() {return this.PasswordUtente;}
@@ -49,59 +54,53 @@ public class Utente {
 
     public void addEvento(Evento evento) {
         if(Eventi == null) {
-            Eventi = new ArrayList<>();
-            currentEvento = 0;
+            Eventi = new RecordList<Evento>();
         }
-        Eventi.add(evento);
+        Eventi.addRecord(evento);
     }
 
-    public void removeEvento(int idEvento){
-        Evento evento = firstEvento();
-        while(evento != null){
-            if(evento.getIdEvento() == idEvento){
-                Eventi.remove(currentEvento);
-            }
-            else evento = nextEvento();
+    public boolean removeEvento(int idEvento){
+        if(Eventi != null){
+            seekEvento(idEvento);
+            Eventi.removeRecord();
+            return true;
         }
-    }
-
-    public int getIdCurrentEvento() {
-        Evento evento = getEvento();
-        if(evento != null){
-            return evento.getIdEvento();
-        }
-        else return -1;
+        return false;
     }
 
     public Evento getEvento(){
-        if(currentEvento >= 0 && currentEvento < Eventi.size()){
-            return Eventi.get(currentEvento);
+        if(Eventi != null){
+            return Eventi.getRecord();
         }
         return null;
     }
 
     public Evento firstEvento(){
-        currentEvento = 0;
-        return getEvento();
+        if(Eventi != null){
+            return Eventi.firstRecord();
+        }
+        return null;
     }
 
     public Evento previousEvento(){
-        if(currentEvento >= 0) {
-            currentEvento--;
+        if(Eventi != null){
+            return Eventi.previousRecord();
         }
-        return getEvento();
+        return null;
     }
 
     public Evento nextEvento(){
-        if(currentEvento < Eventi.size()) {
-            currentEvento++;
+        if(Eventi != null){
+            return Eventi.nextRecord();
         }
-        return getEvento();
+        return null;
     }
 
     public Evento lastEvento(){
-        currentEvento = Eventi.size() - 1;
-        return getEvento();
+        if(Eventi != null){
+            return Eventi.lastRecord();
+        }
+        return null;
     }
 
     public Evento seekEvento(int idEvento) {
@@ -114,7 +113,6 @@ public class Utente {
         }
         return null;
     }
-
 
     public void printDati() {
 

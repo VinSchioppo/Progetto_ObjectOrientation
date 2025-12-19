@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class Partecipante extends Utente {
 
-    private ArrayList<Evento> EventiIscritti = null;
     private ArrayList<Team> TeamUniti = null;
 
     public Partecipante() {}
@@ -16,15 +15,6 @@ public class Partecipante extends Utente {
     public void IscriviEvento(Evento evento) {
 
         evento.enqueueListaAttesaUtenti(this);
-
-    }
-
-    public void addEvento(Evento evento) {
-
-        if(EventiIscritti == null)
-            EventiIscritti = new ArrayList<Evento>();
-
-        EventiIscritti.add(evento);
 
     }
 
