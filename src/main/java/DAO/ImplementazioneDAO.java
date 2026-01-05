@@ -185,6 +185,35 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return evento;
     }
 
+    public ArrayList<Evento> getEventiApertiDB() throws SQLException{
+        ArrayList<Evento> eventi = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Evento WHERE DataInizioReg <= NOW() AND DataFineReg >= NOW();");
+            ResultSet rs = ps.executeQuery();
+            if (rs.isBeforeFirst()) {
+                eventi = new ArrayList<Evento>();
+                while (rs.next()) {
+                    Evento evento = new Evento(rs.getInt("idevento"));
+                    evento.setTitolo(rs.getString("titolo"));
+                    evento.setIndirizzoSede(rs.getString("indirizzosede"));
+                    evento.setNCivicoSede(rs.getInt("ncivicosede"));
+                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                    evento.setMaxTeam(rs.getInt("maxteam"));
+                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                    eventi.add(evento);
+                }
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return eventi;
+    }
+
     public void addEventoDB(Evento evento) throws SQLException {
         try {
             evento.setIdEvento(addEventoDB(evento.getTitolo(), evento.getIndirizzoSede(), evento.getNCivicoSede(), evento.getDataInizio(), evento.getDataFine(), evento.getMaxIscritti(), evento.getMaxTeam(), evento.getDataInizioReg(), evento.getDataFineReg(), evento.getDescrizioneProblema()));
@@ -915,6 +944,18 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             throw e;
         }
         return id;
+    }
+
+    public int addTeamDB(Team team) throws SQLException {
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("CALL CreaTeam('" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");");
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw e;
+        }
+        return getIdTeamDB();
     }
 
     public int addTeamDB(String NomeUtente, int idEvento) throws SQLException {

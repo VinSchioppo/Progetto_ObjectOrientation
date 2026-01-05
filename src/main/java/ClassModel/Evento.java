@@ -19,7 +19,7 @@ public class Evento {
     private String DescrizioneProblema = null;
     private LocalDate DataInizioReg = null;
     private LocalDate DataFineReg = null;
-    private boolean prenotazioni = false;
+    private boolean Prenotazioni = false;
 
     private Organizzatore organizzatore = null;
     private RecordList<Giudice> Giudici = null;
@@ -42,7 +42,7 @@ public class Evento {
     public void setMaxTeam(int MaxTeam) {this.MaxTeam = MaxTeam;}
     public void setDescrizioneProblema(String DesctizioneProblema) {this.DescrizioneProblema = DesctizioneProblema;}
     public void setIdEvento(int IdEvento) {this.IdEvento = IdEvento;}
-    public void setPrenotazioni(boolean prenotazioni){this.prenotazioni = prenotazioni;}
+    public void setPrenotazioni(boolean prenotazioni){this.Prenotazioni = prenotazioni;}
     public void setOrganizzatore(Organizzatore organizzatore) {this.organizzatore = organizzatore;}
     public void setGiudici(ArrayList<Giudice> giudici) {
         if(Giudici == null)
@@ -88,7 +88,7 @@ public class Evento {
     public LocalDate getDataInizioReg() {return DataInizioReg;}
     public LocalDate getDataFineReg() {return DataFineReg;}
     public Organizzatore getOrganizzatore() {return organizzatore;}
-    public boolean getPrenotazioni() {return prenotazioni;}
+    public boolean getPrenotazioni() {return Prenotazioni;}
 
     public void enqueueListaAttesaUtenti(Partecipante utente) {
 

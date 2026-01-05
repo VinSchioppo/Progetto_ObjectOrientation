@@ -5,8 +5,12 @@ import DAO.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
+//Questo enum serve a determinare la specializzazione che un utente assume.
+enum Role{
+    PARTECIPANTE, ORGANIZZATORE, GIUDICE
+}
 
 public class Controller {
 
@@ -14,15 +18,16 @@ public class Controller {
     private Partecipante PartecipanteCorrente = null;
     private Organizzatore OrganizzatoreCorrente = null;
     private Giudice GiudiceCorrente = null;
-    private static ImplementazioneDAO dao = new ImplementazioneDAO();
+    private Role RuoloCorrente = null;
+    private static ImplementazioneDAO DAO = new ImplementazioneDAO();
 
     //Questo metodo verifica i dati di login inseriti e restituisce true se va a buon fine, altrimenti false.
 
     public boolean logInUtente(String NomeUtente, String Password) {
         boolean success = false;
         try {
-            success = dao.checkLoginDB(NomeUtente, Password);
-            if(success) UtenteCorrente = dao.getUtenteDB(NomeUtente);
+            success = DAO.checkLoginDB(NomeUtente, Password);
+            if(success) UtenteCorrente = DAO.getUtenteDB(NomeUtente);
         }
         catch(SQLException e){
             e.printStackTrace();
@@ -36,7 +41,7 @@ public class Controller {
     public boolean registerUtente(String NomeUtente, String Password) {
         boolean success = false;
         try {
-            if(!dao.checkRegisteredDB(NomeUtente)) {
+            if(!DAO.checkRegisteredDB(NomeUtente)) {
                 UtenteCorrente = new Utente(NomeUtente, Password);
                 success = true;
             }
@@ -47,14 +52,54 @@ public class Controller {
         return success;
     }
 
+    //Questo metodo restituisce una stringa contenente i dati personali dell'utente.
+    //Nel caso in cui non sia salvato nessun dato restituisce null.
+    //La stringa segue il formato: FNome MNome LNome DataNascita
+
+    public String datiUtente(){
+        if(UtenteCorrente != null){
+            if(UtenteCorrente.getFNome() == null && UtenteCorrente.getMNome() == null &&
+                    UtenteCorrente.getLNome() == null && UtenteCorrente.getDataNascita() == null)
+                return null;
+            else return UtenteCorrente.getFNome() + " " + UtenteCorrente.getMNome() + " "
+                    + UtenteCorrente.getLNome() + " " + UtenteCorrente.getDataNascita();
+        }
+        return null;
+    }
+
+    //Questo metodo permette di aggiornare i dati personali di un utente.
+    //Restituisce un boolean e accetta solo una data col formato yyyy-mm-dd, altrimenti lancia una eccezione.
+
+    public boolean inserisciDatiUtente(String FNome, String MNome, String LNome, String DataNascita){
+        try {
+            LocalDate DataConvertita = LocalDate.parse(DataNascita);
+            if ((FNome.length() < 3) || (LNome.length() < 3)) return false;
+            else {
+                if(UtenteCorrente != null)
+                    UtenteCorrente.setDati(FNome, MNome, LNome, DataConvertita);
+                if(PartecipanteCorrente != null)
+                    PartecipanteCorrente.setDati(FNome, MNome, LNome, DataConvertita);
+                if(OrganizzatoreCorrente != null)
+                    OrganizzatoreCorrente.setDati(FNome, MNome, LNome, DataConvertita);
+                if(GiudiceCorrente != null)
+                    GiudiceCorrente.setDati(FNome, MNome, LNome, DataConvertita);
+            }
+        } catch (DateTimeParseException e) {
+            System.out.println("Errore nel tentativo di copiare la data di nascita.");
+            return false;
+        }
+        return true;
+    }
+
     //Questo metodo restiuisce una lista contenente l'id e il titolo di tutti gli eventi in cui l'utente ha un ruolo.
+    //Ogni elemento della lista segue il formato: IdEvento Titolo
 
     public ArrayList<String> listaEventiUtente() {
         ArrayList<String> listaEventi = null;
         try {
-            PartecipanteCorrente = dao.getPartecipanteDB(UtenteCorrente.getNomeUtente());
-            OrganizzatoreCorrente = dao.getOrganizzatoreDB(UtenteCorrente.getNomeUtente());
-            GiudiceCorrente = dao.getGiudiceDB(UtenteCorrente.getNomeUtente());
+            PartecipanteCorrente = DAO.getPartecipanteDB(UtenteCorrente.getNomeUtente());
+            OrganizzatoreCorrente = DAO.getOrganizzatoreDB(UtenteCorrente.getNomeUtente());
+            GiudiceCorrente = DAO.getGiudiceDB(UtenteCorrente.getNomeUtente());
         }
         catch(SQLException e){
             e.printStackTrace();
@@ -95,30 +140,161 @@ public class Controller {
         return listaEventi;
     }
 
-    public boolean InserisciDatiUtente(String FNome, String MNome, String LNome, String DataString){
+    //Questo metodo restiuisce una lista contenente i dati di tutti gli eventi le cui prenotazioni sono attualmente aperte.
+    //Ogni elemento della lista segue il formato: IdEvento Titolo IndirizzoSede NCivicoSede DataInizio DataFine
+    // MaxIscritti MaxTeam DataInzioReg DataFineReg DescrizioneProblema
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        try {
-
-            LocalDate DataConvertita = LocalDate.parse(DataString);
-
-            if ((FNome.length() < 3) || (LNome.length() < 3)) {
-
-
-                return false;
-
-            } else {
-
-                //UtenteCorrente.SetDati(FNome, MNome, LNome, DataConvertita);
-
+    public ArrayList<String> listaEventiAperti(){
+        ArrayList<String> listaEventi = null;
+        try{
+            ArrayList<Evento> eventi = DAO.getEventiApertiDB();
+            if(eventi != null) {
+                listaEventi = new ArrayList<String>();
+                for (Evento evento : eventi) {
+                    String datiEvento = evento.getIdEvento() + " " + evento.getTitolo()
+                            + " " + evento.getIndirizzoSede() + " " + evento.getNCivicoSede()
+                            + " " + evento.getDataInizio() + " " + evento.getDataFine()
+                            + " " + evento.getMaxIscritti() + " " + evento.getMaxTeam()
+                            + " " + evento.getDataInizioReg() + " " + evento.getDataFineReg()
+                            + " " + evento.getDescrizioneProblema();
+                    listaEventi.add(datiEvento);
+                }
             }
-
-            return true;
-
-        } catch (DateTimeParseException e) {
-            System.out.println("errore");
-            return false;
         }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        return listaEventi;
     }
 
+    //Questo metodo aggiunge un evento alla lista di eventi a cui è iscritto un partecipante.
+    //Restituisce false se fallisce.
+
+    public boolean IscriviEvento(int idEvento){
+        Evento evento = null;
+        try{
+            evento = DAO.getEventoDB(idEvento);
+            if(evento != null) PartecipanteCorrente.addEvento(evento);
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    //Questo metodo riceve un input l'id di un evento e determina il ruolo dell'utente.
+    //Restituisce il ruolo alla funzione chiamante.
+
+    public Role selectEvento(int idEvento) {
+
+        if(PartecipanteCorrente != null){
+            if(PartecipanteCorrente.seekEvento(idEvento) != null){
+                RuoloCorrente = Role.PARTECIPANTE;
+            }
+        }
+        else if(OrganizzatoreCorrente != null){
+            if(OrganizzatoreCorrente.seekEvento(idEvento) != null){
+                RuoloCorrente = Role.ORGANIZZATORE;
+            }
+        }
+        else if(GiudiceCorrente != null){
+            if(GiudiceCorrente.seekEvento(idEvento) != null){
+                RuoloCorrente = Role.GIUDICE;
+            }
+        }
+        return RuoloCorrente;
+    }
+
+    //Questo metodo restituisce una stringa con l'id e il nome del team con cui il partecipante è iscritto all'evento.
+    //La stringa è fromattata come: IdTeam Nome
+
+    public String teamPartecipante() {
+        String infoTeam = null;
+        Team team = PartecipanteCorrente.seekTeamEvento(PartecipanteCorrente.getEvento().getIdEvento());
+        if(team != null){
+            infoTeam = team.getIdTeam() + " " + team.getNome();
+        }
+        return infoTeam;
+    }
+
+    //Questo metodo restiuisce una lista contenente l'id e il testo di ogni progresso pubblicato da un team.
+    //Ogni elemento della lista segue il formato: IdProgresso Testo
+
+    public ArrayList<String> listaProgressiTeam(){
+        ArrayList<String> listaProgressi = null;
+        Team team = PartecipanteCorrente.getTeam();
+        Progresso progresso = team.firstProgresso();
+        if(progresso != null){
+            listaProgressi = new ArrayList<String>();
+            while(progresso != null){
+                listaProgressi.add(progresso.getIdProgresso() + " " + progresso.getTestoDocumeto());
+                progresso = team.nextProgresso();
+            }
+        }
+        return listaProgressi;
+    }
+
+    //Questo metodo permette di pubblicare un progresso. Restituisce un boolean e fallisce se avviene un SQLException
+    //o se qualcuno di diverso dal team leader cerca di pubblicare il progresso.
+
+    public boolean pubblicaProgresso(String Testo){
+        Progresso progresso = null;
+        Team team = PartecipanteCorrente.getTeam();
+        if(team.getTeamLeader().equals(PartecipanteCorrente.getNomeUtente()))
+        {
+            try {
+                progresso = new Progresso(Testo, team.getIdTeam());
+                progresso.setIdProgresso(DAO.addProgressoDB(team.getIdTeam(), Testo));
+                team.addProgresso(progresso);
+            }
+            catch(SQLException e)
+            {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        else return false;
+        return true;
+    }
+
+    //Questo metodo permette al partecipante di creare un team.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    public boolean creaTeamPartecipante(String nome){
+        Team team = new Team(-1, nome, PartecipanteCorrente.getNomeUtente());
+        team.setEventoIscritto(PartecipanteCorrente.getEvento());
+        team.addMembroTeam(PartecipanteCorrente);
+        try{
+            team.setIdTeam(DAO.addTeamDB(team));
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    //Questo metodo restiuisce una lista contenente l'id e il nome di tutti i team iscritti all'evento.
+    //Ogni elemento della lista segue il formato: IdTeam Nome
+
+    public ArrayList<String> listaTeamEvento(){
+        ArrayList<String> listaTeam = null;
+        Team team = PartecipanteCorrente.getEvento().firstTeam();
+        if(team != null){
+            listaTeam = new ArrayList<String>();
+            while(team != null){
+                listaTeam.add(team.getIdTeam() + " " + team.getNome());
+                team = PartecipanteCorrente.getEvento().nextTeam();
+            }
+        }
+        return listaTeam;
+    }
+
+    //Questo metodo fa aggiungere un partecipante alla lista di attesa per un team.
+
+    public void joinTeam(int idTeam){
+        Team team = PartecipanteCorrente.getEvento().seekTeam(idTeam);
+        team.enqueueListaAttesa(PartecipanteCorrente);
+    }
 }

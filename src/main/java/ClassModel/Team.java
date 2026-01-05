@@ -10,6 +10,7 @@ public class Team {
 
     private int idTeam;
     private String Nome;
+    private String TeamLeader = null;
 
     private RecordList<Partecipante> MembriTeam = null;
     private Evento EventoIscritto = null;
@@ -18,6 +19,12 @@ public class Team {
     private RecordList<Voto> Voti = null;
 
     public Team(int idTeam) {this.idTeam = idTeam;}
+
+    public Team(int idTeam, String Nome, String TeamLeader) {
+        this.idTeam = idTeam;
+        this.Nome = Nome;
+        this.TeamLeader = TeamLeader;
+    }
 
     public Team(String Nome, Evento EventoIscritto) {
 
@@ -50,9 +57,9 @@ public class Team {
     }
 
 
-    public String getNome() {return this.Nome;}
     public int getIdTeam() {return this.idTeam;}
-    public int getidEvento() {return EventoIscritto.getIdEvento();}
+    public String getNome() {return this.Nome;}
+    public String getTeamLeader() {return this.TeamLeader;}
     public Evento getEventoIscritto() {return this.EventoIscritto;}
 
     public void iscriviEvento(Evento evento) {
@@ -140,27 +147,32 @@ public class Team {
 
     }
 
-    private void dequeueListaAttesa()
+    private Partecipante dequeueListaAttesa()
     {
 
-        char answer;
-
+        //char answer;
+        Partecipante utente = null;
         if(RichiestePartecipazione != null) {
 
-            Partecipante utente = RichiestePartecipazione.poll();
-            utente.printDati();
-            System.out.println("\n\nAccettare questo utente nel team?\n\n(Y/n)");
-            Scanner scan = new Scanner(System.in);
-            answer = scan.next().charAt(0);
+            utente = RichiestePartecipazione.poll();
+            /*if(utente != null) {
 
-            if((answer == 'Y') || (answer == 'y')) {
-                MembriTeam.addRecord(utente);
-                utente.addTeam(this);
-            }
+                utente.printDati();
+                System.out.println("\n\nAccettare questo utente nel team?\n\n(Y/n)");
+                Scanner scan = new Scanner(System.in);
+                answer = scan.next().charAt(0);
+
+                if((answer == 'Y') || (answer == 'y')) {
+                    MembriTeam.addRecord(utente);
+                    utente.addTeam(this);
+                }
+
+            }*/
         }
+        return utente;
     }
 
-    void addProgresso(Progresso progressi) {
+    public void addProgresso(Progresso progressi) {
 
         if(Progressi == null)
             Progressi = new RecordList<Progresso>();
@@ -224,7 +236,7 @@ public class Team {
     }
 
 
-    void addVoto(Voto voto) {
+    public void addVoto(Voto voto) {
 
         if(Voti == null)
             Voti = new RecordList<Voto>();

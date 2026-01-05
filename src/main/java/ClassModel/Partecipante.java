@@ -102,4 +102,15 @@ public class Partecipante extends Utente {
         return null;
     }
 
+    public Team seekTeamEvento(int idEvento){
+        Team team = firstTeam();
+        while(team != null){
+            if(team.getEventoIscritto().getIdEvento() == idEvento) {
+                return team;
+            }
+            else team = nextTeam();
+        }
+        return null;
+    }
+
 }

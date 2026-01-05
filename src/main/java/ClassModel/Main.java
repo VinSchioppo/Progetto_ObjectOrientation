@@ -61,10 +61,21 @@ public class Main {
         */
 
         Controller controller = new Controller();
-        if(controller.logInUtente("alice", "pwd1")) System.out.println("Utente loggato");
+
+        //if(controller.logInUtente("alice", "pwd1")) System.out.println("Utente loggato");
+        controller.registerUtente("gino", "password");
+        controller.inserisciDatiUtente("Gino", null, "Cirillo", "10-01-2018");
+        System.out.println(controller.datiUtente());
+        /*
         ArrayList<String> list = controller.listaEventiUtente();
         for(String s : list){
             System.out.println(s);
         }
+
+        ArrayList<String> eventi = controller.listaEventiAperti();
+        for(String evento : eventi) {
+            System.out.println(evento);
+        }
+        */
     }
 }
