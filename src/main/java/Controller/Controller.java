@@ -102,6 +102,29 @@ public class Controller {
         return listaEventi;
     }
 
+    //Questo metodo riceve un input l'id di un evento e determina il ruolo dell'utente.
+    //Restituisce il ruolo alla funzione chiamante.
+
+    public Role selectEvento(int idEvento) {
+
+        if(PartecipanteCorrente != null){
+            if(PartecipanteCorrente.seekEvento(idEvento) != null){
+                RuoloCorrente = Role.PARTECIPANTE;
+            }
+        }
+        if(OrganizzatoreCorrente != null){
+            if(OrganizzatoreCorrente.seekEvento(idEvento) != null){
+                RuoloCorrente = Role.ORGANIZZATORE;
+            }
+        }
+        if(GiudiceCorrente != null){
+            if(GiudiceCorrente.seekEvento(idEvento) != null){
+                RuoloCorrente = Role.GIUDICE;
+            }
+        }
+        return RuoloCorrente;
+    }
+
     //Questo metodo restituisce una stringa contenente i dati personali dell'utente.
     //Nel caso in cui non sia salvato nessun dato restituisce null.
     //La stringa segue il formato: FNome MNome LNome DataNascita
@@ -186,29 +209,6 @@ public class Controller {
             return false;
         }
         return true;
-    }
-
-    //Questo metodo riceve un input l'id di un evento e determina il ruolo dell'utente.
-    //Restituisce il ruolo alla funzione chiamante.
-
-    public Role selectEvento(int idEvento) {
-
-        if(PartecipanteCorrente != null){
-            if(PartecipanteCorrente.seekEvento(idEvento) != null){
-                RuoloCorrente = Role.PARTECIPANTE;
-            }
-        }
-        if(OrganizzatoreCorrente != null){
-            if(OrganizzatoreCorrente.seekEvento(idEvento) != null){
-                RuoloCorrente = Role.ORGANIZZATORE;
-            }
-        }
-        if(GiudiceCorrente != null){
-            if(GiudiceCorrente.seekEvento(idEvento) != null){
-                RuoloCorrente = Role.GIUDICE;
-            }
-        }
-        return RuoloCorrente;
     }
 
     //Questo metodo restituisce una stringa con l'id e il nome del team con cui il partecipante è iscritto all'evento.
