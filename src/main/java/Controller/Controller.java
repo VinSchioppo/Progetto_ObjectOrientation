@@ -52,6 +52,56 @@ public class Controller {
         return success;
     }
 
+    //Questo metodo restiuisce una lista contenente l'id e il titolo di tutti gli eventi in cui l'utente ha un ruolo.
+    //Ogni elemento della lista segue il formato: IdEvento Titolo
+
+    public ArrayList<String> listaEventiUtente() {
+        ArrayList<String> listaEventi = null;
+        try {
+            if(PartecipanteCorrente == null)
+                PartecipanteCorrente = DAO.getPartecipanteDB(UtenteCorrente.getNomeUtente());
+            if(OrganizzatoreCorrente == null)
+                OrganizzatoreCorrente = DAO.getOrganizzatoreDB(UtenteCorrente.getNomeUtente());
+            if(GiudiceCorrente == null)
+                GiudiceCorrente = DAO.getGiudiceDB(UtenteCorrente.getNomeUtente());
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+        if(PartecipanteCorrente != null){
+            listaEventi = new ArrayList<String>();
+            PartecipanteCorrente.firstEvento();
+            while(PartecipanteCorrente.getEvento() != null){
+                String Evento = PartecipanteCorrente.getEvento().getIdEvento() + " " + PartecipanteCorrente.getEvento().getTitolo();
+                listaEventi.add(Evento);
+                PartecipanteCorrente.nextEvento();
+            }
+        }
+        if(OrganizzatoreCorrente != null){
+            if(listaEventi == null){
+                listaEventi = new ArrayList<String>();
+            }
+            OrganizzatoreCorrente.firstEvento();
+            while(OrganizzatoreCorrente.getEvento() != null){
+                String Evento = OrganizzatoreCorrente.getEvento().getIdEvento() + " " + OrganizzatoreCorrente.getEvento().getTitolo();
+                listaEventi.add(Evento);
+                OrganizzatoreCorrente.nextEvento();
+            }
+        }
+        if(GiudiceCorrente != null){
+            if(listaEventi == null){
+                listaEventi = new ArrayList<String>();
+            }
+            GiudiceCorrente.firstEvento();
+            while(GiudiceCorrente.getEvento() != null){
+                String Evento = GiudiceCorrente.getEvento().getIdEvento() + " " + GiudiceCorrente.getEvento().getTitolo();
+                listaEventi.add(Evento);
+                GiudiceCorrente.nextEvento();
+            }
+        }
+        return listaEventi;
+    }
+
     //Questo metodo restituisce una stringa contenente i dati personali dell'utente.
     //Nel caso in cui non sia salvato nessun dato restituisce null.
     //La stringa segue il formato: FNome MNome LNome DataNascita
@@ -91,55 +141,6 @@ public class Controller {
         return true;
     }
 
-    //Questo metodo restiuisce una lista contenente l'id e il titolo di tutti gli eventi in cui l'utente ha un ruolo.
-    //Ogni elemento della lista segue il formato: IdEvento Titolo
-
-    public ArrayList<String> listaEventiUtente() {
-        ArrayList<String> listaEventi = null;
-        try {
-            PartecipanteCorrente = DAO.getPartecipanteDB(UtenteCorrente.getNomeUtente());
-            OrganizzatoreCorrente = DAO.getOrganizzatoreDB(UtenteCorrente.getNomeUtente());
-            GiudiceCorrente = DAO.getGiudiceDB(UtenteCorrente.getNomeUtente());
-        }
-        catch(SQLException e){
-            e.printStackTrace();
-        }
-        if(PartecipanteCorrente != null){
-            if(listaEventi == null){
-                listaEventi = new ArrayList<String>();
-            }
-            PartecipanteCorrente.firstEvento();
-            while(PartecipanteCorrente.getEvento() != null){
-                String Evento = PartecipanteCorrente.getEvento().getIdEvento() + " " + PartecipanteCorrente.getEvento().getTitolo();
-                listaEventi.add(Evento);
-                PartecipanteCorrente.nextEvento();
-            }
-        }
-        if(OrganizzatoreCorrente != null){
-            if(listaEventi == null){
-                listaEventi = new ArrayList<String>();
-            }
-            OrganizzatoreCorrente.firstEvento();
-            while(OrganizzatoreCorrente.getEvento() != null){
-                String Evento = OrganizzatoreCorrente.getEvento().getIdEvento() + " " + OrganizzatoreCorrente.getEvento().getTitolo();
-                listaEventi.add(Evento);
-                OrganizzatoreCorrente.nextEvento();
-            }
-        }
-        if(GiudiceCorrente != null){
-            if(listaEventi == null){
-                listaEventi = new ArrayList<String>();
-            }
-            GiudiceCorrente.firstEvento();
-            while(GiudiceCorrente.getEvento() != null){
-                String Evento = GiudiceCorrente.getEvento().getIdEvento() + " " + GiudiceCorrente.getEvento().getTitolo();
-                listaEventi.add(Evento);
-                GiudiceCorrente.nextEvento();
-            }
-        }
-        return listaEventi;
-    }
-
     //Questo metodo restiuisce una lista contenente i dati di tutti gli eventi le cui prenotazioni sono attualmente aperte.
     //Ogni elemento della lista segue il formato: IdEvento Titolo IndirizzoSede NCivicoSede DataInizio DataFine
     // MaxIscritti MaxTeam DataInzioReg DataFineReg DescrizioneProblema
@@ -174,7 +175,11 @@ public class Controller {
         Evento evento = null;
         try{
             evento = DAO.getEventoDB(idEvento);
-            if(evento != null) PartecipanteCorrente.addEvento(evento);
+            if(evento != null){
+                if(PartecipanteCorrente == null)
+                    PartecipanteCorrente = UtenteCorrente.becomePartecipante();
+                PartecipanteCorrente.addEvento(evento);
+            }
         }
         catch(SQLException e){
             e.printStackTrace();
@@ -193,12 +198,12 @@ public class Controller {
                 RuoloCorrente = Role.PARTECIPANTE;
             }
         }
-        else if(OrganizzatoreCorrente != null){
+        if(OrganizzatoreCorrente != null){
             if(OrganizzatoreCorrente.seekEvento(idEvento) != null){
                 RuoloCorrente = Role.ORGANIZZATORE;
             }
         }
-        else if(GiudiceCorrente != null){
+        if(GiudiceCorrente != null){
             if(GiudiceCorrente.seekEvento(idEvento) != null){
                 RuoloCorrente = Role.GIUDICE;
             }
@@ -297,4 +302,111 @@ public class Controller {
         Team team = PartecipanteCorrente.getEvento().seekTeam(idTeam);
         team.enqueueListaAttesa(PartecipanteCorrente);
     }
+
+    //Questo metodo restituisce una lista contenente il nome utente di tutti coloro che
+    //hanno fatto richiesta di entrare nel team.
+
+    public ArrayList<String> requestTeamNotifications(){
+        ArrayList<String> notifications = null;
+        Team team = PartecipanteCorrente.getTeam();
+        if(PartecipanteCorrente != null){
+            if(PartecipanteCorrente.getNomeUtente().equals(team.getTeamLeader()))
+            {
+                Partecipante partecipante = team.dequeueListaAttesa();
+                while(partecipante != null)
+                {
+                    if(notifications == null)
+                        notifications = new ArrayList<String>();
+                    notifications.add(partecipante.getNomeUtente());
+                    partecipante = team.dequeueListaAttesa();
+                }
+            }
+        }
+        return notifications;
+    }
+
+    //Questo metodo riceve in input gli utenti che sono stati accettati nel team e li aggiunge.
+
+    public void teamAcceptance(ArrayList<String> accepted){
+
+    }
+
+    //Questo metodo restituisce una stringa contenente tutti i dati dell'evento.
+    //La stringa segue il formato: Titolo IndirizzoSede NCivicoSede DataInizio DataFine MaxIscritti MaxTeam
+    // DataInizioReg DataFineReg DescrizioneProblema
+
+    public String datiEvento(){
+        Evento evento = PartecipanteCorrente.getEvento();
+        if(evento != null){
+            return evento.getTitolo() + " "
+                   + evento.getIndirizzoSede() + " " + evento.getNCivicoSede()
+                   + " " + evento.getDataInizio() + " " + evento.getDataFine()
+                   + " " + evento.getMaxIscritti() + " " + evento.getMaxTeam()
+                   + " " + evento.getDataInizioReg() + " " + evento.getDataFineReg()
+                   + " " + evento.getDescrizioneProblema();
+        }
+        return null;
+    }
+
+    //Questo metodo permette di impostare i dati dell'evento.
+
+    public void inserisciDatiEvento(String indirizzoSede, int nCivico, int maxIscritti, int maxTeam){
+        Evento evento = OrganizzatoreCorrente.getEvento();
+        evento.setIndirizzoSede(indirizzoSede);
+        evento.setNCivicoSede(nCivico);
+        evento.setMaxIscritti(maxIscritti);
+        evento.setMaxTeam(maxTeam);
+    }
+
+    //Questo metodo permette di impostare le date dell'evento.
+
+    public boolean setDateEvento(LocalDate dataInizio, LocalDate dataFine){
+        try {
+            OrganizzatoreCorrente.getEvento().setDate(dataInizio, dataFine);
+        }
+        catch(DateTimeParseException e)
+        {
+            System.out.println("Errore nel tentativo di copiare le date dell'evento.");
+            return false;
+        }
+        return true;
+    }
+
+    //Questo metodo permette di impostare le date di registrazione dell'evento.
+
+    public boolean setRegistrazioniEvento(LocalDate dataInizio, LocalDate dataFine){
+        try {
+            OrganizzatoreCorrente.getEvento().setDateReg(dataInizio, dataFine);
+        }
+        catch(DateTimeParseException e)
+        {
+            System.out.println("Errore nel tentativo di copiare le date registrazione evento.");
+            return false;
+        }
+        return true;
+    }
+
+    //Questo metodo restituisce una lista contenente il nome utente di tutti i partecipanti all'evento.
+
+    public ArrayList<String> listaPartecipantiEvento(){
+        ArrayList<String> listaPartecipanti = null;
+        Evento evento = OrganizzatoreCorrente.getEvento();
+        if(evento != null){
+            evento.firstPartecipante();
+            while(evento.getPartecipante() != null){
+                if(listaPartecipanti == null)
+                    listaPartecipanti = new ArrayList<String>();
+                listaPartecipanti.add(evento.getPartecipante().getNomeUtente());
+                evento.nextPartecipante();
+            }
+        }
+        return listaPartecipanti;
+    }
+
+    //
+
+    public void invitaGiudice(String NomeUtente){
+
+    }
+
 }

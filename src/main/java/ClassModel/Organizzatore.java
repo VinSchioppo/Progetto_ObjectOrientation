@@ -26,23 +26,6 @@ public class Organizzatore extends Utente {
         }
     }
 
-    public void apriPrenotazioni() {
-
-        Evento EventoOrganizzato = getEvento();
-        if (EventoOrganizzato != null) {
-            EventoOrganizzato.setPrenotazioni(true);
-        }
-    }
-
-    public void chiudiPrenotazioni() {
-
-        Evento EventoOrganizzato = getEvento();
-        if (EventoOrganizzato != null) {
-            EventoOrganizzato.setPrenotazioni(false);
-        }
-
-    }
-
     public Giudice selezionaGiudice(Utente utente) {
 
         Evento EventoOrganizzato = getEvento();
@@ -58,9 +41,9 @@ public class Organizzatore extends Utente {
 
     public Giudice promuoviUtente(Giudice giudice, Utente utente) {
 
-        giudice.setFnome(utente.getFNome());
-        giudice.setMnome(utente.getMNome());
-        giudice.setLnome(utente.getLNome());
+        giudice.setFNome(utente.getFNome());
+        giudice.setMNome(utente.getMNome());
+        giudice.setLNome(utente.getLNome());
         giudice.setDataNascita(utente.getDataNascita());
         return giudice;
 

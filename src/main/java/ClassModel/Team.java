@@ -56,17 +56,14 @@ public class Team {
         EventoIscritto.addTeam(this);
     }
 
+    public void setRichiestePartecipazione(Queue<Partecipante> richiestePartecipazione) {
+        RichiestePartecipazione = richiestePartecipazione;
+    }
 
     public int getIdTeam() {return this.idTeam;}
     public String getNome() {return this.Nome;}
     public String getTeamLeader() {return this.TeamLeader;}
     public Evento getEventoIscritto() {return this.EventoIscritto;}
-
-    public void iscriviEvento(Evento evento) {
-
-        evento.enqueueListaAttesaTeam(this);
-
-    }
 
     public void addMembroTeam(Partecipante part) {
 
@@ -147,14 +144,14 @@ public class Team {
 
     }
 
-    private Partecipante dequeueListaAttesa()
+    public Partecipante dequeueListaAttesa()
     {
 
         //char answer;
-        Partecipante utente = null;
+        Partecipante partecipante = null;
         if(RichiestePartecipazione != null) {
 
-            utente = RichiestePartecipazione.poll();
+            partecipante = RichiestePartecipazione.poll();
             /*if(utente != null) {
 
                 utente.printDati();
@@ -169,7 +166,7 @@ public class Team {
 
             }*/
         }
-        return utente;
+        return partecipante;
     }
 
     public void addProgresso(Progresso progressi) {

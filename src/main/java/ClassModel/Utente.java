@@ -35,9 +35,9 @@ public class Utente {
 
     public void setNomeUtente(String NomeUtente) {this.NomeUtente = NomeUtente;}
     public void setPasswordUtente(String PasswordUtente) {this.PasswordUtente = PasswordUtente;}
-    public void setFnome(String FNome) {this.FNome = FNome;}
-    public void setMnome(String MNome) {this.MNome = MNome;}
-    public void setLnome(String LNome) {this.LNome = LNome;}
+    public void setFNome(String FNome) {this.FNome = FNome;}
+    public void setMNome(String MNome) {this.MNome = MNome;}
+    public void setLNome(String LNome) {this.LNome = LNome;}
     public void setDataNascita(LocalDate DataNascita) {this.DataNascita = DataNascita;}
     public void setEventi(ArrayList<Evento> eventi){
         if(Eventi == null)
@@ -125,6 +125,33 @@ public class Utente {
         System.out.println(" " + this.LNome);
         System.out.println("\nData di Nascita: " + this.DataNascita);
 
+    }
+
+    public Partecipante becomePartecipante(){
+        Partecipante partecipante = new Partecipante(NomeUtente, PasswordUtente);
+        partecipante.setFNome(FNome);
+        partecipante.setMNome(MNome);
+        partecipante.setLNome(LNome);
+        partecipante.setDataNascita(DataNascita);
+        return partecipante;
+    }
+
+    public Organizzatore becomeOrganizzatore(){
+        Organizzatore organizzatore = new Organizzatore(NomeUtente, PasswordUtente);
+        organizzatore.setFNome(FNome);
+        organizzatore.setMNome(MNome);
+        organizzatore.setLNome(LNome);
+        organizzatore.setDataNascita(DataNascita);
+        return organizzatore;
+    }
+
+    public Giudice becomeGiudice(){
+        Giudice giudice = new Giudice(NomeUtente, PasswordUtente);
+        giudice.setFNome(FNome);
+        giudice.setMNome(MNome);
+        giudice.setLNome(LNome);
+        giudice.setDataNascita(DataNascita);
+        return giudice;
     }
 
 }

@@ -304,9 +304,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 utente.setNomeUtente(rs.getString("nomeutente"));
                 utente.setPasswordUtente(rs.getString("password"));
-                utente.setFnome(rs.getString("fnome"));
-                utente.setMnome(rs.getString("mnome"));
-                utente.setLnome(rs.getString("lnome"));
+                utente.setFNome(rs.getString("fnome"));
+                utente.setMNome(rs.getString("mnome"));
+                utente.setLNome(rs.getString("lnome"));
                 utente.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 rs.close();
             }
@@ -381,9 +381,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 partecipante.setNomeUtente(rs.getString("nomeutente"));
                 partecipante.setPasswordUtente(rs.getString("password"));
-                partecipante.setFnome(rs.getString("fnome"));
-                partecipante.setMnome(rs.getString("mnome"));
-                partecipante.setLnome(rs.getString("lnome"));
+                partecipante.setFNome(rs.getString("fnome"));
+                partecipante.setMNome(rs.getString("mnome"));
+                partecipante.setLNome(rs.getString("lnome"));
                 partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
                 while(rs.next()){
@@ -412,9 +412,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 partecipante.setNomeUtente(rs.getString("nomeutente"));
                 partecipante.setPasswordUtente(rs.getString("password"));
-                partecipante.setFnome(rs.getString("fnome"));
-                partecipante.setMnome(rs.getString("mnome"));
-                partecipante.setLnome(rs.getString("lnome"));
+                partecipante.setFNome(rs.getString("fnome"));
+                partecipante.setMNome(rs.getString("mnome"));
+                partecipante.setLNome(rs.getString("lnome"));
                 partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 rs.close();
                 partecipante.addEvento(evento);
@@ -439,9 +439,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 partecipante.setNomeUtente(rs.getString("nomeutente"));
                 partecipante.setPasswordUtente(rs.getString("password"));
-                partecipante.setFnome(rs.getString("fnome"));
-                partecipante.setMnome(rs.getString("mnome"));
-                partecipante.setLnome(rs.getString("lnome"));
+                partecipante.setFNome(rs.getString("fnome"));
+                partecipante.setMNome(rs.getString("mnome"));
+                partecipante.setLNome(rs.getString("lnome"));
                 partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
                 while(rs.next()){
@@ -471,9 +471,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     Partecipante partecipante = new Partecipante();
                     partecipante.setNomeUtente(rs.getString("nomeutente"));
                     partecipante.setPasswordUtente(rs.getString("password"));
-                    partecipante.setFnome(rs.getString("fnome"));
-                    partecipante.setMnome(rs.getString("mnome"));
-                    partecipante.setLnome(rs.getString("lnome"));
+                    partecipante.setFNome(rs.getString("fnome"));
+                    partecipante.setMNome(rs.getString("mnome"));
+                    partecipante.setLNome(rs.getString("lnome"));
                     partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                     partecipante.addEvento(evento);
                     partecipanti.add(partecipante);
@@ -569,9 +569,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 organizzatore.setNomeUtente(rs.getString("nomeutente"));
                 organizzatore.setPasswordUtente(rs.getString("password"));
-                organizzatore.setFnome(rs.getString("fnome"));
-                organizzatore.setMnome(rs.getString("mnome"));
-                organizzatore.setLnome(rs.getString("lnome"));
+                organizzatore.setFNome(rs.getString("fnome"));
+                organizzatore.setMNome(rs.getString("mnome"));
+                organizzatore.setLNome(rs.getString("lnome"));
                 organizzatore.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 organizzatore.addEvento(getEventoDB(rs.getInt("idevento"), organizzatore));
                 while(rs.next()){
@@ -598,9 +598,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 organizzatore.setNomeUtente(rs.getString("nomeutente"));
                 organizzatore.setPasswordUtente(rs.getString("password"));
-                organizzatore.setFnome(rs.getString("fNome"));
-                organizzatore.setMnome(rs.getString("mNome"));
-                organizzatore.setLnome(rs.getString("lNome"));
+                organizzatore.setFNome(rs.getString("fNome"));
+                organizzatore.setMNome(rs.getString("mNome"));
+                organizzatore.setLNome(rs.getString("lNome"));
                 organizzatore.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 rs.close();
                 organizzatore.addEvento(evento);
@@ -693,9 +693,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 giudice.setNomeUtente(rs.getString("nomeutente"));
                 giudice.setPasswordUtente(rs.getString("password"));
-                giudice.setFnome(rs.getString("fNome"));
-                giudice.setMnome(rs.getString("mNome"));
-                giudice.setLnome(rs.getString("lNome"));
+                giudice.setFNome(rs.getString("fNome"));
+                giudice.setMNome(rs.getString("mNome"));
+                giudice.setLNome(rs.getString("lNome"));
                 giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 giudice.addEvento(getEventoDB(rs.getInt("idevento"), giudice));
                 while(rs.next()) {
@@ -723,9 +723,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 giudice.setNomeUtente(rs.getString("nomeutente"));
                 giudice.setPasswordUtente(rs.getString("password"));
-                giudice.setFnome(rs.getString("fNome"));
-                giudice.setMnome(rs.getString("mNome"));
-                giudice.setLnome(rs.getString("lNome"));
+                giudice.setFNome(rs.getString("fNome"));
+                giudice.setMNome(rs.getString("mNome"));
+                giudice.setLNome(rs.getString("lNome"));
                 giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                 rs.close();
                 giudice.addEvento(evento);
@@ -751,9 +751,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     Giudice giudice = new Giudice();
                     giudice.setNomeUtente(rs.getString("nomeutente"));
                     giudice.setPasswordUtente(rs.getString("password"));
-                    giudice.setFnome(rs.getString("fnome"));
-                    giudice.setMnome(rs.getString("mnome"));
-                    giudice.setLnome(rs.getString("lnome"));
+                    giudice.setFNome(rs.getString("fnome"));
+                    giudice.setMNome(rs.getString("mnome"));
+                    giudice.setLNome(rs.getString("lnome"));
                     giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                     giudice.addEvento(evento);
                     giudici.add(giudice);
