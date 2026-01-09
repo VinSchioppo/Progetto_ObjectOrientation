@@ -143,19 +143,18 @@ public class Controller {
     //Questo metodo permette di aggiornare i dati personali di un utente.
     //Restituisce un boolean e accetta solo una data col formato yyyy-mm-dd, altrimenti lancia una eccezione.
 
-    public boolean inserisciDatiUtente(String FNome, String MNome, String LNome, String DataNascita){
+    public boolean inserisciDatiUtente(String FNome, String MNome, String LNome, LocalDate DataNascita){
         try {
-            LocalDate DataConvertita = LocalDate.parse(DataNascita);
             if ((FNome.length() < 3) || (LNome.length() < 3)) return false;
             else {
                 if(UtenteCorrente != null)
-                    UtenteCorrente.setDati(FNome, MNome, LNome, DataConvertita);
+                    UtenteCorrente.setDati(FNome, MNome, LNome, DataNascita);
                 if(PartecipanteCorrente != null)
-                    PartecipanteCorrente.setDati(FNome, MNome, LNome, DataConvertita);
+                    PartecipanteCorrente.setDati(FNome, MNome, LNome, DataNascita);
                 if(OrganizzatoreCorrente != null)
-                    OrganizzatoreCorrente.setDati(FNome, MNome, LNome, DataConvertita);
+                    OrganizzatoreCorrente.setDati(FNome, MNome, LNome, DataNascita);
                 if(GiudiceCorrente != null)
-                    GiudiceCorrente.setDati(FNome, MNome, LNome, DataConvertita);
+                    GiudiceCorrente.setDati(FNome, MNome, LNome, DataNascita);
             }
         } catch (DateTimeParseException e) {
             System.out.println("Errore nel tentativo di copiare la data di nascita.");
@@ -194,7 +193,7 @@ public class Controller {
     //Questo metodo aggiunge un evento alla lista di eventi a cui è iscritto un partecipante.
     //Restituisce false se fallisce.
 
-    public boolean IscriviEvento(int idEvento){
+    public boolean iscriviEvento(int idEvento){
         Evento evento = null;
         try{
             evento = DAO.getEventoDB(idEvento);
@@ -327,7 +326,7 @@ public class Controller {
 
     //Questo metodo riceve in input gli utenti che sono stati accettati nel team e li aggiunge.
 
-    public void teamAcceptance(ArrayList<String> accepted){
+    public void teamAcceptance(ArrayList<String> accepted, ArrayList<String> refused){
 
     }
 
@@ -336,7 +335,7 @@ public class Controller {
     // DataInizioReg DataFineReg DescrizioneProblema
 
     public String datiEvento(){
-        Evento evento = PartecipanteCorrente.getEvento();
+        Evento evento = OrganizzatoreCorrente.getEvento();
         if(evento != null){
             return evento.getTitolo() + " "
                    + evento.getIndirizzoSede() + " " + evento.getNCivicoSede()
@@ -378,8 +377,7 @@ public class Controller {
         try {
             OrganizzatoreCorrente.getEvento().setDateReg(dataInizio, dataFine);
         }
-        catch(DateTimeParseException e)
-        {
+        catch(DateTimeParseException e){
             System.out.println("Errore nel tentativo di copiare le date registrazione evento.");
             return false;
         }
@@ -387,6 +385,7 @@ public class Controller {
     }
 
     //Questo metodo restituisce una lista contenente il nome utente di tutti i partecipanti all'evento.
+    //Ogni elemento della lista segue il formato: NomeUtente
 
     public ArrayList<String> listaPartecipantiEvento(){
         ArrayList<String> listaPartecipanti = null;
