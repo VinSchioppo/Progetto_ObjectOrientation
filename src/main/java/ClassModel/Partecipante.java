@@ -13,12 +13,6 @@ public class Partecipante extends Utente {
         super(NomeUtente, PasswordUtente);
     }
 
-    public void IscriviEvento(Evento evento) {
-
-        evento.enqueueListaAttesaUtenti(this);
-
-    }
-
     public void setTeamUniti(ArrayList<Team> teams) {
         if (TeamUniti == null)
             this.TeamUniti = new RecordList<Team>();
@@ -31,11 +25,6 @@ public class Partecipante extends Utente {
         addTeam(newTeam);
         newTeam.addMembroTeam(this);
         return newTeam;
-    }
-
-    public void joinTeam(Team team) {
-
-        team.enqueueListaAttesa(this);
     }
 
     public void addTeam(Team team) {

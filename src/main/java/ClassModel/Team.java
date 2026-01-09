@@ -1,10 +1,7 @@
 package ClassModel;
 
-import RecordList.RecordList;
+import RecordList.*;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Scanner;
 
 public class Team {
 
@@ -14,7 +11,7 @@ public class Team {
 
     private RecordList<Partecipante> MembriTeam = null;
     private Evento EventoIscritto = null;
-    private Queue<Partecipante> RichiestePartecipazione = null;
+    private InviteList<Partecipante> RichiestePartecipazione = null;
     private RecordList<Progresso> Progressi = null;
     private RecordList<Voto> Voti = null;
 
@@ -56,8 +53,15 @@ public class Team {
         EventoIscritto.addTeam(this);
     }
 
-    public void setRichiestePartecipazione(Queue<Partecipante> richiestePartecipazione) {
-        RichiestePartecipazione = richiestePartecipazione;
+    public void setRichiestePartecipazione(ArrayList<Partecipante> richiestePartecipazione) {
+        if(RichiestePartecipazione == null)
+            RichiestePartecipazione = new InviteList<Partecipante>();
+        RichiestePartecipazione.setInvites(richiestePartecipazione);
+    }
+    public void setRichiestaAnswer(Boolean answer) {
+
+        if(RichiestePartecipazione != null)
+            RichiestePartecipazione.setInviteAnswer(answer);
     }
 
     public int getIdTeam() {return this.idTeam;}
@@ -127,6 +131,15 @@ public class Team {
         return null;
     }
 
+    public Partecipante seekAndRemoveMembroTeam(String nomeUtente){
+        if(MembriTeam != null){
+            Partecipante membro = seekMembroTeam(nomeUtente);
+            MembriTeam.removeRecord();
+            return membro;
+        }
+        return null;
+    }
+
     public int giveNumMembri() {
         if(MembriTeam != null) {
             return MembriTeam.size();
@@ -134,40 +147,132 @@ public class Team {
         return 0;
     }
 
-    public void enqueueListaAttesa(Partecipante utente)
-    {
+    public void addRichiesta(Partecipante part) {
 
         if(RichiestePartecipazione == null)
-            RichiestePartecipazione = new LinkedList<Partecipante>();
-
-        RichiestePartecipazione.add(utente);
-
+            RichiestePartecipazione = new InviteList<Partecipante>();
+        RichiestePartecipazione.addInvite(part);
     }
 
-    public Partecipante dequeueListaAttesa()
-    {
-
-        //char answer;
-        Partecipante partecipante = null;
-        if(RichiestePartecipazione != null) {
-
-            partecipante = RichiestePartecipazione.poll();
-            /*if(utente != null) {
-
-                utente.printDati();
-                System.out.println("\n\nAccettare questo utente nel team?\n\n(Y/n)");
-                Scanner scan = new Scanner(System.in);
-                answer = scan.next().charAt(0);
-
-                if((answer == 'Y') || (answer == 'y')) {
-                    MembriTeam.addRecord(utente);
-                    utente.addTeam(this);
-                }
-
-            }*/
+    public boolean removeRichiesta(String nomeUtente){
+        if(RichiestePartecipazione != null){
+            seekRichiesta(nomeUtente);
+            RichiestePartecipazione.removeInvite();
+            return true;
         }
-        return partecipante;
+        return false;
     }
+
+    public Boolean getRichiestaAnswer(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.getInviteAnswer();
+        }
+        return null;
+    }
+
+    public Partecipante getRichiesta(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.getInvite();
+        }
+        return null;
+    }
+
+    public Boolean firstRichiestaAnswer(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.firstInviteAnswer();
+        }
+        return null;
+    }
+
+    public Partecipante firstRichiesta(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.firstInvite();
+        }
+        return null;
+    }
+
+    public Boolean previousRichiestaAnswer(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.previousInviteAnswer();
+        }
+        return null;
+    }
+
+    public Partecipante previousRichiesta(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.previousInvite();
+        }
+        return null;
+    }
+
+    public Boolean nextRichiestaAnswer(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.nextInviteAnswer();
+        }
+        return null;
+    }
+
+    public Partecipante nextRichiesta(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.nextInvite();
+        }
+        return null;
+    }
+
+    public Boolean lastRichiestaAnswer(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.lastInviteAnswer();
+        }
+        return null;
+    }
+
+    public Partecipante lastRichiesta(){
+        if(RichiestePartecipazione != null){
+            return RichiestePartecipazione.lastInvite();
+        }
+        return null;
+    }
+
+    public Boolean seekRichiestaAnswer(String nomeUtente){
+        Partecipante richiesta = firstRichiesta();
+        while(richiesta != null){
+            if(richiesta.getNomeUtente().equals(nomeUtente)) {
+                return getRichiestaAnswer();
+            }
+            else richiesta = nextRichiesta();
+        }
+        return null;
+    }
+
+    public Partecipante seekRichiesta(String nomeUtente){
+        Partecipante richiesta = firstRichiesta();
+        while(richiesta != null){
+            if(richiesta.getNomeUtente().equals(nomeUtente)) {
+                return richiesta;
+            }
+            else richiesta = nextRichiesta();
+        }
+        return null;
+    }
+
+    public Boolean seekAndRemoveRichiestaAnswer(String nomeUtente){
+        if(RichiestePartecipazione != null){
+            Partecipante richiesta = seekRichiesta(nomeUtente);
+            RichiestePartecipazione.removeInvite();
+            return getRichiestaAnswer();
+        }
+        return null;
+    }
+
+    public Partecipante seekAndRemoveRichiesta(String nomeUtente){
+        if(RichiestePartecipazione != null){
+            Partecipante richiesta = seekRichiesta(nomeUtente);
+            RichiestePartecipazione.removeInvite();
+            return richiesta;
+        }
+        return null;
+    }
+
 
     public void addProgresso(Progresso progressi) {
 

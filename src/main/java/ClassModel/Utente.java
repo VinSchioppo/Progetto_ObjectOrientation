@@ -114,17 +114,13 @@ public class Utente {
         return null;
     }
 
-    public void printDati() {
-
-        System.out.println("Nome ClassModel.Utente: " + this.NomeUtente);
-        System.out.println("\nNome: " + this.FNome);
-
-        if(!this.MNome.isEmpty())
-            System.out.println(" " + this.MNome);
-
-        System.out.println(" " + this.LNome);
-        System.out.println("\nData di Nascita: " + this.DataNascita);
-
+    public Evento seekAndRemoveEvento(int idEvento){
+        if(Eventi != null){
+            Evento evento = seekEvento(idEvento);
+            Eventi.removeRecord();
+            return evento;
+        }
+        return null;
     }
 
     public Partecipante becomePartecipante(){

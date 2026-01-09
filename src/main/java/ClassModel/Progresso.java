@@ -100,4 +100,13 @@ public class Progresso {
         return null;
     }
 
+    public Commento seekAndRemoveCommento(String nomeGiudice){
+        if(Commenti != null){
+            Commento commento = seekCommento(nomeGiudice);
+            Commenti.removeRecord();
+            return commento;
+        }
+        return null;
+    }
+
 }

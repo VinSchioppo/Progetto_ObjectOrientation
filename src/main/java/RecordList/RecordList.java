@@ -4,69 +4,69 @@ import java.util.ArrayList;
 
 public class RecordList <T>
 {
-    private int current = -1;
-    private ArrayList<T> records = null;
+    private int Current = -1;
+    private ArrayList<T> Records = null;
 
     public int size() {
-       if(records != null) return records.size();
+       if(Records != null) return Records.size();
        return 0;
     }
 
     public void setRecords(ArrayList<T> Records) {
-        current = 0;
-        records = Records;
+        Current = 0;
+        this.Records = Records;
     }
 
     public void addRecord(T record) {
-        if(records == null) {
-            current = 0;
-            records = new ArrayList<T>();
+        if(Records == null) {
+            Current = 0;
+            Records = new ArrayList<T>();
         }
-        records.add(record);
+        Records.add(record);
     }
 
     public void removeRecord(){
         if(getRecord() != null) {
-            records.remove(current);
-            if(records.isEmpty()) {
-                current = -1;
-                records = null;
+            Records.remove(Current);
+            if(Records.isEmpty()) {
+                Current = -1;
+                Records = null;
             }
             else firstRecord();
         }
     }
 
     public T getRecord(){
-        if(records != null) {
-            if(current >= 0 && current < records.size()){
-                return records.get(current);
+        if(Records != null) {
+            if(Current >= 0 && Current < Records.size()){
+                return Records.get(Current);
             }
         }
-        else current = -1;
+        else Current = -1;
         return null;
     }
 
     public T firstRecord(){
-        current = 0;
+        Current = 0;
         return getRecord();
     }
 
     public T previousRecord(){
-        if(current >= 0) {
-            current--;
+        if(Current >= 0) {
+            Current--;
         }
         return getRecord();
     }
 
     public T nextRecord(){
-        if(current < records.size()) {
-            current++;
+        if(Current < Records.size()) {
+            Current++;
         }
         return getRecord();
     }
 
     public T lastRecord(){
-        current = records.size() - 1;
+        Current = Records.size() - 1;
         return getRecord();
     }
 }

@@ -299,7 +299,7 @@ public class Controller {
 
     public void joinTeam(int idTeam){
         Team team = PartecipanteCorrente.getEvento().seekTeam(idTeam);
-        team.enqueueListaAttesa(PartecipanteCorrente);
+        team.addRichiesta(PartecipanteCorrente);
     }
 
     //Questo metodo restituisce una lista contenente il nome utente di tutti coloro che
@@ -311,23 +311,40 @@ public class Controller {
         if(PartecipanteCorrente != null){
             if(PartecipanteCorrente.getNomeUtente().equals(team.getTeamLeader()))
             {
-                Partecipante partecipante = team.dequeueListaAttesa();
+                Partecipante partecipante = team.firstRichiesta();
                 while(partecipante != null)
                 {
                     if(notifications == null)
                         notifications = new ArrayList<String>();
                     notifications.add(partecipante.getNomeUtente());
-                    partecipante = team.dequeueListaAttesa();
+                    partecipante = team.nextRichiesta();
                 }
             }
         }
         return notifications;
     }
 
-    //Questo metodo riceve in input gli utenti che sono stati accettati nel team e li aggiunge.
+    //Questo metodo riceve in input gli utenti che sono stati accettati e rifiutati dal team.
+    //Aggiunge ai membri team, laddove necessario, e li rimuove tutti dalla lista di attesa.
 
     public void teamAcceptance(ArrayList<String> accepted, ArrayList<String> refused){
-
+        Team team = PartecipanteCorrente.getTeam();
+        if(accepted != null){
+            for(String s : accepted){
+                Partecipante partecipante = team.seekRichiesta(s);
+                if(partecipante != null) {
+                    team.addMembroTeam(partecipante);
+                    team.setRichiestaAnswer(true);
+                }
+            }
+        }
+        if(refused != null){
+            for(String s : refused){
+                if(team.seekRichiesta(s) != null) {
+                    team.setRichiestaAnswer(false);
+                }
+            }
+        }
     }
 
     //Questo metodo restituisce una stringa contenente tutti i dati dell'evento.
@@ -402,10 +419,14 @@ public class Controller {
         return listaPartecipanti;
     }
 
-    //
+    //Questo metodo aggiunge un partecipante alla lista di coloro che sono stati invitati a essere giudici.
 
     public void invitaGiudice(String NomeUtente){
-
+        Evento evento = OrganizzatoreCorrente.getEvento();
+        if(evento != null){
+            Partecipante partecipante = evento.seekPartecipante(NomeUtente);
+            evento.addInvitoGiudice(partecipante);
+        }
     }
 
 }

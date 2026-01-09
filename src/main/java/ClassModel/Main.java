@@ -2,14 +2,17 @@ package ClassModel;
 
 import Controller.*;
 import DAO.ImplementazioneDAO;
+import RecordList.InviteList;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 
 public class Main {
     public static void main(String[] args) {
         ImplementazioneDAO d = new ImplementazioneDAO();
+
         /*Evento eventi = new Evento("Sans", "Sans Street", 34);
         ArrayList<Evento> eventi = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
@@ -17,9 +20,21 @@ public class Main {
             evento.setIndirizzoSede("Sede");
             evento.setNCivicoSede(10);
             eventi.add(evento);
-        }*//*
+        }*/
         try {
-
+            InviteList<Partecipante> inviti = new InviteList<Partecipante>();
+            inviti.setInvites(d.getAllPartecipantiDB(d.getEventoDB(1)));
+            Partecipante p = inviti.firstInvite();
+            while(p != null){
+                inviti.setInviteAnswer(true);
+                p = inviti.nextInvite();
+            }
+            p = inviti.firstInvite();
+            while(p != null){
+                System.out.println(inviti.getInviteAnswer());
+                p = inviti.nextInvite();
+            }
+            /*
             Evento e = d.getEventoDB(1);
             Giudice g = d.getGiudiceDB("jud1", e);
             int result = d.addEventoDB("Sans", "Sans Street", 34);
@@ -52,21 +67,21 @@ public class Main {
             if(ruoli.size() >= 1 && ruoli.get(0) != null){System.out.println("Partecipante.");}
             if(ruoli.size() >= 2 && ruoli.get(1) != null){System.out.println("Giudice.");}
             if(ruoli.size() >= 3 && ruoli.get(2) != null){System.out.println("Organizzatore.");}
-
+            */
         }
         catch(SQLException e)
         {
             e.printStackTrace();
         }
-        */
 
+        /*
         Controller controller = new Controller();
 
         //if(controller.logInUtente("alice", "pwd1")) System.out.println("Utente loggato");
         controller.registerUtente("gino", "password");
-        controller.inserisciDatiUtente("Gino", null, "Cirillo", "10-01-2018");
+        controller.inserisciDatiUtente("Gino", null, "Cirillo", LocalDate.parse("2018-10-01"));
         System.out.println(controller.datiUtente());
-        /*
+
         ArrayList<String> list = controller.listaEventiUtente();
         for(String s : list){
             System.out.println(s);
