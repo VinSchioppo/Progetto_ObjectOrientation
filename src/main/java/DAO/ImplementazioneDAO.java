@@ -214,6 +214,41 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return eventi;
     }
 
+    public ArrayList<Evento> getEventiApertiDB(String NomeUtente) throws SQLException{
+        ArrayList<Evento> eventi = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Evento " +
+                                                    "WHERE DataInizioReg <= NOW() AND DataFineReg >= NOW()\n" +
+                                                    "AND IdEvento NOT IN( " +
+                                                    "SELECT pe.idEvento FROM PartecipanteEvento AS pe " +
+                                                    "JOIN OrganizzatoreEvento AS oe ON pe.idEvento = oe.idEvento " +
+                                                    "JOIN GiudiceEvento AS ge ON pe.idEvento = ge.idEvento " +
+                                                    "WHERE pe.NomePartecipante = " + NomeUtente +");");
+            ResultSet rs = ps.executeQuery();
+            if (rs.isBeforeFirst()) {
+                eventi = new ArrayList<Evento>();
+                while (rs.next()) {
+                    Evento evento = new Evento(rs.getInt("idevento"));
+                    evento.setTitolo(rs.getString("titolo"));
+                    evento.setIndirizzoSede(rs.getString("indirizzosede"));
+                    evento.setNCivicoSede(rs.getInt("ncivicosede"));
+                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                    evento.setMaxTeam(rs.getInt("maxteam"));
+                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                    eventi.add(evento);
+                }
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return eventi;
+    }
+
     public void addEventoDB(Evento evento) throws SQLException {
         try {
             evento.setIdEvento(addEventoDB(evento.getTitolo(), evento.getIndirizzoSede(), evento.getNCivicoSede(), evento.getDataInizio(), evento.getDataFine(), evento.getMaxIscritti(), evento.getMaxTeam(), evento.getDataInizioReg(), evento.getDataFineReg(), evento.getDescrizioneProblema()));
@@ -1113,6 +1148,26 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return commenti;
     }
 
+    public ArrayList<Commento> getAllCommentiDB(String Giudice) throws SQLException{
+        ArrayList<Commento> commenti = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Commento WHERE NomeGiudice = " + Giudice + ";");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Commento commento = new Commento(rs.getInt("idprogresso"), Giudice, rs.getString("testo"));
+                if(commenti == null){
+                    commenti = new ArrayList<Commento>();
+                }
+                commenti.add(commento);
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return commenti;
+    }
+
     public void addCommentoDB(Commento commento) throws SQLException{
         try{
             addCommentoDB(commento.getGiudice(), commento.getIdProgresso(), commento.getTesto());
@@ -1162,9 +1217,27 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             ResultSet rs = ps.executeQuery();
             while(rs.next()) {
                 Voto voto = new Voto(idTeam, rs.getInt("valore"), rs.getString("nomegiudice"));
-                if(voti == null){
+                if(voti == null)
                     voti = new ArrayList<Voto>();
-                }
+                voti.add(voto);
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return voti;
+    }
+
+    public ArrayList<Voto> getAllVotiDB(String Giudice) throws SQLException{
+        ArrayList<Voto> voti = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Voto WHERE NomeGiudice = " + Giudice + ";");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                Voto voto = new Voto(rs.getInt("idteam"), rs.getInt("valore"), Giudice);
+                if(voti == null)
+                    voti = new ArrayList<Voto>();
                 voti.add(voto);
             }
         }

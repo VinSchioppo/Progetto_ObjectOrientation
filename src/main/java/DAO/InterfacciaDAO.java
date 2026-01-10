@@ -16,6 +16,7 @@ public interface InterfacciaDAO {
     Evento getEventoDB(int IdEvento, Organizzatore organizzatore) throws SQLException;
     Evento getEventoDB(int IdEvento, Giudice giudice) throws SQLException;
     ArrayList<Evento> getEventiApertiDB() throws SQLException;
+    ArrayList<Evento> getEventiApertiDB(String NomeUtente) throws SQLException;
     int getIdEventoDB() throws SQLException;
     void addEventoDB(Evento evento) throws SQLException;
     int addEventoDB(String Titolo, String Indirizzo, int NCivico) throws SQLException;
@@ -73,11 +74,13 @@ public interface InterfacciaDAO {
 
     Commento getCommentoDB(int idProgresso, String Giudice) throws SQLException;
     ArrayList<Commento> getAllCommentiDB(int idProgresso) throws SQLException;
+    ArrayList<Commento> getAllCommentiDB(String Giudice) throws SQLException;
     void addCommentoDB(Commento commento) throws SQLException;
     void addCommentoDB(String NomeGiudice, int idProgresso, String testo) throws SQLException;
 
     Voto getVotoDB(int idTeam, String Giudice) throws SQLException;
     ArrayList<Voto> getAllVotiDB(int idTeam) throws SQLException;
+    ArrayList<Voto> getAllVotiDB(String Giudice) throws SQLException;
     void addVotoDB(Voto voto) throws SQLException;
     void addVotoDB(String NomeGiudice, int idTeam, int valore) throws SQLException;
 }
