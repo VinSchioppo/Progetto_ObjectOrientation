@@ -27,7 +27,8 @@ public class Controller {
         boolean success = false;
         try {
             success = DAO.checkLoginDB(NomeUtente, Password);
-            if(success) UtenteCorrente = DAO.getUtenteDB(NomeUtente);
+            if(success)
+                UtenteCorrente = DAO.getUtenteDB(NomeUtente);
         }
         catch(SQLException e){
             e.printStackTrace();
@@ -199,7 +200,7 @@ public class Controller {
     }
 
     //Questo metodo aggiunge un evento alla lista di eventi a cui è iscritto un partecipante.
-    //Restituisce false se fallisce.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
 
     public boolean iscriviEvento(int idEvento){
         Evento evento = null;
@@ -218,62 +219,118 @@ public class Controller {
         return true;
     }
 
+    //Questo metodo permette ad un utente di creare un evento.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    public boolean creaEvento(String Titolo, String Indirizzo, int NCivico){
+        if(UtenteCorrente != null) {
+            Evento evento = new Evento(Titolo, Indirizzo, NCivico);
+            Organizzatore organizzatore = null;
+            if(OrganizzatoreCorrente == null)
+                organizzatore = UtenteCorrente.becomeOrganizzatore();
+            else
+                organizzatore = OrganizzatoreCorrente;
+            evento.setOrganizzatore(organizzatore);
+            try {
+                DAO.addEventoDB(evento);
+                organizzatore.addEvento(evento);
+                OrganizzatoreCorrente = organizzatore;
+                return true;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    //Questo metodo restiuisce una lista contenente i dati di tutti gli eventi
+    //per cui un utente è stato invitato a diventare un giudice.
+    //Ogni elemento della lista segue il formato: IdEvento Titolo IndirizzoSede NCivicoSede DataInizio DataFine
+    // MaxIscritti MaxTeam DataInzioReg DataFineReg
+
+    public ArrayList<String> listaInvitiGiudice() {
+        ArrayList<String> invitiGiudice = null;
+        if(UtenteCorrente != null) {
+            if(PartecipanteCorrente != null) {
+                try {
+                    DAO.getAllInvitiGiudiceDB(UtenteCorrente, PartecipanteCorrente);
+                    Evento evento = UtenteCorrente.firstInvitoGiudiceEvento();
+                    while (evento != null) {
+                        if (invitiGiudice == null)
+                            invitiGiudice = new ArrayList<String>();
+                        String datiEvento = evento.getIdEvento() + " " + evento.getTitolo()
+                                + " " + evento.getIndirizzoSede() + " " + evento.getNCivicoSede()
+                                + " " + evento.getDataInizio() + " " + evento.getDataFine()
+                                + " " + evento.getMaxIscritti() + " " + evento.getMaxTeam()
+                                + " " + evento.getDataInizioReg() + " " + evento.getDataFineReg();
+                        invitiGiudice.add(datiEvento);
+                        evento = UtenteCorrente.nextInvitoGiudiceEvento();
+                    }
+                }
+                catch(SQLException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+        return invitiGiudice;
+    }
+
+    //Questo metodo permette ad un utente di accettare un invito ad essere giudice di un evento.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    public boolean acceptInvitoGiudiceEvento(int idEvento){
+        if(UtenteCorrente != null) {
+            Evento evento = UtenteCorrente.seekInvitoGiudiceEvento(idEvento);
+            if (evento != null) {
+                if(UtenteCorrente.getInvitoGiudiceEventoAnswer() == null) {
+                    UtenteCorrente.setInvitoGiudiceEventoAnswer(true);
+                    evento.seekInvitoGiudice(UtenteCorrente.getNomeUtente());
+                    evento.setInvitoGiudiceAnswer(true);
+                    if(GiudiceCorrente == null)
+                        GiudiceCorrente = UtenteCorrente.becomeGiudice();
+                    evento.addGiudice(GiudiceCorrente);
+                    GiudiceCorrente.addEvento(evento);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    //Questo metodo permette ad un utente di rifiutare un invito ad essere giudice di un evento.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    public boolean refuseInvitoGiudiceEvento(int idEvento){
+        if(UtenteCorrente != null) {
+            Evento evento = UtenteCorrente.seekInvitoGiudiceEvento(idEvento);
+            if (evento != null) {
+                if(UtenteCorrente.getInvitoGiudiceEventoAnswer() == null) {
+                    UtenteCorrente.setInvitoGiudiceEventoAnswer(false);
+                    evento.seekInvitoGiudice(UtenteCorrente.getNomeUtente());
+                    evento.setInvitoGiudiceAnswer(false);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /*******************************************************************************************************/
 
     //Operazioni Partecipante
 
     //Questo metodo restituisce una stringa con l'id e il nome del team con cui il partecipante è iscritto all'evento.
-    //La stringa è fromattata come: IdTeam Nome
+    //La stringa è fromattata come: IdTeam Nome TeamLeader
 
     public String teamPartecipante() {
         String infoTeam = null;
         if(PartecipanteCorrente != null) {
             Team team = PartecipanteCorrente.seekTeamEvento(PartecipanteCorrente.getEvento().getIdEvento());
             if (team != null) {
-                infoTeam = team.getIdTeam() + " " + team.getNome();
+                infoTeam = team.getIdTeam() + " " + team.getNome() + " " + team.getTeamLeader();
             }
         }
         return infoTeam;
-    }
-
-    //Questo metodo restiuisce una lista contenente l'id e il testo di ogni progresso pubblicato da un team.
-    //Ogni elemento della lista segue il formato: IdProgresso Testo
-
-    public ArrayList<String> listaProgressiTeam(){
-        ArrayList<String> listaProgressi = null;
-        if(PartecipanteCorrente != null) {
-            Team team = PartecipanteCorrente.getTeam();
-            Progresso progresso = team.firstProgresso();
-            if (progresso != null) {
-                listaProgressi = new ArrayList<String>();
-                while (progresso != null) {
-                    listaProgressi.add(progresso.getIdProgresso() + " " + progresso.getTestoDocumeto());
-                    progresso = team.nextProgresso();
-                }
-            }
-        }
-        return listaProgressi;
-    }
-
-    //Questo metodo permette di pubblicare un progresso.
-    //Restituisce true se l'operazione va a buon fine, altrimenti false.
-
-    public boolean pubblicaProgresso(String Testo){
-        Progresso progresso = null;
-        if(PartecipanteCorrente != null) {
-            Team team = PartecipanteCorrente.getTeam();
-            if (team.getTeamLeader().equals(PartecipanteCorrente.getNomeUtente())) {
-                try {
-                    progresso = new Progresso(Testo, team.getIdTeam());
-                    progresso.setIdProgresso(DAO.addProgressoDB(team.getIdTeam(), Testo));
-                    team.addProgresso(progresso);
-                    return true;
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return false;
     }
 
     //Questo metodo permette al partecipante di creare un team.
@@ -319,8 +376,10 @@ public class Controller {
     public boolean joinTeam(int idTeam){
         if(PartecipanteCorrente != null) {
             Team team = PartecipanteCorrente.getEvento().seekTeam(idTeam);
-            team.addRichiesta(PartecipanteCorrente);
-            return true;
+            if(team != null) {
+                team.addRichiesta(PartecipanteCorrente);
+                return true;
+            }
         }
         return false;
     }
@@ -332,7 +391,7 @@ public class Controller {
         ArrayList<String> notifications = null;
         if(PartecipanteCorrente != null) {
             Team team = PartecipanteCorrente.getTeam();
-            if (PartecipanteCorrente != null) {
+            if (team != null) {
                 if (PartecipanteCorrente.getNomeUtente().equals(team.getTeamLeader())) {
                     Partecipante partecipante = team.firstRichiesta();
                     while (partecipante != null) {
@@ -354,25 +413,130 @@ public class Controller {
     public boolean teamAcceptance(ArrayList<String> accepted, ArrayList<String> refused){
         if(PartecipanteCorrente != null) {
             Team team = PartecipanteCorrente.getTeam();
-            if (accepted != null) {
-                for (String s : accepted) {
-                    Partecipante partecipante = team.seekRichiesta(s);
-                    if (partecipante != null) {
-                        team.addMembroTeam(partecipante);
-                        team.setRichiestaAnswer(true);
+            if(team != null) {
+                if (accepted != null) {
+                    for (String s : accepted) {
+                        Partecipante partecipante = team.seekRichiesta(s);
+                        if (partecipante != null) {
+                            team.addMembroTeam(partecipante);
+                            team.setRichiestaAnswer(true);
+                        }
                     }
                 }
-            }
-            if (refused != null) {
-                for (String s : refused) {
-                    if (team.seekRichiesta(s) != null) {
-                        team.setRichiestaAnswer(false);
+                if (refused != null) {
+                    for (String s : refused) {
+                        if (team.seekRichiesta(s) != null) {
+                            team.setRichiestaAnswer(false);
+                        }
                     }
                 }
+                return true;
             }
-            return true;
         }
         return false;
+    }
+
+    //Questo metodo restiuisce una lista contenente l'id e il testo di ogni progresso pubblicato da un team.
+    //Ogni elemento della lista segue il formato: IdProgresso Testo
+
+    public ArrayList<String> listaProgressiTeam(){
+        ArrayList<String> listaProgressi = null;
+        if (PartecipanteCorrente != null) {
+            Team team = PartecipanteCorrente.getTeam();
+            if (team != null) {
+                Progresso progresso = team.firstProgresso();
+                if (progresso != null) {
+                    listaProgressi = new ArrayList<String>();
+                    while (progresso != null) {
+                        listaProgressi.add(progresso.getIdProgresso() + " " + progresso.getTestoDocumeto());
+                        progresso = team.nextProgresso();
+                    }
+                }
+            }
+        }
+        return listaProgressi;
+    }
+
+    //Questo metodo permette di pubblicare un progresso.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    public boolean pubblicaProgresso(String Testo){
+        Progresso progresso = null;
+        if (PartecipanteCorrente != null) {
+            Team team = PartecipanteCorrente.getTeam();
+            if (team != null) {
+                if (team.getTeamLeader().equals(PartecipanteCorrente.getNomeUtente())) {
+                    try {
+                        progresso = new Progresso(Testo, team.getIdTeam());
+                        progresso.setIdProgresso(DAO.addProgressoDB(team.getIdTeam(), Testo));
+                        team.addProgresso(progresso);
+                        return true;
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    //Questo metodo restutuisce una lista contenente tutti i commenti ricevuti da un progresso.
+    //Ogni elemento della lista segue il formato: Giudice Testo
+
+    public ArrayList<String> listaCommentiProgresso(int idProgresso)
+    {
+        ArrayList<String> listaCommenti = null;
+        if (PartecipanteCorrente != null) {
+            Team team = PartecipanteCorrente.getTeam();
+            if (team != null) {
+                Progresso progresso = team.seekProgresso(idProgresso);
+                if (progresso != null) {
+                    Commento commento = progresso.firstCommento();
+                    while (commento != null) {
+                        if (listaCommenti == null)
+                            listaCommenti = new ArrayList<String>();
+                        listaCommenti.add(commento.getGiudice() + " " + commento.getTesto());
+                        commento = progresso.nextCommento();
+                    }
+                }
+            }
+        }
+        return listaCommenti;
+    }
+
+
+    //Questo metodo restutuisce una lista contenente tutti i voti ricevuti da un team.
+    //Ogni elemento della lista segue il formato: Giudice Valore
+
+    public ArrayList<String> listaVotiTeam()
+    {
+        ArrayList<String> listaVoti = null;
+        if(PartecipanteCorrente != null) {
+            Team team = PartecipanteCorrente.getTeam();
+            if (team != null) {
+                Voto voto = team.firstVoto();
+                while (voto != null) {
+                    if(listaVoti == null)
+                        listaVoti = new ArrayList<String>();
+                    listaVoti.add(voto.getGiudice() + " " + voto.getValore());
+                    voto = team.nextVoto();
+                }
+            }
+        }
+        return listaVoti;
+    }
+
+    //Questo metodo restituisce la media di tutti i voti ricevuti da un team.
+
+    public int mediaVotiTeam(){
+        int mediaVoti = 0;
+        if(PartecipanteCorrente != null) {
+            Team team = PartecipanteCorrente.getTeam();
+            if (team != null) {
+                mediaVoti = team.mediaVoti();
+            }
+        }
+        return mediaVoti;
     }
 
     /*******************************************************************************************************/
@@ -546,7 +710,7 @@ public class Controller {
     //Questo metodo restituisce una lista contenente tutti i voti attribuire dall'utente in qualità di giudice.
     //Ogni elemento della lista segue il formato: IdTeam Valore
 
-    public ArrayList<String> listaVotiTeam(){
+    public ArrayList<String> listaVotiTeamGiudicati(){
         ArrayList<String> listaVoti = null;
         if(GiudiceCorrente != null) {
             try {

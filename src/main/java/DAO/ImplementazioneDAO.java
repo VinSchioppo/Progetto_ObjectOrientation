@@ -93,6 +93,32 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return result;
     }
 
+    public Evento getDatiEventoDB(int IdEvento) throws SQLException{
+        Evento evento = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Evento WHERE IdEvento =" + IdEvento + ";");
+            ResultSet rs = ps.executeQuery();
+            if (rs.isBeforeFirst()) {
+                evento = new Evento(IdEvento);
+                rs.next();
+                evento.setTitolo(rs.getString("titolo"));
+                evento.setIndirizzoSede(rs.getString("indirizzosede"));
+                evento.setNCivicoSede(rs.getInt("ncivicosede"));
+                evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                evento.setMaxTeam(rs.getInt("maxteam"));
+                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return evento;
+    }
+
     public Evento getEventoDB(int IdEvento) throws SQLException{
         Evento evento = null;
         try {
@@ -174,7 +200,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 evento.setPartecipanti(getAllPartecipantiDB(evento));
                 evento.setOrganizzatore(getOrganizzatoreDB(evento));
                 evento.setGiudici(getAllGiudiciDB(evento));
-                evento.removeGiudice(giudice.getNomeUtente());
+                evento.seekAndRemoveGiudice(giudice.getNomeUtente());
                 evento.addGiudice(giudice);
                 evento.setTeamIscritti(getAllTeamDB(evento));
             }
@@ -183,6 +209,42 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             throw e;
         }
         return evento;
+    }
+
+    public ArrayList<Evento> getAllEventiDB(Organizzatore organizzatore) throws SQLException{
+        ArrayList<Evento> eventi = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Evento AS e " +
+                                                "JOIN OrganizzatoreEvento AS oe ON e.IdEvento = oe.idEvento " +
+                                                "WHERE oe.NomeOrganizzatore = '"+ organizzatore.getNomeUtente() +"';");
+            ResultSet rs = ps.executeQuery();
+            if (rs.isBeforeFirst()) {
+                eventi = new ArrayList<Evento>();
+                while (rs.next()) {
+                    Evento evento = new Evento(rs.getInt("idevento"));
+                    evento.setTitolo(rs.getString("titolo"));
+                    evento.setIndirizzoSede(rs.getString("indirizzosede"));
+                    evento.setNCivicoSede(rs.getInt("ncivicosede"));
+                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                    evento.setMaxTeam(rs.getInt("maxteam"));
+                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                    evento.setOrganizzatore(organizzatore);
+                    evento.setGiudici(getAllGiudiciDB(evento));
+                    evento.setTeamIscritti(getAllTeamDB(evento));
+                    getAllPartecipantiSingoliDB(evento);
+                    getAllInvitiGiudiceDB(evento);
+                    eventi.add(evento);
+                }
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return eventi;
     }
 
     public ArrayList<Evento> getEventiApertiDB() throws SQLException{
@@ -404,27 +466,89 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void getAllInvitiGiudiceDB(Evento evento) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM InvitoGiudice WHERE Risposta IS NULL AND idEvento = " + evento.getIdEvento() + ";");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                while(rs.next()){
+                    Partecipante partecipante = evento.seekPartecipante(rs.getString("nomepartecipante"));
+                    if(partecipante != null)
+                        evento.addInvitoGiudice(partecipante);
+                }
+                rs.close();
+            }
+
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
+    public void getAllInvitiGiudiceDB(Utente utente, Partecipante partecipante) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM InvitoGiudice WHERE Risposta IS NULL AND NomePartecipante = '" + utente.getNomeUtente() + "';");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                while(rs.next()){
+                    Evento evento = partecipante.seekEvento(rs.getInt("idevento"));
+                    if(evento != null)
+                        utente.addInvitoGiudiceEvento(evento);
+                }
+                rs.close();
+            }
+
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
     public Partecipante getPartecipanteDB(String NomePartecipante) throws SQLException{
         Partecipante partecipante = null;
         try {
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante" +
-                            " WHERE NomeUtente = '" + NomePartecipante + "';");
+                    connection.prepareStatement("SELECT * FROM Partecipante AS p " +
+                                                "JOIN PartecipanteEvento AS pe ON p.NomeUtente = pe.NomePartecipante " +
+                                                "JOIN Evento AS e ON pe.idEvento = e.IdEvento " +
+                                                "WHERE NomeUtente = '" + NomePartecipante + "';");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
-                partecipante = new Partecipante();
                 rs.next();
-                partecipante.setNomeUtente(rs.getString("nomeutente"));
-                partecipante.setPasswordUtente(rs.getString("password"));
-                partecipante.setFNome(rs.getString("fnome"));
-                partecipante.setMNome(rs.getString("mnome"));
-                partecipante.setLNome(rs.getString("lnome"));
-                partecipante.setDataNascita(rs.getObject("datanascita", LocalDate.class));
-                partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
+                partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
+                partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                ArrayList<Evento> eventi = new ArrayList<Evento>();
+                Evento evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
+                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                evento.setMaxTeam(rs.getInt("maxteam"));
+                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                evento.setOrganizzatore(getOrganizzatoreDB(evento));
+                evento.setGiudici(getAllGiudiciDB(evento));
+                evento.setTeamIscritti(getAllTeamDB(evento, partecipante));
+                getAllPartecipantiSingoliDB(evento, partecipante);
+                getAllInvitiGiudiceDB(evento);
+                eventi.add(evento);
                 while(rs.next()){
-                    partecipante.addEvento(getEventoDB(rs.getInt("idevento")));
+                    evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
+                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                    evento.setMaxTeam(rs.getInt("maxteam"));
+                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                    evento.setOrganizzatore(getOrganizzatoreDB(evento));
+                    evento.setGiudici(getAllGiudiciDB(evento));
+                    evento.setTeamIscritti(getAllTeamDB(evento, partecipante));
+                    getAllPartecipantiSingoliDB(evento, partecipante);
+                    getAllInvitiGiudiceDB(evento);
+                    eventi.add(evento);
                 }
-                partecipante.setTeamUniti(getAllTeamDB(partecipante));
+                getAllRichiesteTeamDB(partecipante);
+                getAllVotiDB(partecipante);
+                getAllProgressiDB(partecipante);
                 rs.close();
             }
         }
@@ -522,6 +646,58 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return partecipanti;
     }
 
+    public void getAllPartecipantiSingoliDB(Evento evento) throws SQLException{
+        try {
+            int idEvento = evento.getIdEvento();
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
+                                                "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN(" +
+                                                "SELECT NomePartecipante FROM CompTeam WHERE idEvento = " + idEvento + ";)");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                while(rs.next()) {
+                    Partecipante partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
+                    partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                    partecipante.addEvento(evento);
+                    evento.addPartecipante(partecipante);
+                }
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
+    public void getAllPartecipantiSingoliDB(Evento evento, Partecipante partecipante) throws SQLException{
+        try {
+            int idEvento = evento.getIdEvento();
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
+                            "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN(" +
+                            "SELECT NomePartecipante FROM CompTeam WHERE idEvento = " + idEvento + ";)");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                while(rs.next()) {
+                    if(partecipante.getNomeUtente().equals(rs.getString("nomeutente"))) {
+                        partecipante.addEvento(evento);
+                        evento.addPartecipante(partecipante);
+                    }
+                    else {
+                        Partecipante nuovoPartecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
+                        nuovoPartecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                        nuovoPartecipante.addEvento(evento);
+                        evento.addPartecipante(partecipante);
+                    }
+                }
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
     public void addPartecipanteDB(Partecipante partecipante, int idEvento) throws SQLException{
         try {
             addPartecipanteDB(partecipante.getNomeUtente(), partecipante.getPasswordUtente(), partecipante.getFNome(), partecipante.getMNome(), partecipante.getLNome(), partecipante.getDataNascita(), idEvento);
@@ -596,23 +772,44 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         Organizzatore organizzatore = null;
         try {
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Organizzatore JOIN OrganizzatoreEvento ON NomeUtente = NomeOrganizzatore " +
-                            "WHERE NomeUtente = '" + NomeUtente + "';");
+                    connection.prepareStatement("SELECT * FROM Organizzatore AS o " +
+                                                "JOIN OrganizzatoreEvento AS oe ON o.NomeUtente = oe.NomeOrganizzatore " +
+                                                "JOIN Evento AS e ON oe.idEvento = e.IdEvento " +
+                                                "WHERE o.NomeUtente = '" + NomeUtente + "';");
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
-                organizzatore = new Organizzatore();
                 rs.next();
-                organizzatore.setNomeUtente(rs.getString("nomeutente"));
-                organizzatore.setPasswordUtente(rs.getString("password"));
-                organizzatore.setFNome(rs.getString("fnome"));
-                organizzatore.setMNome(rs.getString("mnome"));
-                organizzatore.setLNome(rs.getString("lnome"));
-                organizzatore.setDataNascita(rs.getObject("datanascita", LocalDate.class));
-                organizzatore.addEvento(getEventoDB(rs.getInt("idevento"), organizzatore));
-                while(rs.next()){
-                    organizzatore.addEvento(getEventoDB(rs.getInt("idevento"), organizzatore));
+                organizzatore = new Organizzatore(rs.getString("nomeutente"), rs.getString("password"));
+                organizzatore.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                ArrayList<Evento> eventi = new ArrayList<Evento>();
+                Evento evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
+                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                evento.setMaxTeam(rs.getInt("maxteam"));
+                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                evento.setOrganizzatore(organizzatore);
+                evento.setGiudici(getAllGiudiciDB(evento));
+                evento.setTeamIscritti(getAllTeamDB(evento));
+                getAllPartecipantiSingoliDB(evento);
+                getAllInvitiGiudiceDB(evento);
+                eventi.add(evento);
+                while(rs.next()) {
+                    evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
+                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                    evento.setMaxTeam(rs.getInt("maxteam"));
+                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                    evento.setOrganizzatore(organizzatore);
+                    evento.setGiudici(getAllGiudiciDB(evento));
+                    evento.setTeamIscritti(getAllTeamDB(evento));
+                    getAllPartecipantiSingoliDB(evento);
+                    getAllInvitiGiudiceDB(evento);
+                    eventi.add(evento);
                 }
                 rs.close();
+                organizzatore.setEventi(eventi);
             }
         } catch (SQLException e) {
             throw e;
@@ -629,14 +826,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                             "WHERE idEvento =" + idEvento + ";");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
-                organizzatore = new Organizzatore();
                 rs.next();
-                organizzatore.setNomeUtente(rs.getString("nomeutente"));
-                organizzatore.setPasswordUtente(rs.getString("password"));
-                organizzatore.setFNome(rs.getString("fNome"));
-                organizzatore.setMNome(rs.getString("mNome"));
-                organizzatore.setLNome(rs.getString("lNome"));
-                organizzatore.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                organizzatore = new Organizzatore(rs.getString("nomeutente"), rs.getString("password"));
+                organizzatore.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
                 rs.close();
                 organizzatore.addEvento(evento);
             }
@@ -720,23 +912,48 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         Giudice giudice = null;
         try {
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Giudice JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
-                            " WHERE NomeUtente = '" + NomeUtente + "';");
+                    connection.prepareStatement("SELECT * FROM Giudice AS g " +
+                                                "JOIN GiudiceEvento AS ge ON g.NomeUtente = ge.NomeGiudice " +
+                                                "JOIN Evento AS e ON ge.idEvento = e.IdEvento " +
+                                                "WHERE g.NomeUtente = '" + NomeUtente + "';");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
-                giudice = new Giudice();
                 rs.next();
-                giudice.setNomeUtente(rs.getString("nomeutente"));
-                giudice.setPasswordUtente(rs.getString("password"));
-                giudice.setFNome(rs.getString("fNome"));
-                giudice.setMNome(rs.getString("mNome"));
-                giudice.setLNome(rs.getString("lNome"));
-                giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
-                giudice.addEvento(getEventoDB(rs.getInt("idevento"), giudice));
+                giudice = new Giudice(rs.getString("nomeutente"), rs.getString("password"));
+                giudice.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lome"), rs.getObject("datanascita", LocalDate.class));
+                ArrayList<Evento> eventi = new ArrayList<Evento>();
+                Evento evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
+                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                evento.setMaxTeam(rs.getInt("maxteam"));
+                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                evento.setOrganizzatore(getOrganizzatoreDB(evento));
+                evento.setGiudici(getAllGiudiciDB(evento, giudice));
+                evento.setTeamIscritti(getAllTeamDB(evento));
+                getAllPartecipantiSingoliDB(evento);
+                getAllInvitiGiudiceDB(evento);
+                getAllVotiDB(evento);
+                getAllProgressiDB(evento);
+                eventi.add(evento);
                 while(rs.next()) {
-                    giudice.addEvento(getEventoDB(rs.getInt("idevento"), giudice));
+                    evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
+                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
+                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
+                    evento.setMaxTeam(rs.getInt("maxteam"));
+                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                    evento.setOrganizzatore(getOrganizzatoreDB(evento));
+                    evento.setGiudici(getAllGiudiciDB(evento, giudice));
+                    evento.setTeamIscritti(getAllTeamDB(evento));
+                    getAllPartecipantiSingoliDB(evento);
+                    getAllInvitiGiudiceDB(evento);
+                    getAllVotiDB(evento);
+                    getAllProgressiDB(evento);
+                    eventi.add(evento);
                 }
                 rs.close();
+                giudice.setEventi(eventi);
             }
         }
         catch(SQLException e) {
@@ -777,8 +994,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         try {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Giudice JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
-                            " WHERE idEvento = " + idEvento + ";");
+                    connection.prepareStatement("SELECT * FROM Giudice " +
+                                                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
+                                                " WHERE idEvento = " + idEvento + ";");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 giudici = new ArrayList<Giudice>();
@@ -792,6 +1010,32 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
                     giudice.addEvento(evento);
                     giudici.add(giudice);
+                }
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return giudici;
+    }
+
+    public ArrayList<Giudice> getAllGiudiciDB(Evento evento, Giudice giudice) throws SQLException{
+        ArrayList<Giudice> giudici = new ArrayList<Giudice>();
+        giudici.add(giudice);
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Giudice" +
+                                                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
+                                                " WHERE idEvento = " + evento.getIdEvento() +
+                                                " AND NomeGiudice <> " + giudice.getNomeUtente() + ";");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                while(rs.next()) {
+                    Giudice nuovoGiudice = new Giudice(rs.getString("nomeutente"), rs.getString("password"));
+                    nuovoGiudice.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                    nuovoGiudice.addEvento(evento);
+                    giudici.add(nuovoGiudice);
                 }
                 rs.close();
             }
@@ -903,22 +1147,33 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                            "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;");
+                                                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente" +
+                                                "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 teams = new ArrayList<Team>();
                 rs.next();
                 int idTeam = rs.getInt("idteam");
-                Team team = new Team(idTeam);
-                Partecipante partecipante = evento.seekPartecipante(rs.getString("nomepartecipante"));
+                Team team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                Partecipante partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
+                partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                partecipante.addEvento(evento);
+                partecipante.addTeam(team);
                 team.addMembroTeam(partecipante);
+                evento.addPartecipante(partecipante);
                 while(rs.next()) {
                     if(idTeam != rs.getInt("idteam")) {
+                        team.setEventoIscritto(evento);
                         teams.add(team);
-                        team = new Team(rs.getInt("idteam"));
+                        idTeam = rs.getInt("idteam");
+                        team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
                     }
-                    partecipante = evento.seekPartecipante(rs.getString("nomepartecipante"));
+                    partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
+                    partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                    partecipante.addEvento(evento);
+                    partecipante.addTeam(team);
                     team.addMembroTeam(partecipante);
+                    evento.addPartecipante(partecipante);
                 }
                 teams.add(team);
                 rs.close();
@@ -955,6 +1210,65 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     }
                     newPartecipante = getPartecipanteDB(rs.getString("nomepartecipante"), team);
                     team.addMembroTeam(newPartecipante);
+                }
+                teams.add(team);
+                rs.close();
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+        return teams;
+    }
+
+    public ArrayList<Team> getAllTeamDB(Evento evento, Partecipante partecipante) throws SQLException{
+        ArrayList<Team> teams = null;
+        try {
+            int idEvento = evento.getIdEvento();
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                                                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente" +
+                                                "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                teams = new ArrayList<Team>();
+                rs.next();
+                int idTeam = rs.getInt("idteam");
+                Team team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                Partecipante nuovoPartecipante = null;
+                if(partecipante.getNomeUtente().equals(rs.getString("nomeutente"))){
+                    partecipante.addTeam(team);
+                    team.addMembroTeam(partecipante);
+                    evento.addPartecipante(partecipante);
+                }
+                else {
+                    nuovoPartecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
+                    nuovoPartecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                    nuovoPartecipante.addEvento(evento);
+                    nuovoPartecipante.addTeam(team);
+                    team.addMembroTeam(nuovoPartecipante);
+                    evento.addPartecipante(nuovoPartecipante);
+                }
+                while(rs.next()) {
+                    if(idTeam != rs.getInt("idteam")) {
+                        team.setEventoIscritto(evento);
+                        teams.add(team);
+                        idTeam = rs.getInt("idteam");
+                        team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                    }
+                    if(partecipante.getNomeUtente().equals(rs.getString("nomeutente"))){
+                        partecipante.addTeam(team);
+                        team.addMembroTeam(partecipante);
+                        evento.addPartecipante(partecipante);
+                    }
+                    else {
+                        nuovoPartecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
+                        nuovoPartecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                        nuovoPartecipante.addEvento(evento);
+                        nuovoPartecipante.addTeam(team);
+                        team.addMembroTeam(nuovoPartecipante);
+                        evento.addPartecipante(nuovoPartecipante);
+                    }
                 }
                 teams.add(team);
                 rs.close();
@@ -1027,6 +1341,30 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
+    public void getAllRichiesteTeamDB(Partecipante partecipante) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM RichiestaTeam" +
+                                                "WHERE Risposta IS NULL AND idTeam IN(" +
+                                                "SELECT idTeam FROM CompTeam " +
+                                                "WHERE NomePartecipante = '" + partecipante.getNomeUtente() + "');");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                rs.next();
+                Team team = partecipante.seekTeam(rs.getInt("idteam"));
+                team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString("nomepartecipante")));
+                while(rs.next()){
+                    if(team.getIdTeam() != rs.getInt("idteam"))
+                        team = partecipante.seekTeam(rs.getInt("idteam"));
+                    team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString("nomepartecipante")));
+                }
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
     public Progresso getProgressoDB(int IdProgresso) throws SQLException{
         Progresso progresso = null;
         try {
@@ -1070,6 +1408,85 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
         return progressi;
     }
+
+    public void getAllProgressiDB(Evento evento) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT t.IdTeam, p.IdProgresso, p.DataPubblicazione," +
+                                                "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
+                                                "FROM Team AS t JOIN Progresso AS p ON t.IdTeam = p.idTeam " +
+                                                "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
+                                                "WHERE t.idEvento = " + evento.getIdEvento() +
+                                                " ORDER BY t.IdTeam, p.IdProgresso;");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()) {
+                rs.next();
+                ArrayList<Progresso> progressi = new ArrayList<Progresso>();
+                ArrayList<Commento> commenti = new ArrayList<Commento>();
+                Team team = evento.seekTeam(rs.getInt("idteam"));
+                Progresso progresso = new Progresso(rs.getInt("idprogresso"), team.getIdTeam(), rs.getObject("datapubblicazione", LocalDate.class), rs.getString("testoprogresso"));
+                commenti.add(new Commento(progresso.getIdProgresso(), rs.getString("testocommento"), rs.getString("nomegiudice")));
+                while (rs.next()) {
+                    if(progresso.getIdProgresso() != rs.getInt("idprogresso")) {
+                        progresso.setCommenti(commenti);
+                        progressi.add(progresso);
+                        progresso = new Progresso(rs.getInt("idprogresso"), team.getIdTeam(), rs.getObject("datapubblicazione", LocalDate.class), rs.getString("testoprogresso"));
+                    }
+                    if(team.getIdTeam() != rs.getInt("idteam")) {
+                        team.setProgressi(progressi);
+                        team = evento.seekTeam(rs.getInt("idteam"));
+                    }
+                    commenti.add(new Commento(progresso.getIdProgresso(), rs.getString("testocommento"), rs.getString("nomegiudice")));
+                }
+                progresso.setCommenti(commenti);
+                progressi.add(progresso);
+                team.setProgressi(progressi);
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
+    public void getAllProgressiDB(Partecipante partecipante) throws SQLException{
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT ct.idTeam, p.IdProgresso, p.DataPubblicazione," +
+                                                "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
+                                                "FROM CompTeam AS ct JOIN Progresso AS p ON ct.idTeam = p.idTeam " +
+                                                "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
+                                                "WHERE ct.NomePartecipante = '"+ partecipante.getNomeUtente() +"' " +
+                                                "ORDER BY ct.idTeam, p.IdProgresso;");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()) {
+                rs.next();
+                ArrayList<Progresso> progressi = new ArrayList<Progresso>();
+                ArrayList<Commento> commenti = new ArrayList<Commento>();
+                Team team = partecipante.seekTeam(rs.getInt("idteam"));
+                Progresso progresso = new Progresso(rs.getInt("idprogresso"), team.getIdTeam(), rs.getObject("datapubblicazione", LocalDate.class), rs.getString("testoprogresso"));
+                commenti.add(new Commento(progresso.getIdProgresso(), rs.getString("testocommento"), rs.getString("nomegiudice")));
+                while (rs.next()) {
+                    if(progresso.getIdProgresso() != rs.getInt("idprogresso")) {
+                        progresso.setCommenti(commenti);
+                        progressi.add(progresso);
+                        progresso = new Progresso(rs.getInt("idprogresso"), team.getIdTeam(), rs.getObject("datapubblicazione", LocalDate.class), rs.getString("testoprogresso"));
+                    }
+                    if(team.getIdTeam() != rs.getInt("idteam")) {
+                        team.setProgressi(progressi);
+                        team = partecipante.seekTeam(rs.getInt("idteam"));
+                    }
+                    commenti.add(new Commento(progresso.getIdProgresso(), rs.getString("testocommento"), rs.getString("nomegiudice")));
+                }
+                progresso.setCommenti(commenti);
+                progressi.add(progresso);
+                team.setProgressi(progressi);
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
 
     public int getIdProgressoDB() throws SQLException{
         int id = -1;
@@ -1246,6 +1663,68 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
         return voti;
     }
+
+    public void getAllVotiDB(Evento evento) throws SQLException{
+        ArrayList<Voto> voti = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Team AS t " +
+                                                "JOIN Voto AS v ON t.IdTeam = v.idTeam " +
+                                                "WHERE t.idEvento = " + evento.getIdEvento() +
+                                                " ORDER BY t.idTeam;");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                rs.next();
+                voti = new ArrayList<Voto>();
+                Team team = evento.seekTeam(rs.getInt("idteam"));
+                voti.add(new Voto(rs.getInt("idteam"), rs.getInt("valore"), rs.getString("nomegiudice")));
+                while(rs.next()) {
+                    if(team.getIdTeam() != rs.getInt("idteam")){
+                        team.setVoti(voti);
+                        voti = new ArrayList<Voto>();
+                        team = evento.seekTeam(rs.getInt("idteam"));
+                    }
+                    voti.add(new Voto(rs.getInt("idteam"), rs.getInt("valore"), rs.getString("nomegiudice")));
+                }
+                team.setVoti(voti);
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
+    public void getAllVotiDB(Partecipante partecipante) throws SQLException{
+        ArrayList<Voto> voti = null;
+        try {
+            PreparedStatement ps =
+                    connection.prepareStatement("SELECT * FROM Team AS t " +
+                                                "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                                                "JOIN Voto AS v ON ct.idTeam = v.idTeam " +
+                                                "WHERE ct.NomePartecipante = '" + partecipante.getNomeUtente() +"' " +
+                                                "ORDER BY t.IdTeam;");
+            ResultSet rs = ps.executeQuery();
+            if(rs.isBeforeFirst()){
+                rs.next();
+                voti = new ArrayList<Voto>();
+                Team team = partecipante.seekTeam(rs.getInt("idteam"));
+                voti.add(new Voto(rs.getInt("idteam"), rs.getInt("valore"), rs.getString("nomegiudice")));
+                while(rs.next()) {
+                    if(team.getIdTeam() != rs.getInt("idteam")){
+                        team.setVoti(voti);
+                        voti = new ArrayList<Voto>();
+                        team = partecipante.seekTeam(rs.getInt("idteam"));
+                    }
+                    voti.add(new Voto(rs.getInt("idteam"), rs.getInt("valore"), rs.getString("nomegiudice")));
+                }
+                team.setVoti(voti);
+            }
+        }
+        catch(SQLException e) {
+            throw e;
+        }
+    }
+
 
     public void addVotoDB(Voto voto) throws SQLException{
         try{

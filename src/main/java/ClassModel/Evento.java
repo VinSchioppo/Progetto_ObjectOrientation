@@ -25,6 +25,12 @@ public class Evento {
     private RecordList<Team> TeamIscritti = null;
 
     public Evento(int IdEvento) {this.IdEvento = IdEvento;}
+    public Evento(int IdEvento, String Titolo, String Indirizzo, int NCivico) {
+        this.IdEvento = IdEvento;
+        this.Titolo = Titolo;
+        this.IndirizzoSede = Indirizzo;
+        this.NCivicoSede = NCivico;
+    }
     public Evento(String Titolo) {this.Titolo = Titolo;}
     public Evento(String Titolo, String Indirizzo, int NCivico) {
         this.Titolo = Titolo;
@@ -40,16 +46,13 @@ public class Evento {
     public void setDescrizioneProblema(String DesctizioneProblema) {this.DescrizioneProblema = DesctizioneProblema;}
     public void setIdEvento(int IdEvento) {this.IdEvento = IdEvento;}
     public void setOrganizzatore(Organizzatore organizzatore) {this.organizzatore = organizzatore;}
+
     public void setInvitiGiudici(ArrayList<Partecipante> inviti) {
         if(InvitiGiudici == null)
             InvitiGiudici = new InviteList<Partecipante>();
         InvitiGiudici.setInvites(inviti);
     }
 
-    public void setInvitiGiudiciAnswer(Boolean answer){
-        if(InvitiGiudici != null)
-            InvitiGiudici.setInviteAnswer(answer);
-    }
     public void setGiudici(ArrayList<Giudice> giudici) {
         if(Giudici == null)
             Giudici = new RecordList<Giudice>();
@@ -95,19 +98,30 @@ public class Evento {
     public LocalDate getDataFineReg() {return DataFineReg;}
     public Organizzatore getOrganizzatore() {return organizzatore;}
 
+    public void addInvitoGiudice(Partecipante utente, Boolean answer)
+    {
+        if(InvitiGiudici == null)
+            InvitiGiudici = new InviteList<Partecipante>();
+        InvitiGiudici.addInvite(utente, answer);
+    }
+
     public void addInvitoGiudice(Partecipante utente) {
         if(InvitiGiudici == null)
             InvitiGiudici = new InviteList<Partecipante>();
         InvitiGiudici.addInvite(utente);
     }
 
-    public boolean removeInvitoGiudice(String nomeUtente){
+    public boolean removeInvitoGiudice(){
         if(InvitiGiudici != null){
-            seekInvitoGiudice(nomeUtente);
             InvitiGiudici.removeInvite();
             return true;
         }
         return false;
+    }
+
+    public void setInvitoGiudiceAnswer(Boolean answer){
+        if(InvitiGiudici != null)
+            InvitiGiudici.setInviteAnswer(answer);
     }
 
     public Boolean getInvitoGiudiceAnswer(){
@@ -203,21 +217,15 @@ public class Evento {
     }
 
     public Boolean seekAndRemoveInvitoGiudiceAnswer(String nomeUtente){
-        if(InvitiGiudici != null){
-            Partecipante partecipante = seekInvitoGiudice(nomeUtente);
-            InvitiGiudici.removeInvite();
-            return getInvitoGiudiceAnswer();
-        }
-        return null;
+        Boolean answer = seekInvitoGiudiceAnswer(nomeUtente);
+        removeInvitoGiudice();
+        return answer;
     }
 
     public Partecipante seekAndRemoveInvitoGiudice(String nomeUtente){
-        if(InvitiGiudici != null){
-            Partecipante partecipante = seekInvitoGiudice(nomeUtente);
-            InvitiGiudici.removeInvite();
-            return partecipante;
-        }
-        return null;
+        Partecipante partecipante = seekInvitoGiudice(nomeUtente);
+        removeInvitoGiudice();
+        return partecipante;
     }
 
     public void addGiudice(Giudice giudice) {
@@ -226,9 +234,8 @@ public class Evento {
         Giudici.addRecord(giudice);
     }
 
-    public boolean removeGiudice(String nomeUtente){
+    public boolean removeGiudice(){
         if(Giudici != null){
-            seekGiudice(nomeUtente);
             Giudici.removeRecord();
             return true;
         }
@@ -282,12 +289,9 @@ public class Evento {
     }
 
     public Giudice seekAndRemoveGiudice(String nomeUtente){
-        if(Giudici != null){
-            Giudice giudice = seekGiudice(nomeUtente);
-            Giudici.removeRecord();
-            return giudice;
-        }
-        return null;
+        Giudice giudice = seekGiudice(nomeUtente);
+        removeInvitoGiudice();
+        return giudice;
     }
 
     public void addPartecipante(Partecipante utente) {
@@ -296,9 +300,8 @@ public class Evento {
         Partecipanti.addRecord(utente);
     }
 
-    public boolean removePartecipante(String nomeUtente){
+    public boolean removePartecipante(){
         if(Partecipanti != null){
-            seekPartecipante(nomeUtente);
             Partecipanti.removeRecord();
             return true;
         }
@@ -352,12 +355,9 @@ public class Evento {
     }
 
     public Partecipante seekAndRemovePartecipante(String nomeUtente){
-        if(Partecipanti != null){
-            Partecipante partecipante = seekPartecipante(nomeUtente);
-            Partecipanti.removeRecord();
-            return partecipante;
-        }
-        return null;
+        Partecipante partecipante = seekPartecipante(nomeUtente);
+        removePartecipante();
+        return partecipante;
     }
 
     public void addTeam(Team team) {
@@ -368,9 +368,8 @@ public class Evento {
 
     }
 
-    public boolean removeTeam(int idTeam) {
+    public boolean removeTeam() {
         if(TeamIscritti != null){
-            seekTeam(idTeam);
             TeamIscritti.removeRecord();
             return true;
         }
@@ -424,12 +423,9 @@ public class Evento {
     }
 
     public Team seekAndRemoveTeam(int idTeam) {
-        if(TeamIscritti != null){
-            Team team = seekTeam(idTeam);
-            TeamIscritti.removeRecord();
-            return team;
-        }
-        return null;
+        Team team = seekTeam(idTeam);
+        removeTeam();
+        return team;
     }
 
 }

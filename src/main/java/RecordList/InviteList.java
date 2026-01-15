@@ -27,6 +27,13 @@ public class InviteList<T>{
         }
     }
 
+    public void addInvite(T record, Boolean answer) {
+        if(Invites == null)
+            Invites = new RecordList<Invite<T>>();
+        Invite<T> invite = new Invite<T>(record, answer);
+        Invites.addRecord(invite);
+    }
+
     public void addInvite(T record) {
         if(Invites == null)
             Invites = new RecordList<Invite<T>>();

@@ -6,23 +6,27 @@ import java.time.LocalDate;
 
 public class Progresso {
 
-    private int idProgresso;
+    private int IdProgresso;
     private int idTeam;
     private LocalDate DataProgresso;
     private String TestoDocumeto;
 
     private RecordList<Commento> Commenti = null;
 
-    public Progresso(int idProgresso) {this.idProgresso = idProgresso;}
+    public Progresso(int idProgresso) {this.IdProgresso = idProgresso;}
+    public Progresso(int IdProgresso, int idTeam, LocalDate DataProgresso, String testo) {
+        this.IdProgresso = IdProgresso;
+        this.idTeam = idTeam;
+        this.DataProgresso = DataProgresso;
+        TestoDocumeto = testo;
+    }
     public Progresso(String testo, int idTeam) {
-
         DataProgresso = LocalDate.now();
         TestoDocumeto = testo;
         this.idTeam = idTeam;
-
     }
 
-    public void setIdProgresso(int idProgresso) {this.idProgresso = idProgresso;}
+    public void setIdProgresso(int idProgresso) {this.IdProgresso = idProgresso;}
     public void setIdTeam(int idTeam) {this.idTeam = idTeam;}
     public void setDataProgresso(LocalDate dataProgresso) {this.DataProgresso = dataProgresso;}
     public void setTestoDocumeto(String TestoDocumento) {this.TestoDocumeto = TestoDocumento;}
@@ -32,7 +36,7 @@ public class Progresso {
         Commenti.setRecords(commenti);
     }
 
-    public int getIdProgresso() {return idProgresso;}
+    public int getIdProgresso() {return IdProgresso;}
     public LocalDate getDataProgresso() {return this.DataProgresso;}
     public String getTestoDocumeto() {return this.TestoDocumeto;}
     public int getIdTeam() {return this.idTeam;}
@@ -45,9 +49,8 @@ public class Progresso {
         Commenti.addRecord(commento);
     }
 
-    public boolean removeCommento(String nomeGiudice) {
+    public boolean removeCommento() {
         if(Commenti != null){
-            seekCommento(nomeGiudice);
             Commenti.removeRecord();
             return true;
         }
@@ -101,12 +104,9 @@ public class Progresso {
     }
 
     public Commento seekAndRemoveCommento(String nomeGiudice){
-        if(Commenti != null){
-            Commento commento = seekCommento(nomeGiudice);
-            Commenti.removeRecord();
-            return commento;
-        }
-        return null;
+        Commento commento = seekCommento(nomeGiudice);
+        removeCommento();
+        return commento;
     }
 
 }

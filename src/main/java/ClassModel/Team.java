@@ -30,6 +30,7 @@ public class Team {
 
     public void setNome(String Nome) {this.Nome = Nome;}
     public void setIdTeam(int idTeam) {this.idTeam = idTeam;}
+    public void setTeamLeader(String TeamLeader) {this.TeamLeader = TeamLeader;}
     public void setMembriTeam(ArrayList<Partecipante> partecipanti) {
         if(MembriTeam == null)
             MembriTeam = new RecordList<Partecipante>();
@@ -48,20 +49,12 @@ public class Team {
         Voti.setRecords(voti);
     }
 
-    public void setEventoIscritto(Evento EventoIscritto) {
-        this.EventoIscritto = EventoIscritto;
-        EventoIscritto.addTeam(this);
-    }
+    public void setEventoIscritto(Evento EventoIscritto) { this.EventoIscritto = EventoIscritto;}
 
     public void setRichiestePartecipazione(ArrayList<Partecipante> richiestePartecipazione) {
         if(RichiestePartecipazione == null)
             RichiestePartecipazione = new InviteList<Partecipante>();
         RichiestePartecipazione.setInvites(richiestePartecipazione);
-    }
-    public void setRichiestaAnswer(Boolean answer) {
-
-        if(RichiestePartecipazione != null)
-            RichiestePartecipazione.setInviteAnswer(answer);
     }
 
     public int getIdTeam() {return this.idTeam;}
@@ -76,9 +69,8 @@ public class Team {
         MembriTeam.addRecord(part);
     }
 
-    public boolean removeMembroTeam(String nomeUtente){
+    public boolean removeMembroTeam(){
         if(MembriTeam != null){
-            seekMembroTeam(nomeUtente);
             MembriTeam.removeRecord();
             return true;
         }
@@ -132,12 +124,10 @@ public class Team {
     }
 
     public Partecipante seekAndRemoveMembroTeam(String nomeUtente){
-        if(MembriTeam != null){
-            Partecipante membro = seekMembroTeam(nomeUtente);
-            MembriTeam.removeRecord();
-            return membro;
-        }
-        return null;
+
+        Partecipante membro = seekMembroTeam(nomeUtente);
+        removeMembroTeam();
+        return membro;
     }
 
     public int giveNumMembri() {
@@ -147,20 +137,30 @@ public class Team {
         return 0;
     }
 
-    public void addRichiesta(Partecipante part) {
-
+    public void addRichiesta(Partecipante partecipante, Boolean answer) {
         if(RichiestePartecipazione == null)
             RichiestePartecipazione = new InviteList<Partecipante>();
-        RichiestePartecipazione.addInvite(part);
+        RichiestePartecipazione.addInvite(partecipante, answer);
     }
 
-    public boolean removeRichiesta(String nomeUtente){
+    public void addRichiesta(Partecipante partecipante) {
+        if(RichiestePartecipazione == null)
+            RichiestePartecipazione = new InviteList<Partecipante>();
+        RichiestePartecipazione.addInvite(partecipante);
+    }
+
+    public boolean removeRichiesta(){
         if(RichiestePartecipazione != null){
-            seekRichiesta(nomeUtente);
             RichiestePartecipazione.removeInvite();
             return true;
         }
         return false;
+    }
+
+    public void setRichiestaAnswer(Boolean answer) {
+
+        if(RichiestePartecipazione != null)
+            RichiestePartecipazione.setInviteAnswer(answer);
     }
 
     public Boolean getRichiestaAnswer(){
@@ -256,21 +256,16 @@ public class Team {
     }
 
     public Boolean seekAndRemoveRichiestaAnswer(String nomeUtente){
-        if(RichiestePartecipazione != null){
-            Partecipante richiesta = seekRichiesta(nomeUtente);
-            RichiestePartecipazione.removeInvite();
-            return getRichiestaAnswer();
-        }
-        return null;
+        Boolean answer = seekRichiestaAnswer(nomeUtente);
+        removeRichiesta();
+        return getRichiestaAnswer();
     }
 
     public Partecipante seekAndRemoveRichiesta(String nomeUtente){
-        if(RichiestePartecipazione != null){
-            Partecipante richiesta = seekRichiesta(nomeUtente);
-            RichiestePartecipazione.removeInvite();
-            return richiesta;
-        }
-        return null;
+
+        Partecipante richiesta = seekRichiesta(nomeUtente);
+        removeRichiesta();
+        return richiesta;
     }
 
 
@@ -282,9 +277,8 @@ public class Team {
         Progressi.addRecord(progressi);
     }
 
-    public boolean removeProgresso(int idProgresso){
+    public boolean removeProgresso(){
         if(Progressi != null){
-            seekProgresso(idProgresso);
             Progressi.removeRecord();
             return true;
         }
@@ -337,6 +331,12 @@ public class Team {
         return null;
     }
 
+    public Progresso seekAndRemoveProgresso(int idProgresso){
+        Progresso progresso = seekProgresso(idProgresso);
+        removeProgresso();
+        return progresso;
+    }
+
 
     public void addVoto(Voto voto) {
 
@@ -346,9 +346,8 @@ public class Team {
         Voti.addRecord(voto);
     }
 
-    public boolean removeVoto(String nomeGiudice){
+    public boolean removeVoto(){
         if(Voti != null){
-            seekVoto(nomeGiudice);
             Voti.removeRecord();
             return true;
         }
@@ -401,12 +400,23 @@ public class Team {
         return null;
     }
 
-    public void printMembri() {
-        firstMembroTeam();
-        while(getMembroTeam() != null)
-        {
-            System.out.println(getMembroTeam().getNomeUtente());
-            nextMembroTeam();
+    public Voto seekAndRemoveVoto(String NomeGiudice){
+        Voto voto = seekVoto(NomeGiudice);
+        removeVoto();
+        return voto;
+    }
+
+    public int mediaVoti()
+    {
+        int media = 0;
+        if(Voti.size() > 0) {
+            Voto voto = firstVoto();
+            while (voto != null) {
+                media += voto.getValore();
+                voto = nextVoto();
+            }
+            media = media / Voti.size();
         }
+        return media;
     }
 }

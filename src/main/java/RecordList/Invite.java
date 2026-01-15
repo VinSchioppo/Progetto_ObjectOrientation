@@ -8,6 +8,11 @@ public class Invite<T> {
         this.Record = Record;
     }
 
+    public Invite(T Record, Boolean Answer) {
+        this.Record = Record;
+        this.Answer = Answer;
+    }
+
     public Boolean getAnswer() {return Answer;}
     public T getRecordInvite() {return Record;}
 
