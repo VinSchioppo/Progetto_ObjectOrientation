@@ -286,7 +286,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                                                     "SELECT pe.idEvento FROM PartecipanteEvento AS pe " +
                                                     "JOIN OrganizzatoreEvento AS oe ON pe.idEvento = oe.idEvento " +
                                                     "JOIN GiudiceEvento AS ge ON pe.idEvento = ge.idEvento " +
-                                                    "WHERE pe.NomePartecipante = " + NomeUtente +");");
+                                                    "WHERE pe.NomePartecipante = '" + NomeUtente +"');");
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 eventi = new ArrayList<Evento>();
@@ -513,7 +513,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     connection.prepareStatement("SELECT * FROM Partecipante AS p " +
                                                 "JOIN PartecipanteEvento AS pe ON p.NomeUtente = pe.NomePartecipante " +
                                                 "JOIN Evento AS e ON pe.idEvento = e.IdEvento " +
-                                                "WHERE NomeUtente = '" + NomePartecipante + "';");
+                                                "WHERE p.NomeUtente = '" + NomePartecipante + "';");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 rs.next();
@@ -525,7 +525,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 evento.setMaxIscritti(rs.getInt("maxiscritti"));
                 evento.setMaxTeam(rs.getInt("maxteam"));
                 evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
                 evento.setOrganizzatore(getOrganizzatoreDB(evento));
                 evento.setGiudici(getAllGiudiciDB(evento));
                 evento.setTeamIscritti(getAllTeamDB(evento, partecipante));
@@ -538,7 +538,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     evento.setMaxIscritti(rs.getInt("maxiscritti"));
                     evento.setMaxTeam(rs.getInt("maxteam"));
                     evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                    evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
                     evento.setOrganizzatore(getOrganizzatoreDB(evento));
                     evento.setGiudici(getAllGiudiciDB(evento));
                     evento.setTeamIscritti(getAllTeamDB(evento, partecipante));
@@ -550,6 +550,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 getAllVotiDB(partecipante);
                 getAllProgressiDB(partecipante);
                 rs.close();
+                partecipante.setEventi(eventi);
             }
         }
         catch(SQLException e) {
@@ -651,8 +652,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
-                                                "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN(" +
-                                                "SELECT NomePartecipante FROM CompTeam WHERE idEvento = " + idEvento + ";)");
+                                                "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN( " +
+                                                "SELECT NomePartecipante FROM CompTeam WHERE idEvento = " + idEvento + ");");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 while(rs.next()) {
@@ -674,8 +675,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
-                            "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN(" +
-                            "SELECT NomePartecipante FROM CompTeam WHERE idEvento = " + idEvento + ";)");
+                                                "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN( " +
+                                                "SELECT NomePartecipante FROM CompTeam WHERE idEvento = " + idEvento + ");");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 while(rs.next()) {
@@ -787,7 +788,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 evento.setMaxIscritti(rs.getInt("maxiscritti"));
                 evento.setMaxTeam(rs.getInt("maxteam"));
                 evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
                 evento.setOrganizzatore(organizzatore);
                 evento.setGiudici(getAllGiudiciDB(evento));
                 evento.setTeamIscritti(getAllTeamDB(evento));
@@ -800,7 +801,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     evento.setMaxIscritti(rs.getInt("maxiscritti"));
                     evento.setMaxTeam(rs.getInt("maxteam"));
                     evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                    evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
                     evento.setOrganizzatore(organizzatore);
                     evento.setGiudici(getAllGiudiciDB(evento));
                     evento.setTeamIscritti(getAllTeamDB(evento));
@@ -920,14 +921,14 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             if(rs.isBeforeFirst()){
                 rs.next();
                 giudice = new Giudice(rs.getString("nomeutente"), rs.getString("password"));
-                giudice.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lome"), rs.getObject("datanascita", LocalDate.class));
+                giudice.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
                 ArrayList<Evento> eventi = new ArrayList<Evento>();
                 Evento evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
                 evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
                 evento.setMaxIscritti(rs.getInt("maxiscritti"));
                 evento.setMaxTeam(rs.getInt("maxteam"));
                 evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
                 evento.setOrganizzatore(getOrganizzatoreDB(evento));
                 evento.setGiudici(getAllGiudiciDB(evento, giudice));
                 evento.setTeamIscritti(getAllTeamDB(evento));
@@ -942,7 +943,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     evento.setMaxIscritti(rs.getInt("maxiscritti"));
                     evento.setMaxTeam(rs.getInt("maxteam"));
                     evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                    evento.setDescrizioneProblema(rs.getString("descrizioneproblema"));
+                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
                     evento.setOrganizzatore(getOrganizzatoreDB(evento));
                     evento.setGiudici(getAllGiudiciDB(evento, giudice));
                     evento.setTeamIscritti(getAllTeamDB(evento));
@@ -1025,10 +1026,10 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         giudici.add(giudice);
         try {
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Giudice" +
-                                                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
-                                                " WHERE idEvento = " + evento.getIdEvento() +
-                                                " AND NomeGiudice <> " + giudice.getNomeUtente() + ";");
+                    connection.prepareStatement("SELECT * FROM Giudice " +
+                                                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice " +
+                                                "WHERE idEvento = " + evento.getIdEvento() +
+                                                " AND NomeGiudice <> '" + giudice.getNomeUtente() + "';");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 while(rs.next()) {
@@ -1147,7 +1148,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                                                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente" +
+                                                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
                                                 "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
@@ -1227,7 +1228,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             int idEvento = evento.getIdEvento();
             PreparedStatement ps =
                     connection.prepareStatement("SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                                                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente" +
+                                                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
                                                 "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
@@ -1344,7 +1345,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public void getAllRichiesteTeamDB(Partecipante partecipante) throws SQLException{
         try {
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM RichiestaTeam" +
+                    connection.prepareStatement("SELECT * FROM RichiestaTeam " +
                                                 "WHERE Risposta IS NULL AND idTeam IN(" +
                                                 "SELECT idTeam FROM CompTeam " +
                                                 "WHERE NomePartecipante = '" + partecipante.getNomeUtente() + "');");

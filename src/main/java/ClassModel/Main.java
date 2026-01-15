@@ -20,8 +20,15 @@ public class Main {
             evento.setIndirizzoSede("Sede");
             evento.setNCivicoSede(10);
             eventi.add(evento);
-        }*/
+        }*//*
         try {
+            Giudice giudice = d.getGiudiceDB("user1");
+            System.out.println(giudice);
+            Organizzatore organizzatore = d.getOrganizzatoreDB("user1");
+            System.out.println(organizzatore.toString());
+            Partecipante paretcipante = d.getPartecipanteDB("user1");
+            System.out.println(paretcipante.getNomeUtente());
+
             InviteList<Partecipante> inviti = new InviteList<Partecipante>();
             inviti.setInvites(d.getAllPartecipantiDB(d.getEventoDB(1)));
             Partecipante p = inviti.firstInvite();
@@ -34,7 +41,7 @@ public class Main {
                 System.out.println(inviti.getInviteAnswer());
                 p = inviti.nextInvite();
             }
-            /*
+
             Evento e = d.getEventoDB(1);
             Giudice g = d.getGiudiceDB("jud1", e);
             int result = d.addEventoDB("Sans", "Sans Street", 34);
@@ -67,20 +74,17 @@ public class Main {
             if(ruoli.size() >= 1 && ruoli.get(0) != null){System.out.println("Partecipante.");}
             if(ruoli.size() >= 2 && ruoli.get(1) != null){System.out.println("Giudice.");}
             if(ruoli.size() >= 3 && ruoli.get(2) != null){System.out.println("Organizzatore.");}
-            */
+
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-        }
+        }*/
 
-        /*
+
         Controller controller = new Controller();
 
-        //if(controller.logInUtente("alice", "pwd1")) System.out.println("Utente loggato");
-        controller.registerUtente("gino", "password");
-        controller.inserisciDatiUtente("Gino", null, "Cirillo", LocalDate.parse("2018-10-01"));
-        System.out.println(controller.datiUtente());
+        controller.logInUtente("user1", "pwd");
 
         ArrayList<String> list = controller.listaEventiUtente();
         for(String s : list){
@@ -91,6 +95,6 @@ public class Main {
         for(String evento : eventi) {
             System.out.println(evento);
         }
-        */
+        /**/
     }
 }
