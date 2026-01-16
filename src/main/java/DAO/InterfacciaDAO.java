@@ -24,7 +24,13 @@ public interface InterfacciaDAO {
     int addEventoDB(String Titolo, String Indirizzo, int NCivico) throws SQLException;
     int addEventoDB(String Titolo, String Indirizzo, int NCivico, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException;
     void addAllEventiDB(ArrayList<Evento> eventi) throws SQLException;
-    void updateEventoDB(int IdEvento, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException;
+    void updateEventoDB(Evento evento) throws SQLException;
+    void updateEventoDB(int IdEvento, String Indirizzo, int NCivico, int MaxIscritti, int MaxTeam) throws SQLException;
+    void updateDateEventoDB(Evento evento) throws SQLException;
+    void updateDateEventoDB(int IdEvento, LocalDate DataInizio, LocalDate DataFine) throws SQLException;
+    void updateDateRegEventoDB(Evento evento) throws SQLException;
+    void updateDateRegEventoDB(int IdEvento, LocalDate DataInizioReg, LocalDate DataFineReg) throws SQLException;
+
 
     Utente getUtenteDB(String NomeUtente) throws SQLException;
     void addUtenteDB(Utente utente) throws SQLException;
@@ -49,9 +55,10 @@ public interface InterfacciaDAO {
 
     Organizzatore getOrganizzatoreDB(String NomeUtente) throws SQLException;
     Organizzatore getOrganizzatoreDB(Evento evento) throws SQLException;
-    void addOrganizzatoreDB(Organizzatore organizzatore) throws SQLException;
+    void addOrganizzatoreDB(Organizzatore organizzatore, Evento evento) throws SQLException;
     void addOrganizzatoreDB(String NomeUtente, String Password, int idEvento) throws SQLException;
     void addOrganizzatoreDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita, int idEvento) throws SQLException;
+    void addOrganizzatoreEventoDB(String NomeUtente, int idEvento) throws SQLException;
     void addAllOrganizzatoriDB(ArrayList<Organizzatore> organizzatori) throws SQLException;
     void updateOrganizzatoreDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
 

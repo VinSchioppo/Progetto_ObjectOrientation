@@ -87,6 +87,12 @@ public class Utente {
         return giudice;
     }
 
+    public int sizeEventi() {
+        if(Eventi != null)
+            return Eventi.size();
+        return 0;
+    }
+
     public void addEvento(Evento evento) {
         if(Eventi == null) {
             Eventi = new RecordList<Evento>();

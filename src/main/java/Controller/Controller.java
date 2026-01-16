@@ -18,8 +18,13 @@ public class Controller {
     private Partecipante PartecipanteCorrente = null;
     private Organizzatore OrganizzatoreCorrente = null;
     private Giudice GiudiceCorrente = null;
-    private Role RuoloCorrente = null;
     private static final ImplementazioneDAO DAO = new ImplementazioneDAO();
+
+    private boolean updateInvitiGiudice = false;
+    private boolean addOrganizzatore = false;
+    private ArrayList<Evento> updateOrganizzatoreEvento = null;
+    private ArrayList<Evento> updatePartecipanteEvento = null;
+    private ArrayList<Team> updateRichiesteTeam = null;
 
     //Questo metodo verifica i dati di login inseriti e restituisce true se va a buon fine, altrimenti false.
 
@@ -52,7 +57,7 @@ public class Controller {
     }
 
     //Questo metodo restiuisce una lista contenente l'id e il titolo di tutti gli eventi in cui l'utente ha un ruolo.
-    //Ogni elemento della lista segue il formato: IdEvento Titolo
+    //Ogni elemento della lista segue il formato: Ruolo IdEvento Titolo
 
     public ArrayList<String> listaEventiUtente() {
         ArrayList<String> listaEventi = null;
@@ -71,7 +76,7 @@ public class Controller {
             listaEventi = new ArrayList<String>();
             PartecipanteCorrente.firstEvento();
             while(PartecipanteCorrente.getEvento() != null){
-                String Evento = PartecipanteCorrente.getEvento().getIdEvento() + " " + PartecipanteCorrente.getEvento().getTitolo();
+                String Evento = "Partecipante " + PartecipanteCorrente.getEvento().getIdEvento() + " " + PartecipanteCorrente.getEvento().getTitolo();
                 listaEventi.add(Evento);
                 PartecipanteCorrente.nextEvento();
             }
@@ -82,7 +87,7 @@ public class Controller {
             }
             OrganizzatoreCorrente.firstEvento();
             while(OrganizzatoreCorrente.getEvento() != null){
-                String Evento = OrganizzatoreCorrente.getEvento().getIdEvento() + " " + OrganizzatoreCorrente.getEvento().getTitolo();
+                String Evento = "Organizzatore " + OrganizzatoreCorrente.getEvento().getIdEvento() + " " + OrganizzatoreCorrente.getEvento().getTitolo();
                 listaEventi.add(Evento);
                 OrganizzatoreCorrente.nextEvento();
             }
@@ -93,7 +98,7 @@ public class Controller {
             }
             GiudiceCorrente.firstEvento();
             while(GiudiceCorrente.getEvento() != null){
-                String Evento = GiudiceCorrente.getEvento().getIdEvento() + " " + GiudiceCorrente.getEvento().getTitolo();
+                String Evento = "Giudice " + GiudiceCorrente.getEvento().getIdEvento() + " " + GiudiceCorrente.getEvento().getTitolo();
                 listaEventi.add(Evento);
                 GiudiceCorrente.nextEvento();
             }
@@ -101,27 +106,24 @@ public class Controller {
         return listaEventi;
     }
 
-    //Questo metodo riceve un input l'id di un evento e determina il ruolo dell'utente.
-    //Restituisce il ruolo alla funzione chiamante.
+    //Questo metodo riceve un input l'id di un evento e il ruolo del utente in quell'evento e selezione l'evento in memoria.
+    //Restituisce true se l'operazione viene completata con successo, altrimenti restituisce false.
 
-    public Role selectEvento(int idEvento) {
+    public boolean selectEvento(int idEvento, Role ruolo) {
 
-        if(PartecipanteCorrente != null){
-            if(PartecipanteCorrente.seekEvento(idEvento) != null){
-                RuoloCorrente = Role.PARTECIPANTE;
-            }
+        if(PartecipanteCorrente != null && ruolo == Role.PARTECIPANTE){
+            if(PartecipanteCorrente.seekEvento(idEvento) != null)
+                return true;
         }
-        if(OrganizzatoreCorrente != null){
-            if(OrganizzatoreCorrente.seekEvento(idEvento) != null){
-                RuoloCorrente = Role.ORGANIZZATORE;
-            }
+        if(OrganizzatoreCorrente != null && ruolo == Role.ORGANIZZATORE){
+            if(OrganizzatoreCorrente.seekEvento(idEvento) != null)
+                return true;
         }
-        if(GiudiceCorrente != null){
-            if(GiudiceCorrente.seekEvento(idEvento) != null){
-                RuoloCorrente = Role.GIUDICE;
-            }
+        if(GiudiceCorrente != null && ruolo == Role.GIUDICE){
+            if(GiudiceCorrente.seekEvento(idEvento) != null)
+                return true;
         }
-        return RuoloCorrente;
+        return false;
     }
 
     //Questo metodo restituisce una stringa contenente i dati personali dell'utente.
@@ -207,16 +209,21 @@ public class Controller {
         try{
             evento = DAO.getEventoDB(idEvento);
             if(evento != null){
-                if(PartecipanteCorrente == null)
-                    PartecipanteCorrente = UtenteCorrente.becomePartecipante();
-                PartecipanteCorrente.addEvento(evento);
+                if(evento.sizePartecipanti() > evento.getMaxIscritti()) {
+                    if (PartecipanteCorrente == null)
+                        PartecipanteCorrente = UtenteCorrente.becomePartecipante();
+                    PartecipanteCorrente.addEvento(evento);
+                    if(updatePartecipanteEvento == null)
+                        updatePartecipanteEvento = new ArrayList<Evento>();
+                    updatePartecipanteEvento.add(evento);
+                    return true;
+                }
             }
         }
         catch(SQLException e){
             e.printStackTrace();
-            return false;
         }
-        return true;
+        return false;
     }
 
     //Questo metodo permette ad un utente di creare un evento.
@@ -226,8 +233,11 @@ public class Controller {
         if(UtenteCorrente != null) {
             Evento evento = new Evento(Titolo, Indirizzo, NCivico);
             Organizzatore organizzatore = null;
-            if(OrganizzatoreCorrente == null)
+            if(OrganizzatoreCorrente == null) {
                 organizzatore = UtenteCorrente.becomeOrganizzatore();
+                if(!addOrganizzatore)
+                    addOrganizzatore = true;
+            }
             else
                 organizzatore = OrganizzatoreCorrente;
             evento.setOrganizzatore(organizzatore);
@@ -235,6 +245,9 @@ public class Controller {
                 DAO.addEventoDB(evento);
                 organizzatore.addEvento(evento);
                 OrganizzatoreCorrente = organizzatore;
+                if(updateOrganizzatoreEvento == null)
+                    updateOrganizzatoreEvento = new ArrayList<Evento>();
+                updateOrganizzatoreEvento.add(evento);
                 return true;
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -290,6 +303,8 @@ public class Controller {
                         GiudiceCorrente = UtenteCorrente.becomeGiudice();
                     evento.addGiudice(GiudiceCorrente);
                     GiudiceCorrente.addEvento(evento);
+                    if(!updateInvitiGiudice)
+                        updateInvitiGiudice = true;
                     return true;
                 }
             }
@@ -308,6 +323,8 @@ public class Controller {
                     UtenteCorrente.setInvitoGiudiceEventoAnswer(false);
                     evento.seekInvitoGiudice(UtenteCorrente.getNomeUtente());
                     evento.setInvitoGiudiceAnswer(false);
+                    if(!updateInvitiGiudice)
+                        updateInvitiGiudice = true;
                     return true;
                 }
             }
@@ -343,11 +360,10 @@ public class Controller {
             team.addMembroTeam(PartecipanteCorrente);
             try {
                 team.setIdTeam(DAO.addTeamDB(team));
+                return true;
             } catch (SQLException e) {
                 e.printStackTrace();
-                return false;
             }
-            return true;
         }
         return false;
     }
@@ -378,6 +394,9 @@ public class Controller {
             Team team = PartecipanteCorrente.getEvento().seekTeam(idTeam);
             if(team != null) {
                 team.addRichiesta(PartecipanteCorrente);
+                if(updateRichiesteTeam == null)
+                    updateRichiesteTeam = new ArrayList<Team>();
+                updateRichiesteTeam.add(team);
                 return true;
             }
         }
@@ -414,21 +433,26 @@ public class Controller {
         if(PartecipanteCorrente != null) {
             Team team = PartecipanteCorrente.getTeam();
             if(team != null) {
-                if (accepted != null) {
-                    for (String s : accepted) {
-                        Partecipante partecipante = team.seekRichiesta(s);
-                        if (partecipante != null) {
-                            team.addMembroTeam(partecipante);
-                            team.setRichiestaAnswer(true);
+                if(accepted != null || refused != null) {
+                    if (accepted != null) {
+                        for (String s : accepted) {
+                            Partecipante partecipante = team.seekRichiesta(s);
+                            if (partecipante != null) {
+                                team.addMembroTeam(partecipante);
+                                team.setRichiestaAnswer(true);
+                            }
                         }
                     }
-                }
-                if (refused != null) {
-                    for (String s : refused) {
-                        if (team.seekRichiesta(s) != null) {
-                            team.setRichiestaAnswer(false);
+                    if (refused != null) {
+                        for (String s : refused) {
+                            if (team.seekRichiesta(s) != null) {
+                                team.setRichiestaAnswer(false);
+                            }
                         }
                     }
+                    if(updateRichiesteTeam == null)
+                        updateRichiesteTeam = new ArrayList<Team>();
+                    updateRichiesteTeam.add(team);
                 }
                 return true;
             }
@@ -468,7 +492,7 @@ public class Controller {
                 if (team.getTeamLeader().equals(PartecipanteCorrente.getNomeUtente())) {
                     try {
                         progresso = new Progresso(Testo, team.getIdTeam());
-                        progresso.setIdProgresso(DAO.addProgressoDB(team.getIdTeam(), Testo));
+                        DAO.addProgressoDB(progresso);
                         team.addProgresso(progresso);
                         return true;
                     } catch (SQLException e) {
@@ -567,12 +591,18 @@ public class Controller {
 
     public boolean inserisciDatiEvento(String indirizzoSede, int nCivico, int maxIscritti, int maxTeam){
         if(OrganizzatoreCorrente != null) {
-            Evento evento = OrganizzatoreCorrente.getEvento();
-            evento.setIndirizzoSede(indirizzoSede);
-            evento.setNCivicoSede(nCivico);
-            evento.setMaxIscritti(maxIscritti);
-            evento.setMaxTeam(maxTeam);
-            return true;
+            try {
+                DAO.updateEventoDB(OrganizzatoreCorrente.getEvento().getIdEvento(), indirizzoSede, nCivico, maxIscritti, maxTeam);
+                Evento evento = OrganizzatoreCorrente.getEvento();
+                evento.setIndirizzoSede(indirizzoSede);
+                evento.setNCivicoSede(nCivico);
+                evento.setMaxIscritti(maxIscritti);
+                evento.setMaxTeam(maxTeam);
+                return true;
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return false;
     }
@@ -583,15 +613,16 @@ public class Controller {
     public boolean setDateEvento(LocalDate dataInizio, LocalDate dataFine){
         if(OrganizzatoreCorrente != null) {
             try {
+                DAO.updateDateEventoDB(OrganizzatoreCorrente.getEvento().getIdEvento(), dataInizio, dataFine);
                 OrganizzatoreCorrente.getEvento().setDate(dataInizio, dataFine);
+                return true;
+            }catch(SQLException e){
+                e.printStackTrace();
             } catch (NullPointerException e) {
                 System.out.println("Errore nel tentativo di accedere ai dati dell'evento.");
-                return false;
             } catch (DateTimeParseException e) {
                 System.out.println("Errore nel tentativo di copiare le date dell'evento.");
-                return false;
             }
-            return true;
         }
         return false;
     }
@@ -602,17 +633,16 @@ public class Controller {
     public boolean setRegistrazioniEvento(LocalDate dataInizio, LocalDate dataFine){
         if(OrganizzatoreCorrente != null) {
             try {
+                DAO.updateDateRegEventoDB(OrganizzatoreCorrente.getEvento().getIdEvento(), dataInizio, dataFine);
                 OrganizzatoreCorrente.getEvento().setDateReg(dataInizio, dataFine);
-            }
-            catch (NullPointerException e) {
+                return true;
+            }catch(SQLException e){
+                e.printStackTrace();
+            } catch (NullPointerException e) {
                 System.out.println("Errore nel tentativo di accedere ai dati dell'evento.");
-                return false;
-            }
-            catch (DateTimeParseException e) {
+            } catch (DateTimeParseException e) {
                 System.out.println("Errore nel tentativo di copiare le date registrazione evento.");
-                return false;
             }
-            return true;
         }
         return false;
     }

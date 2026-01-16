@@ -70,17 +70,21 @@ public class Evento {
     }
     public void setDate(LocalDate Inizio, LocalDate Fine) {
 
-        if(Inizio.isBefore(Fine)) {
-            this.DataInizio = Inizio;
-            this.DataFine = Fine;
+        if(Inizio != null && Fine != null) {
+            if (Inizio.isBefore(Fine)) {
+                this.DataInizio = Inizio;
+                this.DataFine = Fine;
+            }
         }
 
     }
     public void setDateReg(LocalDate Inizio, LocalDate Fine) {
 
-        if (Inizio.isBefore(Fine) && Fine.isBefore(DataInizio)) {
-            this.DataInizioReg = Inizio;
-            this.DataFineReg = Fine;
+        if(Inizio != null && Fine != null){
+            if (Inizio.isBefore(Fine) && Fine.isBefore(DataInizio)) {
+                this.DataInizioReg = Inizio;
+                this.DataFineReg = Fine;
+            }
         }
     }
 
@@ -292,6 +296,12 @@ public class Evento {
         Giudice giudice = seekGiudice(nomeUtente);
         removeInvitoGiudice();
         return giudice;
+    }
+
+    public int sizePartecipanti(){
+        if(Partecipanti != null)
+            return Partecipanti.size();
+        return 0;
     }
 
     public void addPartecipante(Partecipante utente) {

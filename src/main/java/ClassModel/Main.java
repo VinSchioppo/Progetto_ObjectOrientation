@@ -20,9 +20,11 @@ public class Main {
             evento.setIndirizzoSede("Sede");
             evento.setNCivicoSede(10);
             eventi.add(evento);
-        }*//*
+        }*/
         try {
-            Giudice giudice = d.getGiudiceDB("user1");
+            Evento evento = d.getEventoDB(21);
+            System.out.println(evento.getMaxIscritti());
+            /*Giudice giudice = d.getGiudiceDB("user1");
             System.out.println(giudice);
             Organizzatore organizzatore = d.getOrganizzatoreDB("user1");
             System.out.println(organizzatore.toString());
@@ -73,16 +75,15 @@ public class Main {
             ArrayList<Utente> ruoli = d.getAllRuoliDB(u);
             if(ruoli.size() >= 1 && ruoli.get(0) != null){System.out.println("Partecipante.");}
             if(ruoli.size() >= 2 && ruoli.get(1) != null){System.out.println("Giudice.");}
-            if(ruoli.size() >= 3 && ruoli.get(2) != null){System.out.println("Organizzatore.");}
+            if(ruoli.size() >= 3 && ruoli.get(2) != null){System.out.println("Organizzatore.");}*/
 
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-        }*/
+        }
 
-
-        Controller controller = new Controller();
+        /*Controller controller = new Controller();
 
         controller.logInUtente("user1", "pwd");
 
@@ -95,6 +96,6 @@ public class Main {
         for(String evento : eventi) {
             System.out.println(evento);
         }
-        /**/
+        */
     }
 }
