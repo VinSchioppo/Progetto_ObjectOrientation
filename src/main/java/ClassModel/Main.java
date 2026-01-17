@@ -3,10 +3,10 @@ package ClassModel;
 import Controller.*;
 import DAO.ImplementazioneDAO;
 import RecordList.InviteList;
-
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 
 public class Main {
@@ -22,9 +22,38 @@ public class Main {
             eventi.add(evento);
         }*/
         try {
+            ArrayList<Evento> eventiInvitati = d.getAllEventiDB(new Organizzatore("user23", "pwd"));
+            HashSet<Evento> eventi = new HashSet<Evento>(eventiInvitati);
+            String codiceSQL = "";
+            for (Evento evento : eventi) {
+                Partecipante partecipante = evento.firstInvitoGiudice();
+                while(partecipante != null) {
+                    codiceSQL = codiceSQL + "CALL updateInvitoGiudice('" + partecipante.getNomeUtente() + "'," + evento.getIdEvento() + "," + evento.getInvitoGiudiceAnswer() + ");";
+                    partecipante = evento.nextInvitoGiudice();
+                }
+            }
+            System.out.println(codiceSQL);
+            /*ArrayList<Evento> eventi = new ArrayList<>();
+            eventi.add(new Evento(21, "Sans", null, -1));
+            eventi.add(new Evento(22, "Papyrus", null, -1));
+            eventi.getFirst().setOrganizzatore(new Organizzatore("user1", "pwd"));
+            eventi.get(1).setOrganizzatore(new Organizzatore("user1", "pwd"));
+            d.addOrganizzatoreEventoDB(eventi.getFirst().getOrganizzatore().getNomeUtente(), eventi);
+            for (Evento e : eventi) {
+                System.out.println(e);
+            }
+            HashSet<Evento> hash = new HashSet<Evento>(eventi);
+            String codiceSQL = "INSERT INTO OrganizzatoreEvento(NomeOrganizzatore, idEvento) VALUES";
+            for (Evento evento : hash) {
+                if (evento != eventi.getFirst())
+                    codiceSQL = codiceSQL + ",";
+                codiceSQL = codiceSQL + "('" + evento.getOrganizzatore().getNomeUtente() + "'," + evento.getIdEvento() + ")";
+            }
+            codiceSQL = codiceSQL + ";";
+            System.out.println(codiceSQL);
             Evento evento = d.getEventoDB(21);
             System.out.println(evento.getMaxIscritti());
-            /*Giudice giudice = d.getGiudiceDB("user1");
+            Giudice giudice = d.getGiudiceDB("user1");
             System.out.println(giudice);
             Organizzatore organizzatore = d.getOrganizzatoreDB("user1");
             System.out.println(organizzatore.toString());

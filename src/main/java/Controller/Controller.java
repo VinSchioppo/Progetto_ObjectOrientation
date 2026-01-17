@@ -20,11 +20,14 @@ public class Controller {
     private Giudice GiudiceCorrente = null;
     private static final ImplementazioneDAO DAO = new ImplementazioneDAO();
 
-    private boolean updateInvitiGiudice = false;
     private boolean addOrganizzatore = false;
+    private ArrayList<Evento> updateInvitiGiudice = null;
     private ArrayList<Evento> updateOrganizzatoreEvento = null;
     private ArrayList<Evento> updatePartecipanteEvento = null;
     private ArrayList<Team> updateRichiesteTeam = null;
+    private ArrayList<Evento> pubblicaProblema = null;
+    private ArrayList<Voto> addVoti = null;
+    private ArrayList<Commento> addCommenti = null;
 
     //Questo metodo verifica i dati di login inseriti e restituisce true se va a buon fine, altrimenti false.
 
@@ -235,8 +238,7 @@ public class Controller {
             Organizzatore organizzatore = null;
             if(OrganizzatoreCorrente == null) {
                 organizzatore = UtenteCorrente.becomeOrganizzatore();
-                if(!addOrganizzatore)
-                    addOrganizzatore = true;
+                addOrganizzatore = true;
             }
             else
                 organizzatore = OrganizzatoreCorrente;
@@ -303,8 +305,9 @@ public class Controller {
                         GiudiceCorrente = UtenteCorrente.becomeGiudice();
                     evento.addGiudice(GiudiceCorrente);
                     GiudiceCorrente.addEvento(evento);
-                    if(!updateInvitiGiudice)
-                        updateInvitiGiudice = true;
+                    if(updateInvitiGiudice == null)
+                        updateInvitiGiudice = new ArrayList<Evento>();
+                    updateInvitiGiudice.add(evento);
                     return true;
                 }
             }
@@ -323,8 +326,9 @@ public class Controller {
                     UtenteCorrente.setInvitoGiudiceEventoAnswer(false);
                     evento.seekInvitoGiudice(UtenteCorrente.getNomeUtente());
                     evento.setInvitoGiudiceAnswer(false);
-                    if(!updateInvitiGiudice)
-                        updateInvitiGiudice = true;
+                    if(updateInvitiGiudice == null)
+                        updateInvitiGiudice = new ArrayList<Evento>();
+                    updateInvitiGiudice.add(evento);
                     return true;
                 }
             }
@@ -676,6 +680,9 @@ public class Controller {
             if(evento != null){
                 Partecipante partecipante = evento.seekPartecipante(NomeUtente);
                 evento.addInvitoGiudice(partecipante);
+                if(updateInvitiGiudice == null)
+                    updateInvitiGiudice = new ArrayList<Evento>();
+                updateInvitiGiudice.add(evento);
                 return true;
             }
         }
@@ -694,6 +701,9 @@ public class Controller {
             Evento evento = GiudiceCorrente.getEvento();
             if(evento != null){
                 evento.setDescrizioneProblema(problema);
+                if(pubblicaProblema == null)
+                    pubblicaProblema = new ArrayList<Evento>();
+                pubblicaProblema.add(evento);
                 return true;
             }
         }
@@ -729,7 +739,11 @@ public class Controller {
             if (evento != null) {
                 Team team = evento.seekTeam(idTeam);
                 if (team != null) {
-                    team.addVoto(new Voto(team.getIdTeam(), valore, GiudiceCorrente.getNomeUtente()));
+                    Voto voto = new Voto(team.getIdTeam(), valore, GiudiceCorrente.getNomeUtente());
+                    team.addVoto(voto);
+                    if(addVoti == null)
+                        addVoti = new ArrayList<Voto>();
+                    addVoti.add(voto);
                     return true;
                 }
             }
@@ -786,7 +800,7 @@ public class Controller {
     //Questo metodo permette a un giudice di commentare il progresso di un team.
     //Restituisce true se l'operazione va a buon fine, altrimenti false.
 
-    public boolean commentaProgresso(int idProgresso, String commento){
+    public boolean commentaProgresso(int idProgresso, String testoCommento){
         if(GiudiceCorrente != null) {
             Evento evento = GiudiceCorrente.getEvento();
             if(evento != null){
@@ -794,7 +808,11 @@ public class Controller {
                 if(team != null){
                     Progresso progresso = team.seekProgresso(idProgresso);
                     if(progresso != null) {
-                        progresso.addCommento(new Commento(progresso.getIdProgresso(), commento, GiudiceCorrente.getNomeUtente()));
+                        Commento commento = new Commento(progresso.getIdProgresso(), testoCommento, GiudiceCorrente.getNomeUtente());
+                        progresso.addCommento(commento);
+                        if(addCommenti == null)
+                            addCommenti = new ArrayList<Commento>();
+                        addCommenti.add(commento);
                         return true;
                     }
                 }
@@ -824,5 +842,45 @@ public class Controller {
             }
         }
         return listaCommenti;
+    }
+
+    //Questo metodo serve a riportare tutti i cambiamenti avvenuti sul database all'uscita dall'applicazione.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    public boolean exitApplication(){
+        try {
+            if(UtenteCorrente != null) {
+                if (updateInvitiGiudice != null)
+                    DAO.addInvitiGiudiceDB(updateInvitiGiudice);
+            }
+
+            if(PartecipanteCorrente != null) {
+                if(updatePartecipanteEvento != null)
+                    DAO.addPartecipanteEventoDB(PartecipanteCorrente.getNomeUtente(), updatePartecipanteEvento);
+                if(updateRichiesteTeam != null)
+                    DAO.addRichiesteTeamDB(updateRichiesteTeam);
+            }
+
+            if(OrganizzatoreCorrente != null) {
+                if (addOrganizzatore)
+                    DAO.addOrganizzatoreDB(OrganizzatoreCorrente);
+                if(updateOrganizzatoreEvento != null)
+                    DAO.addOrganizzatoreEventoDB(OrganizzatoreCorrente.getNomeUtente(), updateOrganizzatoreEvento);
+            }
+
+            if(GiudiceCorrente != null) {
+                if(pubblicaProblema != null)
+                    DAO.updateProblemaDB(pubblicaProblema);
+                if(addVoti != null)
+                    DAO.addVotiDB(addVoti);
+                if(addCommenti != null)
+                    DAO.addCommentiDB(addCommenti);
+            }
+
+            return true;
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+        return false;
     }
 }
