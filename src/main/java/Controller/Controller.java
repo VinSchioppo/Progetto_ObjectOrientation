@@ -359,14 +359,16 @@ public class Controller {
 
     public boolean creaTeamPartecipante(String nome){
         if(PartecipanteCorrente != null) {
-            Team team = new Team(-1, nome, PartecipanteCorrente.getNomeUtente());
-            team.setEventoIscritto(PartecipanteCorrente.getEvento());
-            team.addMembroTeam(PartecipanteCorrente);
-            try {
-                team.setIdTeam(DAO.addTeamDB(team));
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
+            if(PartecipanteCorrente.getEvento().getDataFineReg() != null && PartecipanteCorrente.getEvento().getDataFineReg().isAfter(LocalDate.now())){
+                Team team = new Team(-1, nome, PartecipanteCorrente.getNomeUtente());
+                team.setEventoIscritto(PartecipanteCorrente.getEvento());
+                team.addMembroTeam(PartecipanteCorrente);
+                try {
+                    team.setIdTeam(DAO.addTeamDB(team));
+                    return true;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return false;
@@ -395,13 +397,15 @@ public class Controller {
 
     public boolean joinTeam(int idTeam){
         if(PartecipanteCorrente != null) {
-            Team team = PartecipanteCorrente.getEvento().seekTeam(idTeam);
-            if(team != null) {
-                team.addRichiesta(PartecipanteCorrente);
-                if(updateRichiesteTeam == null)
-                    updateRichiesteTeam = new ArrayList<Team>();
-                updateRichiesteTeam.add(team);
-                return true;
+            if(PartecipanteCorrente.getEvento().getDataFineReg() != null && PartecipanteCorrente.getEvento().getDataFineReg().isAfter(LocalDate.now())) {
+                Team team = PartecipanteCorrente.getEvento().seekTeam(idTeam);
+                if (team != null) {
+                    team.addRichiesta(PartecipanteCorrente);
+                    if (updateRichiesteTeam == null)
+                        updateRichiesteTeam = new ArrayList<Team>();
+                    updateRichiesteTeam.add(team);
+                    return true;
+                }
             }
         }
         return false;

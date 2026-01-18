@@ -642,7 +642,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     connection.prepareStatement("SELECT * FROM Partecipante AS p " +
                                                 "JOIN PartecipanteEvento AS pe ON p.NomeUtente = pe.NomePartecipante " +
                                                 "JOIN Evento AS e ON pe.idEvento = e.IdEvento " +
-                                                "WHERE p.NomeUtente = '" + NomePartecipante + "';");
+                                                "WHERE e.DataFine >= NOW() AND p.NomeUtente = '" + NomePartecipante + "';");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 rs.next();
@@ -821,7 +821,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                         Partecipante nuovoPartecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
                         nuovoPartecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
                         nuovoPartecipante.addEvento(evento);
-                        evento.addPartecipante(partecipante);
+                        evento.addPartecipante(nuovoPartecipante);
                     }
                 }
                 rs.close();
@@ -928,7 +928,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     connection.prepareStatement("SELECT * FROM Organizzatore AS o " +
                                                 "JOIN OrganizzatoreEvento AS oe ON o.NomeUtente = oe.NomeOrganizzatore " +
                                                 "JOIN Evento AS e ON oe.idEvento = e.IdEvento " +
-                                                "WHERE o.NomeUtente = '" + NomeUtente + "';");
+                                                "WHERE e.DataFine >= NOW() AND o.NomeUtente = '" + NomeUtente + "';");
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 rs.next();
@@ -1131,7 +1131,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     connection.prepareStatement("SELECT * FROM Giudice AS g " +
                                                 "JOIN GiudiceEvento AS ge ON g.NomeUtente = ge.NomeGiudice " +
                                                 "JOIN Evento AS e ON ge.idEvento = e.IdEvento " +
-                                                "WHERE g.NomeUtente = '" + NomeUtente + "';");
+                                                "WHERE e.DataFine >= NOW() AND g.NomeUtente = '" + NomeUtente + "';");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
                 rs.next();
@@ -1371,6 +1371,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 int idTeam = rs.getInt("idteam");
                 Team team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                team.setEventoIscritto(evento);
                 Partecipante partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
                 partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
                 partecipante.addEvento(evento);
@@ -1379,10 +1380,10 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 evento.addPartecipante(partecipante);
                 while(rs.next()) {
                     if(idTeam != rs.getInt("idteam")) {
-                        team.setEventoIscritto(evento);
                         teams.add(team);
                         idTeam = rs.getInt("idteam");
                         team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                        team.setEventoIscritto(evento);
                     }
                     partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
                     partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
@@ -1451,6 +1452,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 int idTeam = rs.getInt("idteam");
                 Team team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                team.setEventoIscritto(evento);
                 Partecipante nuovoPartecipante = null;
                 if(partecipante.getNomeUtente().equals(rs.getString("nomeutente"))){
                     partecipante.addTeam(team);
@@ -1467,10 +1469,10 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 }
                 while(rs.next()) {
                     if(idTeam != rs.getInt("idteam")) {
-                        team.setEventoIscritto(evento);
                         teams.add(team);
                         idTeam = rs.getInt("idteam");
                         team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                        team.setEventoIscritto(evento);
                     }
                     if(partecipante.getNomeUtente().equals(rs.getString("nomeutente"))){
                         partecipante.addTeam(team);
@@ -1689,9 +1691,11 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             PreparedStatement ps =
                     connection.prepareStatement("SELECT ct.idTeam, p.IdProgresso, p.DataPubblicazione," +
                                                 "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
-                                                "FROM CompTeam AS ct JOIN Progresso AS p ON ct.idTeam = p.idTeam " +
+                                                "FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                                                "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
+                                                "JOIN Progresso AS p ON ct.idTeam = p.idTeam " +
                                                 "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
-                                                "WHERE ct.NomePartecipante = '"+ partecipante.getNomeUtente() +"' " +
+                                                "WHERE e.DataFine >= NOW() AND ct.NomePartecipante = '"+ partecipante.getNomeUtente() +"' " +
                                                 "ORDER BY ct.idTeam, p.IdProgresso;");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()) {
@@ -1953,10 +1957,12 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         ArrayList<Voto> voti = null;
         try {
             PreparedStatement ps =
-                    connection.prepareStatement("SELECT * FROM Team AS t " +
+                    connection.prepareStatement("SELECT t.IdTeam, v.Valore, v.NomeGiudice FROM Team AS t " +
                                                 "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                                                "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
                                                 "JOIN Voto AS v ON ct.idTeam = v.idTeam " +
-                                                "WHERE ct.NomePartecipante = '" + partecipante.getNomeUtente() +"' " +
+                                                "WHERE e.DataFine >= NOW() " +
+                                                "AND ct.NomePartecipante = '" + partecipante.getNomeUtente() + "' " +
                                                 "ORDER BY t.IdTeam;");
             ResultSet rs = ps.executeQuery();
             if(rs.isBeforeFirst()){
