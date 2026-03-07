@@ -881,6 +881,7 @@ public class Controller {
                     DAO.addCommentiDB(addCommenti);
             }
 
+            DAO.disconnect();
             return true;
         }catch(SQLException e){
             e.printStackTrace();
