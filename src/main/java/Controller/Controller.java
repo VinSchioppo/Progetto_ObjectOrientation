@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 //Questo enum serve a determinare la specializzazione che un utente assume.
+
 enum Role{
     PARTECIPANTE, ORGANIZZATORE, GIUDICE
 }
@@ -876,9 +877,9 @@ public class Controller {
                 if(pubblicaProblema != null)
                     DAO.updateProblemaDB(pubblicaProblema);
                 if(addVoti != null)
-                    DAO.addVotiDB(addVoti);
+                    DAO.addAllVotiDB(addVoti);
                 if(addCommenti != null)
-                    DAO.addCommentiDB(addCommenti);
+                    DAO.addAllCommentiDB(addCommenti);
             }
 
             DAO.disconnect();

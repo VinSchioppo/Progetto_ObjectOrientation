@@ -6,10 +6,10 @@ import java.time.LocalDate;
 
 public class Progresso {
 
-    private int IdProgresso;
-    private int idTeam;
-    private LocalDate DataProgresso;
-    private String TestoDocumeto;
+    private int IdProgresso = -1;
+    private int idTeam = -1;
+    private LocalDate DataProgresso = null;
+    private String TestoDocumeto = null;
 
     private RecordList<Commento> Commenti = null;
 

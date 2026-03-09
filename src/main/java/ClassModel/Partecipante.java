@@ -19,14 +19,6 @@ public class Partecipante extends Utente {
         TeamUniti.setRecords(teams);
     }
 
-    public Team creaTeam(String Nome, Evento EventoIscritto) {
-
-        Team newTeam = new Team(Nome, EventoIscritto);
-        addTeam(newTeam);
-        newTeam.addMembroTeam(this);
-        return newTeam;
-    }
-
     public void addTeam(Team team) {
 
         if(TeamUniti == null)

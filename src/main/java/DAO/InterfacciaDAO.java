@@ -100,7 +100,7 @@ public interface InterfacciaDAO {
     //Operazioni sulla tabella Commento
 
     ArrayList<Commento> getAllCommentiDB(String Giudice) throws SQLException;
-    void addCommentiDB(ArrayList<Commento> nuoviCommenti) throws SQLException;
+    void addAllCommentiDB(ArrayList<Commento> nuoviCommenti) throws SQLException;
 
     /*******************************************************************************************************/
 
@@ -109,6 +109,6 @@ public interface InterfacciaDAO {
     ArrayList<Voto> getAllVotiDB(String Giudice) throws SQLException;
     void getAllVotiDB(Evento evento) throws SQLException;
     void getAllVotiDB(Partecipante partecipante) throws SQLException;
-    void addVotiDB(ArrayList<Voto> nuoviVoti) throws SQLException;
+    void addAllVotiDB(ArrayList<Voto> nuoviVoti) throws SQLException;
 
 }

@@ -46,12 +46,6 @@ public class Utente {
         Eventi.setRecords(eventi);
     }
 
-    public void setInvitoGiudiceEvento(ArrayList<Evento> inviti) {
-        if(InvitiGiudiceEvento == null)
-            InvitiGiudiceEvento = new InviteList<Evento>();
-        InvitiGiudiceEvento.setInvites(inviti);
-    }
-
     public String getNomeUtente() {return this.NomeUtente;}
     public String getPasswordUtente() {return this.PasswordUtente;}
     public String getFNome() {return this.FNome;}
