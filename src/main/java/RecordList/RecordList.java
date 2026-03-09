@@ -1,72 +1,72 @@
 package RecordList;
-
 import java.util.ArrayList;
+import java.util.List;
 
 public class RecordList <T>
 {
-    private int Current = -1;
-    private ArrayList<T> Records = null;
+    private int current = -1;
+    private ArrayList<T> records = null;
 
     public int size() {
-       if(Records != null) return Records.size();
+       if(records != null) return records.size();
        return 0;
     }
 
-    public void setRecords(ArrayList<T> Records) {
-        Current = 0;
-        this.Records = Records;
+    public void setRecords(List<T> records) {
+        current = 0;
+        this.records = new ArrayList<>(records);
     }
 
     public void addRecord(T record) {
-        if(Records == null) {
-            Current = 0;
-            Records = new ArrayList<T>();
+        if(records == null) {
+            current = 0;
+            records = new ArrayList<T>();
         }
-        Records.add(record);
+        records.add(record);
     }
 
     public void removeRecord(){
         if(getRecord() != null) {
-            Records.remove(Current);
-            if(Records.isEmpty()) {
-                Current = -1;
-                Records = null;
+            records.remove(current);
+            if(records.isEmpty()) {
+                current = -1;
+                records = null;
             }
             else firstRecord();
         }
     }
 
     public T getRecord(){
-        if(Records != null) {
-            if(Current >= 0 && Current < Records.size()){
-                return Records.get(Current);
+        if(records != null) {
+            if(current >= 0 && current < records.size()){
+                return records.get(current);
             }
         }
-        else Current = -1;
+        else current = -1;
         return null;
     }
 
     public T firstRecord(){
-        Current = 0;
+        current = 0;
         return getRecord();
     }
 
     public T previousRecord(){
-        if(Current >= 0) {
-            Current--;
+        if(current >= 0) {
+            current--;
         }
         return getRecord();
     }
 
     public T nextRecord(){
-        if(Current < Records.size()) {
-            Current++;
+        if(current < records.size()) {
+            current++;
         }
         return getRecord();
     }
 
     public T lastRecord(){
-        Current = Records.size() - 1;
+        current = records.size() - 1;
         return getRecord();
     }
 }

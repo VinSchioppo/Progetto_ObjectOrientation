@@ -8,28 +8,28 @@ import java.util.ArrayList;
 public interface InterfacciaDAO {
 
     void disconnect();
-    boolean checkLoginDB(String NomeUtente, String Password) throws SQLException;
+    boolean checkLoginDB(String nomeUtente, String password) throws SQLException;
 
     /*******************************************************************************************************/
 
     //Operazioni sulla tabella Evento
 
-    Evento getEventoDB(int IdEvento) throws SQLException;
-    ArrayList<Evento> getEventiApertiDB(String NomeUtente) throws SQLException;
+    Evento getEventoDB(int idEvento) throws SQLException;
+    ArrayList<Evento> getEventiApertiDB(String nomeUtente) throws SQLException;
     int getIdEventoDB() throws SQLException;
     void addEventoDB(Evento evento) throws SQLException;
-    int addEventoDB(String Titolo, String Indirizzo, int NCivico, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException;
-    void updateEventoDB(int IdEvento, String Indirizzo, int NCivico, int MaxIscritti, int MaxTeam) throws SQLException;
-    void updateDateEventoDB(int IdEvento, LocalDate DataInizio, LocalDate DataFine) throws SQLException;
-    void updateDateRegEventoDB(int IdEvento, LocalDate DataInizioReg, LocalDate DataFineReg) throws SQLException;
+    int addEventoDB(String titolo, String indirizzo, int nCivico, LocalDate dataInizio, LocalDate dataFine, int maxIscritti, int maxTeam, LocalDate dataInizioReg, LocalDate dataFineReg, String descrizioneProb) throws SQLException;
+    void updateEventoDB(int idEvento, String indirizzo, int nCivico, int maxIscritti, int maxTeam) throws SQLException;
+    void updateDateEventoDB(int idEvento, LocalDate dataInizio, LocalDate dataFine) throws SQLException;
+    void updateDateRegEventoDB(int idEvento, LocalDate dataInizioReg, LocalDate dataFineReg) throws SQLException;
     void updateProblemaDB(ArrayList<Evento> eventiProblema) throws SQLException;
 
     /*******************************************************************************************************/
 
     //Operazioni sulla tabella Partecipante
 
-    Utente getUtenteDB(String NomeUtente) throws SQLException;
-    void addUtenteDB(String NomeUtente, String Password) throws SQLException;
+    Utente getUtenteDB(String nomeUtente) throws SQLException;
+    void addUtenteDB(String nomeUtente, String password) throws SQLException;
 
     /*******************************************************************************************************/
 
@@ -43,31 +43,31 @@ public interface InterfacciaDAO {
 
     //Operazioni sulle tabelle Partecipante e PartecipanteEvento
 
-    Partecipante getPartecipanteDB(String NomePartecipante) throws SQLException;
+    Partecipante getPartecipanteDB(String nomePartecipante) throws SQLException;
     void getAllPartecipantiSingoliDB(Evento evento) throws SQLException;
     void getAllPartecipantiSingoliDB(Evento evento, Partecipante partecipante) throws SQLException;
-    void addPartecipanteEventoDB(String NomePartecipante, ArrayList<Evento> partecipantiEvento) throws SQLException;
-    void updatePartecipanteDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
+    void addPartecipanteEventoDB(String nomePartecipante, ArrayList<Evento> partecipantiEvento) throws SQLException;
+    void updatePartecipanteDB(String nomePartecipante, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException;
 
     /*******************************************************************************************************/
 
     //Operazioni sulle tabelle Organizzatore e OrganizzatoreEvento
 
-    Organizzatore getOrganizzatoreDB(String NomeUtente) throws SQLException;
+    Organizzatore getOrganizzatoreDB(String nomeUtente) throws SQLException;
     Organizzatore getOrganizzatoreDB(Evento evento) throws SQLException;
     void addOrganizzatoreDB(Organizzatore organizzatore) throws SQLException;
-    void addOrganizzatoreDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
-    void addOrganizzatoreEventoDB(String NomeOrganizzatore, ArrayList<Evento> eventiOrganizzatore) throws SQLException;
-    void updateOrganizzatoreDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
+    void addOrganizzatoreDB(String nomeUtente, String password, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException;
+    void addOrganizzatoreEventoDB(String nomeOrganizzatore, ArrayList<Evento> eventiOrganizzatore) throws SQLException;
+    void updateOrganizzatoreDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException;
 
     /*******************************************************************************************************/
 
     //Operazioni sulle tabelle Giudice e GiudiceEvento
 
-    Giudice getGiudiceDB(String NomeUtente) throws SQLException;
+    Giudice getGiudiceDB(String nomeUtente) throws SQLException;
     ArrayList<Giudice> getAllGiudiciDB(Evento evento) throws SQLException;
     ArrayList<Giudice> getAllGiudiciDB(Evento evento, Giudice giudice) throws SQLException;
-    void updateGiudiceDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException;
+    void updateGiudiceDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException;
 
     /*******************************************************************************************************/
 
@@ -99,14 +99,14 @@ public interface InterfacciaDAO {
 
     //Operazioni sulla tabella Commento
 
-    ArrayList<Commento> getAllCommentiDB(String Giudice) throws SQLException;
+    ArrayList<Commento> getAllCommentiDB(String giudice) throws SQLException;
     void addAllCommentiDB(ArrayList<Commento> nuoviCommenti) throws SQLException;
 
     /*******************************************************************************************************/
 
     //Operazioni sulla tabella Voto
 
-    ArrayList<Voto> getAllVotiDB(String Giudice) throws SQLException;
+    ArrayList<Voto> getAllVotiDB(String giudice) throws SQLException;
     void getAllVotiDB(Evento evento) throws SQLException;
     void getAllVotiDB(Partecipante partecipante) throws SQLException;
     void addAllVotiDB(ArrayList<Voto> nuoviVoti) throws SQLException;

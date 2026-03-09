@@ -1,128 +1,122 @@
 package RecordList;
-
-import java.util.ArrayList;
+import java.util.List;
 
 public class InviteList<T>{
-    private RecordList<Invite<T>> Invites;
+    private RecordList<Invite<T>> invites;
 
     public int size() {
-        if(Invites != null)
-            return Invites.size();
+        if(invites != null)
+            return invites.size();
         return 0;
     }
 
-    public void setInvites(ArrayList<T> Records) {
-        if(Records != null) {
-            if(Invites == null)
-                Invites = new RecordList<Invite<T>>();
-            for (T Record : Records) {
-                Invites.addRecord(new Invite<T>(Record));
+    public void setInvites(List<T> records) {
+        if(records != null) {
+            if(invites == null)
+                invites = new RecordList<Invite<T>>();
+            for (T record : records) {
+                invites.addRecord(new Invite<T>(record));
             }
         }
     }
 
-    public void setInviteAnswer(boolean Answer) {
-        if(Invites != null) {
-            Invites.getRecord().setAnswer(Answer);
+    public void setInviteAnswer(boolean answer) {
+        if(invites != null) {
+            invites.getRecord().setAnswer(answer);
         }
     }
 
     public void addInvite(T record, Boolean answer) {
-        if(Invites == null)
-            Invites = new RecordList<Invite<T>>();
+        if(invites == null)
+            invites = new RecordList<Invite<T>>();
         Invite<T> invite = new Invite<T>(record, answer);
-        Invites.addRecord(invite);
+        invites.addRecord(invite);
     }
 
     public void addInvite(T record) {
-        if(Invites == null)
-            Invites = new RecordList<Invite<T>>();
-        Invites.addRecord(new Invite<T>(record));
+        if(invites == null)
+            invites = new RecordList<Invite<T>>();
+        invites.addRecord(new Invite<T>(record));
     }
 
     public void removeInvite(){
-        if(Invites != null) {
-            Invites.removeRecord();
+        if(invites != null) {
+            invites.removeRecord();
         }
     }
 
+    @javax.annotation.CheckForNull
     public Boolean getInviteAnswer(){
-        if(Invites != null) {
-            if(Invites.getRecord() != null)
-                return Invites.getRecord().getAnswer();
-        }
+        if(invites != null && invites.getRecord() != null)
+            return invites.getRecord().getAnswer();
+
         return null;
     }
 
     public T getInvite(){
-        if(Invites != null) {
-            if(Invites.getRecord() != null)
-                return Invites.getRecord().getRecordInvite();
-        }
+        if(invites != null && invites.getRecord() != null)
+            return invites.getRecord().getRecordInvite();
+
         return null;
     }
 
+    @javax.annotation.CheckForNull
     public Boolean firstInviteAnswer(){
-        if(Invites != null) {
-            if(Invites.firstRecord() != null)
-                return Invites.getRecord().getAnswer();
-        }
+        if(invites != null && invites.firstRecord() != null)
+            return invites.getRecord().getAnswer();
+
         return null;
     }
 
     public T firstInvite(){
-        if(Invites != null) {
-            if(Invites.firstRecord() != null)
-                return Invites.getRecord().getRecordInvite();
-        }
+        if(invites != null && invites.firstRecord() != null)
+            return invites.getRecord().getRecordInvite();
+
         return null;
     }
 
+    @javax.annotation.CheckForNull
     public Boolean previousInviteAnswer(){
-        if(Invites != null) {
-            if(Invites.previousRecord() != null)
-                return Invites.getRecord().getAnswer();
-        }
+        if(invites != null && invites.previousRecord() != null)
+            return invites.getRecord().getAnswer();
+
         return null;
     }
 
     public T previousInvite(){
-        if(Invites != null) {
-            if(Invites.previousRecord() != null)
-                return Invites.getRecord().getRecordInvite();
-        }
+        if(invites != null && invites.previousRecord() != null)
+            return invites.getRecord().getRecordInvite();
+
         return null;
     }
 
+    @javax.annotation.CheckForNull
     public Boolean nextInviteAnswer(){
-        if(Invites != null) {
-            if(Invites.nextRecord() != null)
-                return Invites.getRecord().getAnswer();
-        }
+        if(invites != null && invites.nextRecord() != null)
+            return invites.getRecord().getAnswer();
+
         return null;
     }
 
     public T nextInvite(){
-        if(Invites != null) {
-            if(Invites.nextRecord() != null)
-                return Invites.getRecord().getRecordInvite();
-        }
+        if(invites != null && invites.nextRecord() != null)
+            return invites.getRecord().getRecordInvite();
+
         return null;
     }
 
+    @javax.annotation.CheckForNull
     public Boolean lastInviteAnswer(){
-        if(Invites != null) {
-            if(Invites.lastRecord() != null)
-                return Invites.getRecord().getAnswer();
-        }
+        if(invites != null && invites.lastRecord() != null)
+            return invites.getRecord().getAnswer();
+
         return null;
     }
 
     public T lastInvite(){
-        if(Invites != null) {
-            if(Invites.lastRecord() != null)
-                return Invites.getRecord().getRecordInvite();
-        }
+        if(invites != null && invites.lastRecord() != null)
+            return invites.getRecord().getRecordInvite();
+
         return null;
     }
 }

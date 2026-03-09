@@ -9,11 +9,48 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class ImplementazioneDAO implements InterfacciaDAO {
-    private Connection Connection = null;
+    private Connection connection = null;
+
+    private static final String IDEVENTO = "idevento";
+    private static final String TITOLO = "titolo";
+    private static final String INDIRIZZO = "indirizzosede";
+    private static final String NCIVICO = "ncivicosede";
+    private static final String DATAINIZIO = "datainizio";
+    private static final String DATAFINE = "datafine";
+    private static final String MAXISCRITTI = "maxiscritti";
+    private static final String MAXTEAM = "maxteam";
+    private static final String DATAINIZIOREG = "datainizioreg";
+    private static final String DATAFINEREG = "datafinereg";
+    private static final String DESCRIZIONEPROBLEMA = "descrizioneprob";
+
+    private static final String NOMEUTENTE = "nomeutente";
+    private static final String PASSWORD = "password";
+    private static final String FNOME = "fnome";
+    private static final String MNOME = "mnome";
+    private static final String LNOME = "lnome";
+    private static final String DATANASCITA = "datanascita";
+
+    private static final String NOMEPARTECIPANTE = "nomepartecipante";
+    private static final String NOMEGIUDICE = "nomegiudice";
+
+    private static final String IDTEAM = "idteam";
+    private static final String NOMETEAM = "nome";
+    private static final String TEAMLEADER = "teamleader";
+
+    private static final String IDPROGRESSO = "idprogresso";
+    private static final String DATAPUBBLICAZIONE = "datapubblicazione";
+    private static final String TESTOPROGRESSO = "testoprogresso";
+
+    private static final String TESTOCOMMENTO = "testocommento";
+
+    private static final String VALORE = "valore";
+
+    private static final String WHERE_UTENTE = " WHERE NomeUtente = ";
+    private static final String ORDER = " ORDER BY t.idTeam;";
 
     public ImplementazioneDAO() {
         try {
-            Connection = ConnessioneDatabase.getInstance().Connection;
+            connection = ConnessioneDatabase.getInstance().Connection;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -21,63 +58,52 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void disconnect() {
         try {
-            Connection.close();
+            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public boolean checkLoginDB(String NomeUtente, String Password) throws SQLException{
+    public boolean checkLoginDB(String nomeUtente, String password) throws SQLException{
         boolean success = true;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT NomeUtente, Password FROM Partecipante" +
-                            " WHERE NomeUtente = '" + NomeUtente + "' AND Password = '" + Password +"';");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT NomeUtente, Password FROM Partecipante" +
+                " WHERE NomeUtente = '" + nomeUtente + "' AND Password = '" + password + "';")) {
             ResultSet rs = ps.executeQuery();
             if (!rs.isBeforeFirst()) {
                 success = false;
             }
             rs.close();
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return success;
     }
 
     public int getIdEventoDB() throws SQLException{
         int result;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT MAX(IdEvento) FROM Evento;");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT MAX(IdEvento) FROM Evento;")) {
             ResultSet rs = ps.executeQuery();
             rs.next();
-            result =  rs.getInt(1);
+            result = rs.getInt(1);
             rs.close();
-        }
-        catch (SQLException e) {
-            throw e;
         }
         return result;
     }
 
-    public Evento getEventoDB(int IdEvento) throws SQLException{
+    public Evento getEventoDB(int idEvento) throws SQLException{
         Evento evento = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Evento WHERE IdEvento =" + IdEvento + ";");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Evento WHERE IdEvento =" + idEvento + ";")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
-                evento = new Evento(IdEvento);
+                evento = new Evento(idEvento);
                 rs.next();
-                evento.setTitolo(rs.getString("titolo"));
-                evento.setIndirizzoSede(rs.getString("indirizzosede"));
-                evento.setNCivicoSede(rs.getInt("ncivicosede"));
-                evento.setMaxIscritti(rs.getInt("maxiscritti"));
-                evento.setMaxTeam(rs.getInt("maxteam"));
-                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
-                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                evento.setTitolo(rs.getString(TITOLO));
+                evento.setIndirizzoSede(rs.getString(INDIRIZZO));
+                evento.setnCivicoSede(rs.getInt(NCIVICO));
+                evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
+                evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
+                evento.setMaxTeam(rs.getInt(MAXTEAM));
+                evento.setDateReg(rs.getObject(DATAINIZIOREG, LocalDate.class), rs.getObject(DATAFINEREG, LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                 rs.close();
                 evento.setOrganizzatore(getOrganizzatoreDB(evento));
                 evento.setGiudici(getAllGiudiciDB(evento));
@@ -86,289 +112,227 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 getAllInvitiGiudiceDB(evento);
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return evento;
     }
 
-    public ArrayList<Evento> getEventiApertiDB(String NomeUtente) throws SQLException{
+    public ArrayList<Evento> getEventiApertiDB(String nomeUtente) throws SQLException{
         ArrayList<Evento> eventi = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Evento " +
-                                                    "WHERE DataInizioReg <= NOW() AND DataFineReg >= NOW()\n" +
-                                                    "AND IdEvento NOT IN( " +
-                                                    "SELECT pe.idEvento FROM PartecipanteEvento AS pe " +
-                                                    "JOIN OrganizzatoreEvento AS oe ON pe.idEvento = oe.idEvento " +
-                                                    "JOIN GiudiceEvento AS ge ON pe.idEvento = ge.idEvento " +
-                                                    "WHERE pe.NomePartecipante = '" + NomeUtente +"');");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Evento " +
+                "WHERE DataInizioReg <= NOW() AND DataFineReg >= NOW()\n" +
+                "AND IdEvento NOT IN( " +
+                "SELECT pe.idEvento FROM PartecipanteEvento AS pe " +
+                "JOIN OrganizzatoreEvento AS oe ON pe.idEvento = oe.idEvento " +
+                "JOIN GiudiceEvento AS ge ON pe.idEvento = ge.idEvento " +
+                "WHERE pe.NomePartecipante = '" + nomeUtente + "');")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
-                eventi = new ArrayList<Evento>();
+                eventi = new ArrayList<>();
                 while (rs.next()) {
-                    Evento evento = new Evento(rs.getInt("idevento"));
-                    evento.setTitolo(rs.getString("titolo"));
-                    evento.setIndirizzoSede(rs.getString("indirizzosede"));
-                    evento.setNCivicoSede(rs.getInt("ncivicosede"));
-                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
-                    evento.setMaxTeam(rs.getInt("maxteam"));
-                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
-                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
+                    Evento evento = new Evento(rs.getInt(IDEVENTO));
+                    evento.setTitolo(rs.getString(TITOLO));
+                    evento.setIndirizzoSede(rs.getString(INDIRIZZO));
+                    evento.setnCivicoSede(rs.getInt(NCIVICO));
+                    evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
+                    evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
+                    evento.setMaxTeam(rs.getInt(MAXTEAM));
+                    evento.setDateReg(rs.getObject(DATAINIZIOREG, LocalDate.class), rs.getObject(DATAFINEREG, LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                     eventi.add(evento);
                 }
                 rs.close();
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return eventi;
     }
 
     public void addEventoDB(Evento evento) throws SQLException {
-        try {
-            evento.setIdEvento(addEventoDB(evento.getTitolo(), evento.getIndirizzoSede(), evento.getNCivicoSede(), evento.getDataInizio(), evento.getDataFine(), evento.getMaxIscritti(), evento.getMaxTeam(), evento.getDataInizioReg(), evento.getDataFineReg(), evento.getDescrizioneProblema()));
-        }
-        catch (SQLException e) {
-            throw e;
-        }
+            evento.setIdEvento(addEventoDB(evento.getTitolo(), evento.getIndirizzoSede(), evento.getnCivicoSede(), evento.getDataInizio(), evento.getDataFine(), evento.getMaxIscritti(), evento.getMaxTeam(), evento.getDataInizioReg(), evento.getDataFineReg(), evento.getDescrizioneProblema()));
     }
 
-    public int addEventoDB(String Titolo, String Indirizzo, int NCivico, LocalDate DataInizio, LocalDate DataFine, int MaxIscritti, int MaxTeam, LocalDate DataInizioReg, LocalDate DataFineReg, String DescrizioneProb) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede, DataInizio, DataFine," +
-                                                    " MaxIscritti, MaxTeam, DataInizioReg, DataFineReg, DescrizioneProb)" +
-                                                    " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-            ps.setString(1, Titolo);
-            ps.setString(2, Indirizzo);
-            if(NCivico == -1)
+    public int addEventoDB(String titolo, String indirizzo, int nCivico, LocalDate dataInizio, LocalDate dataFine, int maxIscritti, int maxTeam, LocalDate dataInizioReg, LocalDate dataFineReg, String descrizioneProb) throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement(
+                "INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede, DataInizio, DataFine," +
+                " MaxIscritti, MaxTeam, DataInizioReg, DataFineReg, DescrizioneProb)" +
+                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+            ps.setString(1, titolo);
+            ps.setString(2, indirizzo);
+            if (nCivico == -1)
                 ps.setNull(3, Types.INTEGER);
             else
-                ps.setInt(3, NCivico);
-            ps.setObject(4, DataInizio);
-            ps.setObject(5, DataFine);
-            if(MaxIscritti == -1)
+                ps.setInt(3, nCivico);
+            ps.setObject(4, dataInizio);
+            ps.setObject(5, dataFine);
+            if (maxIscritti == -1)
                 ps.setNull(6, Types.INTEGER);
             else
-                ps.setInt(6, MaxIscritti);
-            if(MaxTeam == -1)
+                ps.setInt(6, maxIscritti);
+            if (maxTeam == -1)
                 ps.setNull(7, Types.INTEGER);
             else
-                ps.setInt(7, MaxTeam);
-            ps.setObject(8, DataInizioReg);
-            ps.setObject(9, DataFineReg);
-            ps.setString(10, DescrizioneProb);
+                ps.setInt(7, maxTeam);
+            ps.setObject(8, dataInizioReg);
+            ps.setObject(9, dataFineReg);
+            ps.setString(10, descrizioneProb);
             ps.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw e;
         }
         return getIdEventoDB();
     }
 
-    public void updateEventoDB(int IdEvento,  String Indirizzo, int NCivico, int MaxIscritti, int MaxTeam) throws SQLException {
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("UPDATE Evento SET Titolo = ?, IndirizzoSede = ?, NCivicoSede = ?, " +
-                                                "MaxIscritti = ?, MaxTeam = ? WHERE IdEvento = ?;");
-            ps.setString(1, Indirizzo);
-            if(NCivico == -1)
+    public void updateEventoDB(int idEvento, String indirizzo, int nCivico, int maxIscritti, int maxTeam) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(
+                "UPDATE Evento SET Titolo = ?, IndirizzoSede = ?, NCivicoSede = ?, " +
+                "MaxIscritti = ?, MaxTeam = ? WHERE IdEvento = ?;")) {
+            ps.setString(1, indirizzo);
+            if (nCivico == -1)
                 ps.setNull(2, Types.INTEGER);
             else
-                ps.setInt(2, NCivico);
-            if(MaxIscritti == -1)
+                ps.setInt(2, nCivico);
+            if (maxIscritti == -1)
                 ps.setNull(3, Types.INTEGER);
             else
-                ps.setInt(3, MaxIscritti);
-            if(MaxTeam == -1)
+                ps.setInt(3, maxIscritti);
+            if (maxTeam == -1)
                 ps.setNull(4, Types.INTEGER);
             else
-                ps.setInt(4, MaxTeam);
-            ps.setInt(5, IdEvento);
+                ps.setInt(4, maxTeam);
+            ps.setInt(5, idEvento);
             ps.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw e;
         }
     }
 
-    public void updateDateEventoDB(int IdEvento, LocalDate DataInizio, LocalDate DataFine) throws SQLException {
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("UPDATE Evento SET DataInizio = ?, DataFine = ? WHERE IdEvento = ? ;");
-            ps.setObject(1, DataInizio);
-            ps.setObject(2, DataFine);
-            ps.setInt(3, IdEvento);
+    public void updateDateEventoDB(int idEvento, LocalDate dataInizio, LocalDate dataFine) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement("UPDATE Evento SET DataInizio = ?, DataFine = ? WHERE IdEvento = ? ;")) {
+            ps.setObject(1, dataInizio);
+            ps.setObject(2, dataFine);
+            ps.setInt(3, idEvento);
             ps.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw e;
         }
     }
 
-    public void updateDateRegEventoDB(int IdEvento, LocalDate DataInizioReg, LocalDate DataFineReg) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("UPDATE Evento SET DataInizioReg = ?, DataFineReg = ? WHERE IdEvento = ? ;");
-            ps.setObject(1, DataInizioReg);
-            ps.setObject(2, DataFineReg);
-            ps.setInt(3, IdEvento);
+    public void updateDateRegEventoDB(int idEvento, LocalDate dataInizioReg, LocalDate dataFineReg) throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement("UPDATE Evento SET DataInizioReg = ?, DataFineReg = ? WHERE IdEvento = ? ;")) {
+            ps.setObject(1, dataInizioReg);
+            ps.setObject(2, dataFineReg);
+            ps.setInt(3, idEvento);
             ps.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw e;
         }
     }
 
     public void updateProblemaDB(ArrayList<Evento> eventiProblema) throws SQLException{
         if(eventiProblema != null){
-            HashSet<Evento> eventi = new HashSet<Evento>(eventiProblema);
-            String codiceSQL = "";
+            HashSet<Evento> eventi = new HashSet<>(eventiProblema);
+            StringBuilder codiceSQL = new StringBuilder();
             for (Evento evento : eventi) {
-                codiceSQL = codiceSQL + "UPDATE Evento SET DescrizioneProb = '" + evento.getDescrizioneProblema() + "' WHERE IdEvento = " + evento.getIdEvento() + ";";
+                codiceSQL.append("UPDATE Evento SET DescrizioneProb = '").append(evento.getDescrizioneProblema()).append("' WHERE IdEvento = ").append(evento.getIdEvento()).append(";");
             }
-            try {
-                PreparedStatement ps = Connection.prepareStatement(codiceSQL);
+            try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
-            } catch (SQLException e) {
-                throw e;
             }
         }
     }
 
-    public Utente getUtenteDB(String NomeUtente) throws SQLException{
+    public Utente getUtenteDB(String nomeUtente) throws SQLException{
         Utente utente = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Partecipante WHERE NomeUtente = '" + NomeUtente + "';");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Partecipante WHERE NomeUtente = '" + nomeUtente + "';")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                utente = new Utente();
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                utente.setNomeUtente(rs.getString("nomeutente"));
-                utente.setPasswordUtente(rs.getString("password"));
-                utente.setFNome(rs.getString("fnome"));
-                utente.setMNome(rs.getString("mnome"));
-                utente.setLNome(rs.getString("lnome"));
-                utente.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+                utente = new Utente(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                utente.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                 rs.close();
             }
 
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return utente;
     }
 
-    public void addUtenteDB(String NomeUtente, String Password) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password) VALUES('"
-                            + NomeUtente + "','" + Password + "');");
+    public void addUtenteDB(String nomeUtente, String password) throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement("INSERT INTO Partecipante(NomeUtente, Password) VALUES('"
+                + nomeUtente + "','" + password + "');")) {
             ps.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw e;
         }
     }
 
     public void getAllInvitiGiudiceDB(Evento evento) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM InvitoGiudice WHERE Risposta IS NULL AND idEvento = " + evento.getIdEvento() + ";");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM InvitoGiudice WHERE Risposta IS NULL AND idEvento = " + evento.getIdEvento() + ";")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                while(rs.next()){
-                    Partecipante partecipante = evento.seekPartecipante(rs.getString("nomepartecipante"));
-                    if(partecipante != null)
+            if (rs.isBeforeFirst()) {
+                while (rs.next()) {
+                    Partecipante partecipante = evento.seekPartecipante(rs.getString(NOMEPARTECIPANTE));
+                    if (partecipante != null)
                         evento.addInvitoGiudice(partecipante);
                 }
                 rs.close();
             }
 
         }
-        catch(SQLException e) {
-            throw e;
-        }
     }
 
     public void getAllInvitiGiudiceDB(Utente utente, Partecipante partecipante) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM InvitoGiudice WHERE Risposta IS NULL AND NomePartecipante = '" + utente.getNomeUtente() + "';");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM InvitoGiudice WHERE Risposta IS NULL AND NomePartecipante = '" + utente.getNomeUtente() + "';")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                while(rs.next()){
-                    Evento evento = partecipante.seekEvento(rs.getInt("idevento"));
-                    if(evento != null)
+            if (rs.isBeforeFirst()) {
+                while (rs.next()) {
+                    Evento evento = partecipante.seekEvento(rs.getInt(IDEVENTO));
+                    if (evento != null)
                         utente.addInvitoGiudiceEvento(evento);
                 }
                 rs.close();
             }
 
         }
-        catch(SQLException e) {
-            throw e;
-        }
     }
 
     public void addInvitiGiudiceDB(ArrayList<Evento> eventiInvitati) throws SQLException{
         if(eventiInvitati != null) {
-            HashSet<Evento> eventi = new HashSet<Evento>(eventiInvitati);
-            String codiceSQL = "";
+            HashSet<Evento> eventi = new HashSet<>(eventiInvitati);
+            StringBuilder codiceSQL = new StringBuilder();
             for (Evento evento : eventi) {
                 Partecipante partecipante = evento.firstInvitoGiudice();
                 while(partecipante != null) {
-                    codiceSQL = codiceSQL + "CALL updateInvitoGiudice('" + partecipante.getNomeUtente() + "'," + evento.getIdEvento() + "," + evento.getInvitoGiudiceAnswer() + ");";
+                    codiceSQL.append("CALL updateInvitoGiudice('").append(partecipante.getNomeUtente()).append("',").append(evento.getIdEvento()).append(",").append(evento.getInvitoGiudiceAnswer()).append(");");
                     partecipante = evento.nextInvitoGiudice();
                 }
             }
-            try {
-                PreparedStatement ps = Connection.prepareStatement(codiceSQL);
+            try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
-            } catch (SQLException e) {
-                throw e;
             }
         }
     }
 
-    public Partecipante getPartecipanteDB(String NomePartecipante) throws SQLException{
+    public Partecipante getPartecipanteDB(String nomePartecipante) throws SQLException{
         Partecipante partecipante = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Partecipante AS p " +
-                                                "JOIN PartecipanteEvento AS pe ON p.NomeUtente = pe.NomePartecipante " +
-                                                "JOIN Evento AS e ON pe.idEvento = e.IdEvento " +
-                                                "WHERE e.DataFine >= NOW() AND p.NomeUtente = '" + NomePartecipante + "';");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Partecipante AS p " +
+                "JOIN PartecipanteEvento AS pe ON p.NomeUtente = pe.NomePartecipante " +
+                "JOIN Evento AS e ON pe.idEvento = e.IdEvento " +
+                "WHERE e.DataFine >= NOW() AND p.NomeUtente = '" + nomePartecipante + "';")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
-                partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
-                ArrayList<Evento> eventi = new ArrayList<Evento>();
-                Evento evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
-                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-                evento.setMaxIscritti(rs.getInt("maxiscritti"));
-                evento.setMaxTeam(rs.getInt("maxteam"));
-                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                partecipante = new Partecipante(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                partecipante.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
+                ArrayList<Evento> eventi = new ArrayList<>();
+                Evento evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
+                evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
+                evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
+                evento.setMaxTeam(rs.getInt(MAXTEAM));
+                evento.setDateReg(rs.getObject(DATAINIZIOREG, LocalDate.class), rs.getObject(DATAFINEREG, LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                 evento.setOrganizzatore(getOrganizzatoreDB(evento));
                 evento.setGiudici(getAllGiudiciDB(evento));
                 evento.setTeamIscritti(getAllTeamDB(evento, partecipante));
                 getAllPartecipantiSingoliDB(evento, partecipante);
                 getAllInvitiGiudiceDB(evento);
                 eventi.add(evento);
-                while(rs.next()){
-                    evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
-                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
-                    evento.setMaxTeam(rs.getInt("maxteam"));
-                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                while (rs.next()) {
+                    evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
+                    evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
+                    evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
+                    evento.setMaxTeam(rs.getInt(MAXTEAM));
+                    evento.setDateReg(rs.getObject(DATAINIZIOREG, LocalDate.class), rs.getObject(DATAFINEREG, LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                     evento.setOrganizzatore(getOrganizzatoreDB(evento));
                     evento.setGiudici(getAllGiudiciDB(evento));
                     evento.setTeamIscritti(getAllTeamDB(evento, partecipante));
@@ -383,56 +347,47 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 partecipante.setEventi(eventi);
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return partecipante;
     }
 
     public void getAllPartecipantiSingoliDB(Evento evento) throws SQLException{
-        try {
-            int idEvento = evento.getIdEvento();
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
-                                                "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN( " +
-                                                "SELECT ct.NomePartecipante FROM Team AS t " +
-                                                "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                                                "WHERE t.idEvento = " + idEvento + ");");
+        int idEvento = evento.getIdEvento();
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
+                "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN( " +
+                "SELECT ct.NomePartecipante FROM Team AS t " +
+                "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                "WHERE t.idEvento = " + idEvento + ");")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                while(rs.next()) {
-                    Partecipante partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
-                    partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+            if (rs.isBeforeFirst()) {
+                while (rs.next()) {
+                    Partecipante partecipante = new Partecipante(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                    partecipante.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                     partecipante.addEvento(evento);
                     evento.addPartecipante(partecipante);
                 }
                 rs.close();
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
     }
 
     public void getAllPartecipantiSingoliDB(Evento evento, Partecipante partecipante) throws SQLException{
-        try {
-            int idEvento = evento.getIdEvento();
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
-                                                "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN( " +
-                                                "SELECT ct.NomePartecipante FROM Team AS t " +
-                                                "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                                                "WHERE t.idEvento = " + idEvento + ");");
+        int idEvento = evento.getIdEvento();
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
+                "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN( " +
+                "SELECT ct.NomePartecipante FROM Team AS t " +
+                "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                "WHERE t.idEvento = " + idEvento + ");")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                while(rs.next()) {
-                    if(partecipante.getNomeUtente().equals(rs.getString("nomeutente"))) {
+            if (rs.isBeforeFirst()) {
+                while (rs.next()) {
+                    if (partecipante.getNomeUtente().equals(rs.getString(NOMEUTENTE))) {
                         partecipante.addEvento(evento);
                         evento.addPartecipante(partecipante);
-                    }
-                    else {
-                        Partecipante nuovoPartecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
-                        nuovoPartecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                    } else {
+                        Partecipante nuovoPartecipante = new Partecipante(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                        nuovoPartecipante.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                         nuovoPartecipante.addEvento(evento);
                         evento.addPartecipante(nuovoPartecipante);
                     }
@@ -440,79 +395,69 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.close();
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
     }
 
-    public void addPartecipanteEventoDB(String NomePartecipante, ArrayList<Evento> partecipantiEvento) throws SQLException{
+    public void addPartecipanteEventoDB(String nomePartecipante, ArrayList<Evento> partecipantiEvento) throws SQLException{
         if(partecipantiEvento != null) {
-            HashSet<Evento> eventi = new HashSet<Evento>(partecipantiEvento);
-            String codiceSQL = "INSERT INTO PartecipanteEvento(NomePartecipante, idEvento) VALUES";
+            HashSet<Evento> eventi = new HashSet<>(partecipantiEvento);
+            StringBuilder codiceSQL = new StringBuilder();
+            codiceSQL.append("INSERT INTO PartecipanteEvento(NomePartecipante, idEvento) VALUES");
             for (Evento evento : eventi) {
                 if (evento != partecipantiEvento.getFirst())
-                    codiceSQL = codiceSQL + ",";
-                codiceSQL = codiceSQL + "('" + NomePartecipante + "'," + evento.getIdEvento() + ")";
+                    codiceSQL.append(",");
+                codiceSQL.append("('").append(nomePartecipante).append("',").append(evento.getIdEvento()).append(")");
             }
-            codiceSQL = codiceSQL + ";";
-            try {
-                PreparedStatement ps = Connection.prepareStatement(codiceSQL);
+            codiceSQL.append(";");
+            try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
-            } catch (SQLException e) {
-                throw e;
             }
         }
     }
 
-    public void updatePartecipanteDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("UPDATE Partecipante SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
-                            " WHERE NomeUtente = " + NomeUtente + ";");
-            ps.setString(1, FNome);
-            ps.setString(2, MNome);
-            ps.setString(3, LNome);
-            ps.setObject(4, DataNascita);
+    public void updatePartecipanteDB(String nomePartecipante, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement(
+                "UPDATE Partecipante SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
+                        WHERE_UTENTE + nomePartecipante + ";")) {
+            ps.setString(1, fNome);
+            ps.setString(2, mNome);
+            ps.setString(3, lNome);
+            ps.setObject(4, dataNascita);
             ps.executeUpdate();
         }
-        catch (SQLException e) {
-            throw e;
-        }
     }
 
-    public Organizzatore getOrganizzatoreDB(String NomeUtente) throws SQLException {
+    public Organizzatore getOrganizzatoreDB(String nomeUtente) throws SQLException {
         Organizzatore organizzatore = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Organizzatore AS o " +
-                                                "JOIN OrganizzatoreEvento AS oe ON o.NomeUtente = oe.NomeOrganizzatore " +
-                                                "JOIN Evento AS e ON oe.idEvento = e.IdEvento " +
-                                                "WHERE e.DataFine >= NOW() AND o.NomeUtente = '" + NomeUtente + "';");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Organizzatore AS o " +
+                "JOIN OrganizzatoreEvento AS oe ON o.NomeUtente = oe.NomeOrganizzatore " +
+                "JOIN Evento AS e ON oe.idEvento = e.IdEvento " +
+                "WHERE e.DataFine >= NOW() AND o.NomeUtente = '" + nomeUtente + "';")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 rs.next();
-                organizzatore = new Organizzatore(rs.getString("nomeutente"), rs.getString("password"));
-                organizzatore.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
-                ArrayList<Evento> eventi = new ArrayList<Evento>();
-                Evento evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
-                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-                evento.setMaxIscritti(rs.getInt("maxiscritti"));
-                evento.setMaxTeam(rs.getInt("maxteam"));
-                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                organizzatore = new Organizzatore(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                organizzatore.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
+                ArrayList<Evento> eventi = new ArrayList<>();
+                Evento evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
+                evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
+                evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
+                evento.setMaxTeam(rs.getInt(MAXTEAM));
+                evento.setDateReg(rs.getObject(DATAINIZIOREG, LocalDate.class), rs.getObject(DATAFINEREG, LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                 evento.setOrganizzatore(organizzatore);
                 evento.setGiudici(getAllGiudiciDB(evento));
                 evento.setTeamIscritti(getAllTeamDB(evento));
                 getAllPartecipantiSingoliDB(evento);
                 getAllInvitiGiudiceDB(evento);
                 eventi.add(evento);
-                while(rs.next()) {
-                    evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
-                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
-                    evento.setMaxTeam(rs.getInt("maxteam"));
-                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                while (rs.next()) {
+                    evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
+                    evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
+                    evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
+                    evento.setMaxTeam(rs.getInt(MAXTEAM));
+                    evento.setDateReg(rs.getObject(DATAINIZIOREG, LocalDate.class), rs.getObject(DATAFINEREG, LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                     evento.setOrganizzatore(organizzatore);
                     evento.setGiudici(getAllGiudiciDB(evento));
                     evento.setTeamIscritti(getAllTeamDB(evento));
@@ -523,116 +468,100 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.close();
                 organizzatore.setEventi(eventi);
             }
-        } catch (SQLException e) {
-            throw e;
         }
         return organizzatore;
     }
 
     public Organizzatore getOrganizzatoreDB(Evento evento) throws SQLException{
         Organizzatore organizzatore = null;
-        try {
-            int idEvento = evento.getIdEvento();
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Organizzatore JOIN OrganizzatoreEvento ON NomeUtente = NomeOrganizzatore " +
-                            "WHERE idEvento =" + idEvento + ";");
+        int idEvento = evento.getIdEvento();
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Organizzatore JOIN OrganizzatoreEvento ON NomeUtente = NomeOrganizzatore " +
+                "WHERE idEvento =" + idEvento + ";")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                organizzatore = new Organizzatore(rs.getString("nomeutente"), rs.getString("password"));
-                organizzatore.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                organizzatore = new Organizzatore(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                organizzatore.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                 rs.close();
                 organizzatore.addEvento(evento);
             }
-        }
-        catch(SQLException e) {
-            throw e;
         }
         return organizzatore;
     }
 
     public void addOrganizzatoreDB(Organizzatore organizzatore) throws SQLException{
-        try {
-            addOrganizzatoreDB(organizzatore.getNomeUtente(), organizzatore.getPasswordUtente(), organizzatore.getFNome(), organizzatore.getMNome(), organizzatore.getLNome(), organizzatore.getDataNascita());
-        }
-        catch (SQLException e) {
-            throw e;
-        }
+        addOrganizzatoreDB(organizzatore.getNomeUtente(), organizzatore.getPasswordUtente(), organizzatore.getfNome(), organizzatore.getmNome(), organizzatore.getlNome(), organizzatore.getDataNascita());
     }
 
-    public void addOrganizzatoreDB(String NomeUtente, String Password, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException{
+    public void addOrganizzatoreDB(String nomeUtente, String password, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
+        PreparedStatement ps =
+                connection.prepareStatement(
+                        "INSERT INTO Organizzatore(NomeUtente, Password," +
+                        " FNome, MNome, LNome, DataNascita, idEvento)" +
+                        "VALUES(?, ?, ?, ?, ?, ?, ?);");
         try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("INSERT INTO Organizzatore(NomeUtente, Password, FNome, MNome, LNome, DataNascita, idEvento)" +
-                                                "VALUES(?, ?, ?, ?, ?, ?, ?);");
-            ps.setString(1, NomeUtente);
-            ps.setString(2, Password);
-            ps.setString(3, FNome);
-            ps.setString(4, MNome);
-            ps.setString(5, LNome);
-            ps.setObject(6, DataNascita);
+            ps.setString(1, nomeUtente);
+            ps.setString(2, password);
+            ps.setString(3, fNome);
+            ps.setString(4, mNome);
+            ps.setString(5, lNome);
+            ps.setObject(6, dataNascita);
             ps.executeUpdate();
         }
-        catch (SQLException e) {
-            throw e;
+        finally{
+            ps.close();
         }
     }
 
-    public void addOrganizzatoreEventoDB(String NomeOrganizzatore, ArrayList<Evento> eventiOrganizzatore) throws SQLException{
+    public void addOrganizzatoreEventoDB(String nomeOrganizzatore, ArrayList<Evento> eventiOrganizzatore) throws SQLException{
         if(eventiOrganizzatore != null) {
-            HashSet<Evento> eventi = new HashSet<Evento>(eventiOrganizzatore);
-            String codiceSQL = "INSERT INTO OrganizzatoreEvento(NomeOrganizzatore, idEvento) VALUES";
+            HashSet<Evento> eventi = new HashSet<>(eventiOrganizzatore);
+            StringBuilder codiceSQL = new StringBuilder();
+            codiceSQL.append("INSERT INTO OrganizzatoreEvento(NomeOrganizzatore, idEvento) VALUES");
             for (Evento evento : eventi) {
                 if (evento != eventiOrganizzatore.getFirst())
-                    codiceSQL = codiceSQL + ",";
-                codiceSQL = codiceSQL + "('" + NomeOrganizzatore + "'," + evento.getIdEvento() + ")";
+                    codiceSQL.append(",");
+                codiceSQL.append("('").append(nomeOrganizzatore).append("',").append(evento.getIdEvento()).append(")");
             }
-            codiceSQL = codiceSQL + ";";
-            try {
-                PreparedStatement ps = Connection.prepareStatement(codiceSQL);
+            codiceSQL.append(";");
+            try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
-            } catch (SQLException e) {
-                throw e;
             }
         }
     }
 
-    public void updateOrganizzatoreDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("UPDATE Organizzatore SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
-                            " WHERE NomeUtente = " + NomeUtente + ";");
-            ps.setString(1, FNome);
-            ps.setString(2, MNome);
-            ps.setString(3, LNome);
-            ps.setObject(4, DataNascita);
+    public void updateOrganizzatoreDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement(
+                "UPDATE Organizzatore SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
+                        WHERE_UTENTE + nomeUtente + ";")) {
+            ps.setString(1, fNome);
+            ps.setString(2, mNome);
+            ps.setString(3, lNome);
+            ps.setObject(4, dataNascita);
             ps.executeUpdate();
         }
-        catch (SQLException e) {
-            throw e;
-        }
     }
 
-    public Giudice getGiudiceDB(String NomeUtente) throws SQLException {
+    public Giudice getGiudiceDB(String nomeUtente) throws SQLException {
         Giudice giudice = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Giudice AS g " +
-                                                "JOIN GiudiceEvento AS ge ON g.NomeUtente = ge.NomeGiudice " +
-                                                "JOIN Evento AS e ON ge.idEvento = e.IdEvento " +
-                                                "WHERE e.DataFine >= NOW() AND g.NomeUtente = '" + NomeUtente + "';");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Giudice AS g " +
+                "JOIN GiudiceEvento AS ge ON g.NomeUtente = ge.NomeGiudice " +
+                "JOIN Evento AS e ON ge.idEvento = e.IdEvento " +
+                "WHERE e.DataFine >= NOW() AND g.NomeUtente = '" + nomeUtente + "';")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                giudice = new Giudice(rs.getString("nomeutente"), rs.getString("password"));
-                giudice.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
-                ArrayList<Evento> eventi = new ArrayList<Evento>();
-                Evento evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
-                evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-                evento.setMaxIscritti(rs.getInt("maxiscritti"));
-                evento.setMaxTeam(rs.getInt("maxteam"));
-                evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                giudice = new Giudice(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                giudice.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
+                ArrayList<Evento> eventi = new ArrayList<>();
+                Evento evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
+                evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
+                evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
+                evento.setMaxTeam(rs.getInt(MAXTEAM));
+                evento.setDateReg(rs.getObject(DATAINIZIOREG, LocalDate.class), rs.getObject(DATAFINEREG, LocalDate.class));
+                evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                 evento.setOrganizzatore(getOrganizzatoreDB(evento));
                 evento.setGiudici(getAllGiudiciDB(evento, giudice));
                 evento.setTeamIscritti(getAllTeamDB(evento));
@@ -641,13 +570,13 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 getAllVotiDB(evento);
                 getAllProgressiDB(evento);
                 eventi.add(evento);
-                while(rs.next()) {
-                    evento = new Evento(rs.getInt("idevento"), rs.getString("titolo"), rs.getString("indirizzosede"), rs.getInt("ncivicosede"));
-                    evento.setDate(rs.getObject("datainizio", LocalDate.class), rs.getObject("datafine", LocalDate.class));
-                    evento.setMaxIscritti(rs.getInt("maxiscritti"));
-                    evento.setMaxTeam(rs.getInt("maxteam"));
-                    evento.setDateReg(rs.getObject("datainizioreg", LocalDate.class), rs.getObject("datafinereg", LocalDate.class));
-                    evento.setDescrizioneProblema(rs.getString("descrizioneprob"));
+                while (rs.next()) {
+                    evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
+                    evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
+                    evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
+                    evento.setMaxTeam(rs.getInt(MAXTEAM));
+                    evento.setDateReg(rs.getObject(DATAINIZIOREG, LocalDate.class), rs.getObject(DATAFINEREG, LocalDate.class));
+                    evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                     evento.setOrganizzatore(getOrganizzatoreDB(evento));
                     evento.setGiudici(getAllGiudiciDB(evento, giudice));
                     evento.setTeamIscritti(getAllTeamDB(evento));
@@ -661,115 +590,93 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 giudice.setEventi(eventi);
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return giudice;
     }
 
     public ArrayList<Giudice> getAllGiudiciDB(Evento evento) throws SQLException{
         ArrayList<Giudice> giudici = null;
-        try {
-            int idEvento = evento.getIdEvento();
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Giudice " +
-                                                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
-                                                " WHERE idEvento = " + idEvento + ";");
+        int idEvento = evento.getIdEvento();
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Giudice " +
+                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
+                " WHERE idEvento = " + idEvento + ";")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                giudici = new ArrayList<Giudice>();
-                while(rs.next()) {
-                    Giudice giudice = new Giudice();
-                    giudice.setNomeUtente(rs.getString("nomeutente"));
-                    giudice.setPasswordUtente(rs.getString("password"));
-                    giudice.setFNome(rs.getString("fnome"));
-                    giudice.setMNome(rs.getString("mnome"));
-                    giudice.setLNome(rs.getString("lnome"));
-                    giudice.setDataNascita(rs.getObject("datanascita", LocalDate.class));
+            if (rs.isBeforeFirst()) {
+                giudici = new ArrayList<>();
+                while (rs.next()) {
+                    Giudice giudice = new Giudice(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                    giudice.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                     giudice.addEvento(evento);
                     giudici.add(giudice);
                 }
                 rs.close();
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return giudici;
     }
 
     public ArrayList<Giudice> getAllGiudiciDB(Evento evento, Giudice giudice) throws SQLException{
-        ArrayList<Giudice> giudici = new ArrayList<Giudice>();
+        ArrayList<Giudice> giudici = new ArrayList<>();
         giudici.add(giudice);
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Giudice " +
-                                                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice " +
-                                                "WHERE idEvento = " + evento.getIdEvento() +
-                                                " AND NomeGiudice <> '" + giudice.getNomeUtente() + "';");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Giudice " +
+                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice " +
+                "WHERE idEvento = " + evento.getIdEvento() +
+                " AND NomeGiudice <> '" + giudice.getNomeUtente() + "';")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                while(rs.next()) {
-                    Giudice nuovoGiudice = new Giudice(rs.getString("nomeutente"), rs.getString("password"));
-                    nuovoGiudice.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+            if (rs.isBeforeFirst()) {
+                while (rs.next()) {
+                    Giudice nuovoGiudice = new Giudice(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                    nuovoGiudice.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                     nuovoGiudice.addEvento(evento);
                     giudici.add(nuovoGiudice);
                 }
                 rs.close();
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return giudici;
     }
 
-    public void updateGiudiceDB(String NomeUtente, String FNome, String MNome, String LNome, LocalDate DataNascita) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("UPDATE Giudice SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
-                            " WHERE NomeUtente = " + NomeUtente + ";");
-            ps.setString(1, FNome);
-            ps.setString(2, MNome);
-            ps.setString(3, LNome);
-            ps.setObject(4, DataNascita);
+    public void updateGiudiceDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement(
+                "UPDATE Giudice SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
+                        WHERE_UTENTE + nomeUtente + ";")) {
+            ps.setString(1, fNome);
+            ps.setString(2, mNome);
+            ps.setString(3, lNome);
+            ps.setObject(4, dataNascita);
             ps.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw e;
         }
     }
 
     public ArrayList<Team> getAllTeamDB(Evento evento) throws SQLException{
         ArrayList<Team> teams = null;
-        try {
-            int idEvento = evento.getIdEvento();
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                                                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
-                                                "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;");
+        int idEvento = evento.getIdEvento();
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
+                "WHERE t.idEvento = " + idEvento + ORDER)) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                teams = new ArrayList<Team>();
+            if (rs.isBeforeFirst()) {
+                teams = new ArrayList<>();
                 rs.next();
-                int idTeam = rs.getInt("idteam");
-                Team team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                int idTeam = rs.getInt(IDTEAM);
+                Team team = new Team(idTeam, rs.getString(NOMETEAM), rs.getString(TEAMLEADER));
                 team.setEventoIscritto(evento);
-                Partecipante partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
-                partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                Partecipante partecipante = new Partecipante(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                partecipante.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                 partecipante.addEvento(evento);
                 partecipante.addTeam(team);
                 team.addMembroTeam(partecipante);
                 evento.addPartecipante(partecipante);
-                while(rs.next()) {
-                    if(idTeam != rs.getInt("idteam")) {
+                while (rs.next()) {
+                    if (idTeam != rs.getInt(IDTEAM)) {
                         teams.add(team);
-                        idTeam = rs.getInt("idteam");
-                        team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                        idTeam = rs.getInt(IDTEAM);
+                        team = new Team(idTeam, rs.getString(NOMETEAM), rs.getString(TEAMLEADER));
                         team.setEventoIscritto(evento);
                     }
-                    partecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
-                    partecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                    partecipante = new Partecipante(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                    partecipante.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                     partecipante.addEvento(evento);
                     partecipante.addTeam(team);
                     team.addMembroTeam(partecipante);
@@ -779,56 +686,50 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.close();
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return teams;
     }
 
     public ArrayList<Team> getAllTeamDB(Evento evento, Partecipante partecipante) throws SQLException{
         ArrayList<Team> teams = null;
-        try {
-            int idEvento = evento.getIdEvento();
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                                                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
-                                                "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;");
+        int idEvento = evento.getIdEvento();
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
+                "WHERE t.idEvento = " + idEvento + ORDER)) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
-                teams = new ArrayList<Team>();
+            if (rs.isBeforeFirst()) {
+                teams = new ArrayList<>();
                 rs.next();
-                int idTeam = rs.getInt("idteam");
-                Team team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                int idTeam = rs.getInt(IDTEAM);
+                Team team = new Team(idTeam, rs.getString(NOMETEAM), rs.getString(TEAMLEADER));
                 team.setEventoIscritto(evento);
                 Partecipante nuovoPartecipante = null;
-                if(partecipante.getNomeUtente().equals(rs.getString("nomeutente"))){
+                if (partecipante.getNomeUtente().equals(rs.getString(NOMEUTENTE))) {
                     partecipante.addTeam(team);
                     team.addMembroTeam(partecipante);
                     evento.addPartecipante(partecipante);
-                }
-                else {
-                    nuovoPartecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
-                    nuovoPartecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                } else {
+                    nuovoPartecipante = new Partecipante(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                    nuovoPartecipante.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                     nuovoPartecipante.addEvento(evento);
                     nuovoPartecipante.addTeam(team);
                     team.addMembroTeam(nuovoPartecipante);
                     evento.addPartecipante(nuovoPartecipante);
                 }
-                while(rs.next()) {
-                    if(idTeam != rs.getInt("idteam")) {
+                while (rs.next()) {
+                    if (idTeam != rs.getInt(IDTEAM)) {
                         teams.add(team);
-                        idTeam = rs.getInt("idteam");
-                        team = new Team(idTeam, rs.getString("nome"), rs.getString("teamleader"));
+                        idTeam = rs.getInt(IDTEAM);
+                        team = new Team(idTeam, rs.getString(NOMETEAM), rs.getString(TEAMLEADER));
                         team.setEventoIscritto(evento);
                     }
-                    if(partecipante.getNomeUtente().equals(rs.getString("nomeutente"))){
+                    if (partecipante.getNomeUtente().equals(rs.getString(NOMEUTENTE))) {
                         partecipante.addTeam(team);
                         team.addMembroTeam(partecipante);
                         evento.addPartecipante(partecipante);
-                    }
-                    else {
-                        nuovoPartecipante = new Partecipante(rs.getString("nomeutente"), rs.getString("password"));
-                        nuovoPartecipante.setDati(rs.getString("fnome"), rs.getString("mnome"), rs.getString("lnome"), rs.getObject("datanascita", LocalDate.class));
+                    } else {
+                        nuovoPartecipante = new Partecipante(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
+                        nuovoPartecipante.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
                         nuovoPartecipante.addEvento(evento);
                         nuovoPartecipante.addTeam(team);
                         team.addMembroTeam(nuovoPartecipante);
@@ -839,337 +740,273 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.close();
             }
         }
-        catch(SQLException e) {
-            throw e;
-        }
         return teams;
     }
 
     public int getIdTeamDB() throws SQLException{
         int id;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT MAX(IdTeam) FROM Team;");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT MAX(IdTeam) FROM Team;")) {
             ResultSet rs = ps.executeQuery();
             rs.next();
             id = rs.getInt(1);
-        }
-        catch (SQLException e) {
-            throw e;
         }
         return id;
     }
 
     public int addTeamDB(Team team) throws SQLException {
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("CALL CreaTeam('" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");");
+        try (PreparedStatement ps = connection.prepareStatement("CALL CreaTeam('" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");")) {
             ps.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw e;
         }
         return getIdTeamDB();
     }
 
     public void getAllRichiesteTeamDB(Partecipante partecipante) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM RichiestaTeam " +
-                                                "WHERE Risposta IS NULL AND idTeam IN(" +
-                                                "SELECT idTeam FROM CompTeam " +
-                                                "WHERE NomePartecipante = '" + partecipante.getNomeUtente() + "');");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM RichiestaTeam " +
+                "WHERE Risposta IS NULL AND idTeam IN(" +
+                "SELECT idTeam FROM CompTeam " +
+                "WHERE NomePartecipante = '" + partecipante.getNomeUtente() + "');")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                Team team = partecipante.seekTeam(rs.getInt("idteam"));
-                team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString("nomepartecipante")));
-                while(rs.next()){
-                    if(team.getIdTeam() != rs.getInt("idteam"))
-                        team = partecipante.seekTeam(rs.getInt("idteam"));
-                    team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString("nomepartecipante")));
+                Team team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString(NOMEPARTECIPANTE)));
+                while (rs.next()) {
+                    if (team.getIdTeam() != rs.getInt(IDTEAM))
+                        team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                    team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString(NOMEPARTECIPANTE)));
                 }
             }
-        }
-        catch(SQLException e) {
-            throw e;
         }
     }
 
     public void addRichiesteTeamDB(ArrayList<Team> richiesteTeam) throws SQLException{
         if(richiesteTeam != null) {
-            HashSet<Team> teams = new HashSet<Team>(richiesteTeam);
-            String codiceSQL = "";
+            HashSet<Team> teams = new HashSet<>(richiesteTeam);
+            StringBuilder codiceSQL = new StringBuilder();
             for (Team team : teams) {
                 Partecipante partecipante = team.firstRichiesta();
                 while(partecipante != null) {
-                    codiceSQL = codiceSQL + "CALL updateRichiestaTeam('" + partecipante.getNomeUtente() + "'," + team.getIdTeam() + "," + team.getRichiestaAnswer() + ");";
+                    codiceSQL.append("CALL updateRichiestaTeam('").append(partecipante.getNomeUtente()).append("',").append(team.getIdTeam()).append(",").append(team.getRichiestaAnswer()).append(");");
                     partecipante = team.nextRichiesta();
                 }
             }
-            try {
-                PreparedStatement ps = Connection.prepareStatement(codiceSQL);
+            try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
-            } catch (SQLException e) {
-                throw e;
             }
         }
     }
 
     public void getAllProgressiDB(Evento evento) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT t.IdTeam, p.IdProgresso, p.DataPubblicazione," +
-                                                "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
-                                                "FROM Team AS t JOIN Progresso AS p ON t.IdTeam = p.idTeam " +
-                                                "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
-                                                "WHERE t.idEvento = " + evento.getIdEvento() +
-                                                " ORDER BY t.IdTeam, p.IdProgresso;");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT t.IdTeam, p.IdProgresso, p.DataPubblicazione," +
+                "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
+                "FROM Team AS t JOIN Progresso AS p ON t.IdTeam = p.idTeam " +
+                "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
+                "WHERE t.idEvento = " + evento.getIdEvento() +
+                " ORDER BY t.IdTeam, p.IdProgresso;")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()) {
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                ArrayList<Progresso> progressi = new ArrayList<Progresso>();
-                ArrayList<Commento> commenti = new ArrayList<Commento>();
-                Team team = evento.seekTeam(rs.getInt("idteam"));
-                Progresso progresso = new Progresso(rs.getInt("idprogresso"), team.getIdTeam(), rs.getObject("datapubblicazione", LocalDate.class), rs.getString("testoprogresso"));
-                commenti.add(new Commento(progresso.getIdProgresso(), rs.getString("testocommento"), rs.getString("nomegiudice")));
+                ArrayList<Progresso> progressi = new ArrayList<>();
+                ArrayList<Commento> commenti = new ArrayList<>();
+                Team team = evento.seekTeam(rs.getInt(IDTEAM));
+                Progresso progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
+                commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
                 while (rs.next()) {
-                    if(progresso.getIdProgresso() != rs.getInt("idprogresso")) {
+                    if (progresso.getIdProgresso() != rs.getInt(IDPROGRESSO)) {
                         progresso.setCommenti(commenti);
                         progressi.add(progresso);
-                        progresso = new Progresso(rs.getInt("idprogresso"), team.getIdTeam(), rs.getObject("datapubblicazione", LocalDate.class), rs.getString("testoprogresso"));
+                        progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
                     }
-                    if(team.getIdTeam() != rs.getInt("idteam")) {
+                    if (team.getIdTeam() != rs.getInt(IDTEAM)) {
                         team.setProgressi(progressi);
-                        team = evento.seekTeam(rs.getInt("idteam"));
+                        team = evento.seekTeam(rs.getInt(IDTEAM));
                     }
-                    commenti.add(new Commento(progresso.getIdProgresso(), rs.getString("testocommento"), rs.getString("nomegiudice")));
+                    commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
                 }
                 progresso.setCommenti(commenti);
                 progressi.add(progresso);
                 team.setProgressi(progressi);
             }
-        }
-        catch(SQLException e) {
-            throw e;
         }
     }
 
     public void getAllProgressiDB(Partecipante partecipante) throws SQLException{
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT ct.idTeam, p.IdProgresso, p.DataPubblicazione," +
-                                                "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
-                                                "FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                                                "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
-                                                "JOIN Progresso AS p ON ct.idTeam = p.idTeam " +
-                                                "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
-                                                "WHERE e.DataFine >= NOW() AND ct.NomePartecipante = '"+ partecipante.getNomeUtente() +"' " +
-                                                "ORDER BY ct.idTeam, p.IdProgresso;");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT ct.idTeam, p.IdProgresso, p.DataPubblicazione," +
+                "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
+                "FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
+                "JOIN Progresso AS p ON ct.idTeam = p.idTeam " +
+                "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
+                "WHERE e.DataFine >= NOW() AND ct.NomePartecipante = '" + partecipante.getNomeUtente() + "' " +
+                "ORDER BY ct.idTeam, p.IdProgresso;")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()) {
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                ArrayList<Progresso> progressi = new ArrayList<Progresso>();
-                ArrayList<Commento> commenti = new ArrayList<Commento>();
-                Team team = partecipante.seekTeam(rs.getInt("idteam"));
-                Progresso progresso = new Progresso(rs.getInt("idprogresso"), team.getIdTeam(), rs.getObject("datapubblicazione", LocalDate.class), rs.getString("testoprogresso"));
-                commenti.add(new Commento(progresso.getIdProgresso(), rs.getString("testocommento"), rs.getString("nomegiudice")));
+                ArrayList<Progresso> progressi = new ArrayList<>();
+                ArrayList<Commento> commenti = new ArrayList<>();
+                Team team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                Progresso progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
+                commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
                 while (rs.next()) {
-                    if(progresso.getIdProgresso() != rs.getInt("idprogresso")) {
+                    if (progresso.getIdProgresso() != rs.getInt(IDPROGRESSO)) {
                         progresso.setCommenti(commenti);
                         progressi.add(progresso);
-                        progresso = new Progresso(rs.getInt("idprogresso"), team.getIdTeam(), rs.getObject("datapubblicazione", LocalDate.class), rs.getString("testoprogresso"));
+                        progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
                     }
-                    if(team.getIdTeam() != rs.getInt("idteam")) {
+                    if (team.getIdTeam() != rs.getInt(IDTEAM)) {
                         team.setProgressi(progressi);
-                        team = partecipante.seekTeam(rs.getInt("idteam"));
+                        team = partecipante.seekTeam(rs.getInt(IDTEAM));
                     }
-                    commenti.add(new Commento(progresso.getIdProgresso(), rs.getString("testocommento"), rs.getString("nomegiudice")));
+                    commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
                 }
                 progresso.setCommenti(commenti);
                 progressi.add(progresso);
                 team.setProgressi(progressi);
             }
-        }
-        catch(SQLException e) {
-            throw e;
         }
     }
 
 
     public int getIdProgressoDB() throws SQLException{
         int id = -1;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT MAX(IdProgresso) FROM Progresso;");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT MAX(IdProgresso) FROM Progresso;")) {
             ResultSet rs = ps.executeQuery();
             rs.next();
             id = rs.getInt(1);
-        }
-        catch (SQLException e) {
-            throw e;
         }
         return id;
     }
 
     public void addProgressoDB(Progresso progresso) throws SQLException{
-        try{
-            progresso.setIdProgresso(addProgressoDB(progresso.getIdTeam(), progresso.getTestoDocumeto()));
-        }
-        catch(SQLException e){
-            throw e;
-        }
+        progresso.setIdProgresso(addProgressoDB(progresso.getIdTeam(), progresso.getTestoDocumeto()));
     }
 
     public int addProgressoDB(int idTeam, String testo) throws SQLException {
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("INSERT INTO Progresso(idTeam, Testo) VALUES("
-                                                + idTeam + ",'" + testo + "');");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "INSERT INTO Progresso(idTeam, Testo) VALUES("
+                + idTeam + ",'" + testo + "');")) {
             ps.executeUpdate();
-        }
-        catch (SQLException e) {
-            throw e;
         }
         return getIdProgressoDB();
     }
 
-    public ArrayList<Commento> getAllCommentiDB(String Giudice) throws SQLException{
+    public ArrayList<Commento> getAllCommentiDB(String giudice) throws SQLException{
         ArrayList<Commento> commenti = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Commento WHERE NomeGiudice = " + Giudice + ";");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Commento WHERE NomeGiudice = " + giudice + ";")) {
             ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                Commento commento = new Commento(rs.getInt("idprogresso"), Giudice, rs.getString("testo"));
-                if(commenti == null){
-                    commenti = new ArrayList<Commento>();
+            while (rs.next()) {
+                Commento commento = new Commento(rs.getInt(IDPROGRESSO), giudice, rs.getString("testo"));
+                if (commenti == null) {
+                    commenti = new ArrayList<>();
                 }
                 commenti.add(commento);
             }
-        }
-        catch(SQLException e) {
-            throw e;
         }
         return commenti;
     }
 
     public void addAllCommentiDB(ArrayList<Commento> nuoviCommenti) throws SQLException{
         if(nuoviCommenti != null){
-            HashSet<Commento> commenti = new HashSet<Commento>(nuoviCommenti);
-            String codiceSQL = "INSERT INTO Commento(NomeGiudice, idProgresso, Testo) VALUES";
+            HashSet<Commento> commenti = new HashSet<>(nuoviCommenti);
+            StringBuilder codiceSQL = new StringBuilder();
+            codiceSQL.append("INSERT INTO Commento(NomeGiudice, idProgresso, Testo) VALUES");
             for (Commento commento : commenti) {
                 if(commento != nuoviCommenti.getFirst())
-                    codiceSQL = codiceSQL + ",";
-                codiceSQL = codiceSQL + "('" + commento.getGiudice() + "'," + commento.getIdProgresso() + ",'" + commento.getTesto() + "')";
+                    codiceSQL.append(",");
+                codiceSQL.append("('").append(commento.getGiudice()).append("',").append(commento.getIdProgresso()).append(",'").append(commento.getTesto()).append("')");
             }
-            codiceSQL = codiceSQL + ";";
-            try {
-                PreparedStatement ps = Connection.prepareStatement(codiceSQL);
+            codiceSQL.append(";");
+            try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
-            } catch (SQLException e) {
-                throw e;
             }
         }
     }
 
-    public ArrayList<Voto> getAllVotiDB(String Giudice) throws SQLException{
+    public ArrayList<Voto> getAllVotiDB(String giudice) throws SQLException{
         ArrayList<Voto> voti = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Voto WHERE NomeGiudice = " + Giudice + ";");
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Voto WHERE NomeGiudice = " + giudice + ";")) {
             ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                Voto voto = new Voto(rs.getInt("idteam"), rs.getInt("valore"), Giudice);
-                if(voti == null)
-                    voti = new ArrayList<Voto>();
+            while (rs.next()) {
+                Voto voto = new Voto(rs.getInt(IDTEAM), rs.getInt(VALORE), giudice);
+                if (voti == null)
+                    voti = new ArrayList<>();
                 voti.add(voto);
             }
-        }
-        catch(SQLException e) {
-            throw e;
         }
         return voti;
     }
 
     public void getAllVotiDB(Evento evento) throws SQLException{
         ArrayList<Voto> voti = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT * FROM Team AS t " +
-                                                "JOIN Voto AS v ON t.IdTeam = v.idTeam " +
-                                                "WHERE t.idEvento = " + evento.getIdEvento() +
-                                                " ORDER BY t.idTeam;");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT * FROM Team AS t " +
+                "JOIN Voto AS v ON t.IdTeam = v.idTeam " +
+                "WHERE t.idEvento = " + evento.getIdEvento() +
+                        ORDER)) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                voti = new ArrayList<Voto>();
-                Team team = evento.seekTeam(rs.getInt("idteam"));
-                voti.add(new Voto(rs.getInt("idteam"), rs.getInt("valore"), rs.getString("nomegiudice")));
-                while(rs.next()) {
-                    if(team.getIdTeam() != rs.getInt("idteam")){
+                voti = new ArrayList<>();
+                Team team = evento.seekTeam(rs.getInt(IDTEAM));
+                voti.add(new Voto(rs.getInt(IDTEAM), rs.getInt(VALORE), rs.getString(NOMEGIUDICE)));
+                while (rs.next()) {
+                    if (team.getIdTeam() != rs.getInt(IDTEAM)) {
                         team.setVoti(voti);
-                        voti = new ArrayList<Voto>();
-                        team = evento.seekTeam(rs.getInt("idteam"));
+                        voti = new ArrayList<>();
+                        team = evento.seekTeam(rs.getInt(IDTEAM));
                     }
-                    voti.add(new Voto(rs.getInt("idteam"), rs.getInt("valore"), rs.getString("nomegiudice")));
+                    voti.add(new Voto(rs.getInt(IDTEAM), rs.getInt(VALORE), rs.getString(NOMEGIUDICE)));
                 }
                 team.setVoti(voti);
             }
-        }
-        catch(SQLException e) {
-            throw e;
         }
     }
 
     public void getAllVotiDB(Partecipante partecipante) throws SQLException{
         ArrayList<Voto> voti = null;
-        try {
-            PreparedStatement ps =
-                    Connection.prepareStatement("SELECT t.IdTeam, v.Valore, v.NomeGiudice FROM Team AS t " +
-                                                "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
-                                                "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
-                                                "JOIN Voto AS v ON ct.idTeam = v.idTeam " +
-                                                "WHERE e.DataFine >= NOW() " +
-                                                "AND ct.NomePartecipante = '" + partecipante.getNomeUtente() + "' " +
-                                                "ORDER BY t.IdTeam;");
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT t.IdTeam, v.Valore, v.NomeGiudice FROM Team AS t " +
+                "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+                "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
+                "JOIN Voto AS v ON ct.idTeam = v.idTeam " +
+                "WHERE e.DataFine >= NOW() " +
+                "AND ct.NomePartecipante = '" + partecipante.getNomeUtente() + "' " +
+                "ORDER BY t.IdTeam;")) {
             ResultSet rs = ps.executeQuery();
-            if(rs.isBeforeFirst()){
+            if (rs.isBeforeFirst()) {
                 rs.next();
-                voti = new ArrayList<Voto>();
-                Team team = partecipante.seekTeam(rs.getInt("idteam"));
-                voti.add(new Voto(rs.getInt("idteam"), rs.getInt("valore"), rs.getString("nomegiudice")));
-                while(rs.next()) {
-                    if(team.getIdTeam() != rs.getInt("idteam")){
+                voti = new ArrayList<>();
+                Team team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                voti.add(new Voto(rs.getInt(IDTEAM), rs.getInt(VALORE), rs.getString(NOMEGIUDICE)));
+                while (rs.next()) {
+                    if (team.getIdTeam() != rs.getInt(IDTEAM)) {
                         team.setVoti(voti);
-                        voti = new ArrayList<Voto>();
-                        team = partecipante.seekTeam(rs.getInt("idteam"));
+                        voti = new ArrayList<>();
+                        team = partecipante.seekTeam(rs.getInt(IDTEAM));
                     }
-                    voti.add(new Voto(rs.getInt("idteam"), rs.getInt("valore"), rs.getString("nomegiudice")));
+                    voti.add(new Voto(rs.getInt(IDTEAM), rs.getInt(VALORE), rs.getString(NOMEGIUDICE)));
                 }
                 team.setVoti(voti);
             }
-        }
-        catch(SQLException e) {
-            throw e;
         }
     }
 
     public void addAllVotiDB(ArrayList<Voto> nuoviVoti) throws SQLException{
         if(nuoviVoti != null){
-            HashSet<Voto> voti = new HashSet<Voto>(nuoviVoti);
-            String codiceSQL = "INSERT INTO Voto(NomeGiudice, idTeam, Valore) VALUES";
+            HashSet<Voto> voti = new HashSet<>(nuoviVoti);
+            StringBuilder codiceSQL = new StringBuilder();
+            codiceSQL.append("INSERT INTO Voto(NomeGiudice, idTeam, Valore) VALUES");
             for (Voto voto : voti) {
                 if(voto != nuoviVoti.getFirst())
-                    codiceSQL = codiceSQL + ",";
-                codiceSQL = codiceSQL + "('" + voto.getGiudice() + "'," + voto.getIdTeam() + "," + voto.getValore() + ")";
+                    codiceSQL.append(",");
+                codiceSQL.append("('").append(voto.getGiudice()).append("',").append(voto.getIdTeam()).append(",").append(voto.getValore()).append(")");
             }
-            codiceSQL = codiceSQL + ";";
-            try {
-                PreparedStatement ps = Connection.prepareStatement(codiceSQL);
+            codiceSQL.append(";");
+            try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
-            } catch (SQLException e) {
-                throw e;
             }
         }
     }
