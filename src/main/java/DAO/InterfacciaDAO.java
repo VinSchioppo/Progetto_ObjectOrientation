@@ -77,6 +77,7 @@ public interface InterfacciaDAO {
     ArrayList<Team> getAllTeamDB(Evento evento, Partecipante partecipante) throws SQLException;
     int getIdTeamDB() throws SQLException;
     int addTeamDB(Team team) throws SQLException;
+    void leaveTeamDB(String nomePartecipante, int idTeam) throws SQLException;
 
     /*******************************************************************************************************/
 

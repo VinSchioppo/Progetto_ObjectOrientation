@@ -761,6 +761,15 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return getIdTeamDB();
     }
 
+    public void leaveTeamDB(String nomePartecipante, int idTeam) throws SQLException{
+        try (PreparedStatement ps = connection.prepareStatement(
+                "DELETE FROM CompTeam " +
+                    "WHERE NomePartecipante = '" + nomePartecipante + "' " +
+                    "AND idTeam = " + idTeam + ";")) {
+            ps.executeUpdate();
+        }
+    }
+
     public void getAllRichiesteTeamDB(Partecipante partecipante) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM RichiestaTeam " +

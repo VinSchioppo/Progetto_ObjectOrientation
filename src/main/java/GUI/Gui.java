@@ -1,4 +1,6 @@
-package Controller;
+package GUI;
+
+import Controller.Controller;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -22,38 +24,6 @@ public class Gui extends JDialog {
         //setModal(true);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
 
-        logInButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (!controller.TrovaUtente(NomeUtente.getText(), PasswordUtente.getText())) {
-                    JOptionPane.showMessageDialog(null, "Impossibile registrare l'Utente!", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-                else{
-                    JOptionPane.showMessageDialog(null, "Utente registrato con Successo!", "Comfirmation", JOptionPane.INFORMATION_MESSAGE);
-                    setVisible(false);
-                }
-
-            }
-        });
-
-        nonHaiUnAccountButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-
-                //System.out.println("Il bottone è stato premuto!"); // Debug
-
-                setVisible(true);
-                dispose();
-
-                RegisterUtent registerUtent = new RegisterUtent(controller);
-
-                JFrame frame = new JFrame("Registrazione Utente");
-                frame.setContentPane(registerUtent.getRegisterUtentPanel());
-                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                frame.pack();
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
-            }
-
-        });
 
     }
 
