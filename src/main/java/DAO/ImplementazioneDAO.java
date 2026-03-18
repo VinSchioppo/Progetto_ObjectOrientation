@@ -432,7 +432,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 "SELECT * FROM Organizzatore AS o " +
                 "JOIN OrganizzatoreEvento AS oe ON o.NomeUtente = oe.NomeOrganizzatore " +
                 "JOIN Evento AS e ON oe.idEvento = e.IdEvento " +
-                "WHERE e.DataFine >= NOW() AND o.NomeUtente = '" + nomeUtente + "';")) {
+                "WHERE (e.DataInizio IS NULL OR e.DataFine >= NOW()) " +
+                "AND o.NomeUtente = '" + nomeUtente + "';")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 rs.next();
