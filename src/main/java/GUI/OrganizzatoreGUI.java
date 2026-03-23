@@ -1,14 +1,14 @@
 package GUI;
 
-import ClassModel.Evento;
-import Controller.*;
+import Controller.Controller;
+import Controller.Role;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.util.List;
 
 public class OrganizzatoreGUI {
 
@@ -18,11 +18,10 @@ public class OrganizzatoreGUI {
     private JButton invitaGiudiceButton;
     private JButton backButton;
 
+    private List<String> eventiOrganizzatore;
+
     private SelectEventoFrame parentFrame;
     private Controller controller;
-
-    private ArrayList<Evento> eventiOrganizzatore;
-    private Evento eventoSelezionato = null;
 
     public OrganizzatoreGUI(SelectEventoFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -37,11 +36,8 @@ public class OrganizzatoreGUI {
        ============================================================ */
     private void inizializzaTabella() {
 
-        String[] colonne = {
-                "Titolo",
-                "Tipo",
-                "Max squadre"
-        };
+        // UNA SOLA COLONNA → niente parsing fragile
+        String[] colonne = { "Evento" };
 
         DefaultTableModel model = new DefaultTableModel(colonne, 0) {
             @Override
@@ -52,15 +48,9 @@ public class OrganizzatoreGUI {
 
         eventiOrganizzatore = controller.listaEventiOrganizzatore();
 
-        if (eventiOrganizzatore != null) {
-            for (Evento e : eventiOrganizzatore) {
-                String tipo = (e.getMaxTeam() > 1) ? "Team" : "Singolo";
-                model.addRow(new Object[]{
-                        e.getTitolo(),
-                        tipo,
-                        e.getMaxIscritti()
-                });
-            }
+        // Mostra direttamente la stringa intera
+        for (String evento : eventiOrganizzatore) {
+            model.addRow(new Object[]{ evento });
         }
 
         table1.setModel(model);
@@ -69,24 +59,20 @@ public class OrganizzatoreGUI {
         table1.setRowSelectionAllowed(true);
         table1.setColumnSelectionAllowed(false);
 
-        // ===== CENTRATURA TESTO =====
+        // ===== CENTRATURA =====
         DefaultTableCellRenderer center = new DefaultTableCellRenderer();
         center.setHorizontalAlignment(SwingConstants.CENTER);
-
-        for (int i = 0; i < table1.getColumnCount(); i++) {
-            table1.getColumnModel().getColumn(i).setCellRenderer(center);
-        }
+        table1.getColumnModel().getColumn(0).setCellRenderer(center);
 
         table1.getTableHeader().setReorderingAllowed(false);
 
-        // ===== SELEZIONE RIGA =====
+        // ===== SELEZIONE =====
         table1.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = table1.getSelectedRow();
-                if (row != -1) {
-                    eventoSelezionato = eventiOrganizzatore.get(row);
 
-                    controller.selezionaEvento(eventoSelezionato); //QUI CON eventoSelezionato nelle parentesi
+                if (row != -1) {
+                    selezionaEvento(row);
 
                     setDatiEventoButton.setEnabled(true);
                     invitaGiudiceButton.setEnabled(true);
@@ -101,7 +87,7 @@ public class OrganizzatoreGUI {
                 if (e.getClickCount() == 2) {
                     int row = table1.getSelectedRow();
                     if (row != -1) {
-                        mostraDettagliEvento(eventiOrganizzatore.get(row));
+                        mostraDettagliEvento(row);
                     }
                 }
             }
@@ -109,18 +95,29 @@ public class OrganizzatoreGUI {
     }
 
     /* ============================================================
+       ================= SELEZIONE EVENTO =========================
+       ============================================================ */
+    private void selezionaEvento(int row) {
+
+        String evento = eventiOrganizzatore.get(row);
+
+        // Parsing MINIMO e sicuro → solo ID
+        int spazio = evento.indexOf(" ");
+        if (spazio == -1) return;
+
+        int idEvento = Integer.parseInt(evento.substring(0, spazio));
+
+        controller.selectEvento(idEvento, Role.ORGANIZZATORE);
+    }
+
+    /* ============================================================
        ================= DETTAGLI EVENTO ==========================
        ============================================================ */
-    private void mostraDettagliEvento(Evento evento) {
+    private void mostraDettagliEvento(int row) {
 
-        String testo =
-                "Titolo: " + evento.getTitolo() + "\n\n" +
-                        "Luogo: " + evento.getIndirizzoSede() + " " + evento.getNCivicoSede() + "\n\n" +
-                        "Date evento: " + evento.getDataInizio() + " → " + evento.getDataFine() + "\n\n" +
-                        "Registrazioni: " + evento.getDataInizioReg() + " → " + evento.getDataFineReg() + "\n\n" +
-                        "Max squadre: " + evento.getMaxIscritti() + "\n" +
-                        "Membri per squadra: " + evento.getMaxTeam() + "\n\n" +
-                        "Descrizione problema:\n" + evento.getDescrizioneProblema();
+        selezionaEvento(row);
+
+        String testo = controller.datiEvento();
 
         JOptionPane.showMessageDialog(
                 mainPanel,
@@ -135,31 +132,24 @@ public class OrganizzatoreGUI {
        ============================================================ */
     private void inizializzaBottoni() {
 
-        // Disabilitati finché non selezioni un evento
         setDatiEventoButton.setEnabled(false);
         invitaGiudiceButton.setEnabled(false);
 
         backButton.addActionListener(e -> parentFrame.showHome());
 
         setDatiEventoButton.addActionListener(e -> {
-            int row = table1.getSelectedRow();
-            if (row != -1) {
-                Evento evento = eventiOrganizzatore.get(row);
-                controller.selezionaEvento(evento);
+            if (table1.getSelectedRow() != -1) {
                 parentFrame.showSetDatiEvento();
             }
         });
 
         invitaGiudiceButton.addActionListener(e -> {
-            int row = table1.getSelectedRow();
-            if (row != -1) {
-                Evento evento = eventiOrganizzatore.get(row);
-                controller.selezionaEvento(evento);
+            if (table1.getSelectedRow() != -1) {
                 parentFrame.showInvitaGiudice();
             }
         });
 
-        // Abilita i bottoni solo quando selezioni una riga
+        // Abilitazione bottoni
         table1.getSelectionModel().addListSelectionListener(e -> {
             boolean selected = table1.getSelectedRow() != -1;
             setDatiEventoButton.setEnabled(selected);

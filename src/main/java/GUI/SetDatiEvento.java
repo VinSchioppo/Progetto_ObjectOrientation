@@ -1,6 +1,5 @@
 package GUI;
 
-import ClassModel.Evento;
 import Controller.Controller;
 
 import javax.swing.*;
@@ -12,18 +11,19 @@ public class SetDatiEvento {
 
     private JPanel mainPanel;
 
-    private JTextField textField1;   // Indirizzo
-    private JSpinner spinner1;        // Numero civico
+    private JTextField indirizzoSede;   // Indirizzo
+    private JSpinner maxTeamSpinner;        // Numero civico
 
-    private JSpinner spinner3;        // Data inizio evento
-    private JSpinner spinner2;        // Data fine evento
+    private JSpinner Datainizio;        // Data inizio evento
+    private JSpinner Datafine;        // Data fine evento
 
-    private JSpinner spinner4;        // Data inizio registrazioni
-    private JSpinner spinner5;        // Data fine registrazioni
+    private JSpinner Datainizioreg;        // Data inizio registrazioni
+    private JSpinner Datafinereg;        // Data fine registrazioni
 
-    private JTextArea textArea1;      // (NON usata qui, ma la lasciamo)
     private JButton saveButton;
     private JButton backButton;
+    private JSpinner MaxPartecipantispinner;
+    private JSpinner NumeroCivicospinner;
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
@@ -48,20 +48,24 @@ public class SetDatiEvento {
        ============================================================ */
     private void inizializzaSpinnerDate() {
 
-        spinner2.setModel(new SpinnerDateModel());
-        spinner3.setModel(new SpinnerDateModel());
-        spinner4.setModel(new SpinnerDateModel());
-        spinner5.setModel(new SpinnerDateModel());
+        Datafine.setModel(new SpinnerDateModel());
+        Datainizio.setModel(new SpinnerDateModel());
+        Datainizioreg.setModel(new SpinnerDateModel());
+        Datafinereg.setModel(new SpinnerDateModel());
 
-        JSpinner.DateEditor editor1 = new JSpinner.DateEditor(spinner2, "yyyy-MM-dd");
-        JSpinner.DateEditor editor2 = new JSpinner.DateEditor(spinner3, "yyyy-MM-dd");
-        JSpinner.DateEditor editor3 = new JSpinner.DateEditor(spinner4, "yyyy-MM-dd");
-        JSpinner.DateEditor editor4 = new JSpinner.DateEditor(spinner5, "yyyy-MM-dd");
+        JSpinner.DateEditor editor1 = new JSpinner.DateEditor(Datafine, "yyyy-MM-dd");
+        JSpinner.DateEditor editor2 = new JSpinner.DateEditor(Datainizio, "yyyy-MM-dd");
+        JSpinner.DateEditor editor3 = new JSpinner.DateEditor(Datainizioreg, "yyyy-MM-dd");
+        JSpinner.DateEditor editor4 = new JSpinner.DateEditor(Datafinereg, "yyyy-MM-dd");
 
-        spinner2.setEditor(editor1);
-        spinner3.setEditor(editor2);
-        spinner4.setEditor(editor3);
-        spinner5.setEditor(editor4);
+        Datafine.setEditor(editor1);
+        Datainizio.setEditor(editor2);
+        Datainizioreg.setEditor(editor3);
+        Datafinereg.setEditor(editor4);
+
+        NumeroCivicospinner.setModel(new SpinnerNumberModel(1, 1, 300, 1));
+        maxTeamSpinner.setModel(new SpinnerNumberModel(1,1,50,1));
+        MaxPartecipantispinner.setModel(new SpinnerNumberModel(1,1,200,1));
     }
 
     /* ============================================================
@@ -69,33 +73,25 @@ public class SetDatiEvento {
        ============================================================ */
     private void salvaDatiEvento() {
 
-        Evento evento = controller.getEventoSelezionato();
-        if (evento == null) {
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Nessun evento selezionato",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
-
         try {
-            String indirizzo = textField1.getText().trim();
-            int nCivico = (int) spinner1.getValue();
+            String indirizzo = indirizzoSede.getText().trim();
+            int nCivico = (int) NumeroCivicospinner.getValue();
+            int MaxPartecipanti = (int) MaxPartecipantispinner.getValue();
+            int MaxTeam = (int) maxTeamSpinner.getValue();
 
             // ===== DATE EVENTO =====
-            LocalDate dataInizioEvento = convertiData(spinner3);
-            LocalDate dataFineEvento   = convertiData(spinner2);
+            LocalDate dataInizioEvento = convertiData(Datainizio);
+            LocalDate dataFineEvento   = convertiData(Datafine);
 
             // ===== DATE REGISTRAZIONI =====
-            LocalDate dataInizioReg = convertiData(spinner4);
-            LocalDate dataFineReg   = convertiData(spinner5);
+            LocalDate dataInizioReg = convertiData(Datainizioreg);
+            LocalDate dataFineReg   = convertiData(Datafinereg);
 
             boolean ok1 = controller.inserisciDatiEvento(
                     indirizzo,
                     nCivico,
-                    textArea1.getText()
+                    MaxPartecipanti,
+                    MaxTeam
             );
 
             boolean ok2 = controller.setDateEvento(
@@ -125,6 +121,8 @@ public class SetDatiEvento {
             mostraErrore();
         }
     }
+
+
 
     private void mostraErrore() {
         JOptionPane.showMessageDialog(

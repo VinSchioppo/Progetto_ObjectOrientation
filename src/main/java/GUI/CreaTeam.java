@@ -1,6 +1,5 @@
 package GUI;
 
-import ClassModel.Evento;
 import Controller.Controller;
 
 import javax.swing.*;
@@ -16,7 +15,6 @@ public class CreaTeam extends JDialog {
 
     private Controller controller;
 
-    private ArrayList<Evento> eventi;
 
     public CreaTeam(JFrame owner, Controller controller) {
 
@@ -41,15 +39,7 @@ public class CreaTeam extends JDialog {
 
         DefaultListModel<String> model = new DefaultListModel<>();
 
-        eventi = controller.listaEventiDisponibiliTeam();
-
-        if (eventi != null) {
-
-            for (Evento e : eventi) {
-
-                model.addElement(e.getTitolo());
-            }
-        }
+        controller.listaEventiAperti();
 
         ListaEventi.setModel(model);
     }
@@ -74,11 +64,8 @@ public class CreaTeam extends JDialog {
             return;
         }
 
-        Evento evento = eventi.get(index);
-
-        boolean ok = controller.creaTeam(
-                nomeTeam,
-                evento.getIdEvento()
+        boolean ok = controller.creaTeamPartecipante(
+                nomeTeam
         );
 
         if (ok) {

@@ -15,7 +15,7 @@ public class InviteList<T>{
             if(invites == null)
                 invites = new RecordList<Invite<T>>();
             for (T record : records) {
-                invites.addRecord(new Invite<T>(record));
+                invites.addRecord(new Invite<>(record));
             }
         }
     }
@@ -29,14 +29,14 @@ public class InviteList<T>{
     public void addInvite(T record, Boolean answer) {
         if(invites == null)
             invites = new RecordList<Invite<T>>();
-        Invite<T> invite = new Invite<T>(record, answer);
+        Invite<T> invite = new Invite<>(record, answer);
         invites.addRecord(invite);
     }
 
     public void addInvite(T record) {
         if(invites == null)
             invites = new RecordList<Invite<T>>();
-        invites.addRecord(new Invite<T>(record));
+        invites.addRecord(new Invite<>(record));
     }
 
     public void removeInvite(){

@@ -1,11 +1,10 @@
 package GUI;
 
-import ClassModel.Evento;
-import ClassModel.Team;
-import Controller.*;
+import Controller.Controller;
+import Controller.Role;
 
 import javax.swing.*;
-import java.util.ArrayList;
+import java.util.List;
 
 public class GiudiceGUI {
 
@@ -14,141 +13,195 @@ public class GiudiceGUI {
     private JButton saveButton;
     private JList<String> listEventi;
     private JList<String> listTeam;
+    private JList<String> listProgressi;
+
     private JSpinner voto;
     private JTextPane giudizio;
     private JCheckBox abilitaVoto;
+    private JCheckBox abilitaGiudizio;
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
-
-    private ArrayList<Evento> eventiGiudice;
-    private Evento eventoSelezionato;
-    private ArrayList<Team> teamEvento;
 
     public GiudiceGUI(SelectEventoFrame parentFrame, Controller controller) {
 
         this.parentFrame = parentFrame;
         this.controller = controller;
 
-        voto.setModel(new SpinnerNumberModel(1,1,10,1));
+        inizializzaComponenti();
+        inizializzaListe();
+        inizializzaBottoni();
+    }
 
-        abilitaVoto.addActionListener(e -> {
-            voto.setEnabled(abilitaVoto.isSelected());
-        });
+    /* ================= COMPONENTI ================= */
+
+    private void inizializzaComponenti() {
+
+        voto.setModel(new SpinnerNumberModel(1, 1, 10, 1));
 
         voto.setEnabled(false);
+        giudizio.setEnabled(false);
 
-        caricaEventi();
+        abilitaVoto.addActionListener(e ->
+                voto.setEnabled(abilitaVoto.isSelected())
+        );
+
+        abilitaGiudizio.addActionListener(e ->
+                giudizio.setEnabled(abilitaGiudizio.isSelected())
+        );
+
+        saveButton.setEnabled(false);
+    }
+
+    /* ================= LISTE ================= */
+
+    private void inizializzaListe() {
+
+        // EVENTI
+        List<String> eventi = controller.listaEventiGiudice();
+        DefaultListModel<String> modelEventi = new DefaultListModel<>();
+
+        if (eventi != null) {
+            for (String e : eventi) modelEventi.addElement(e);
+        }
+
+        listEventi.setModel(modelEventi);
 
         listEventi.addListSelectionListener(e -> {
-
-            if(!e.getValueIsAdjusting()){
-
-                int index = listEventi.getSelectedIndex();
-
-                if(index != -1){
-
-                    eventoSelezionato = eventiGiudice.get(index);
-
-                    caricaTeam(eventoSelezionato.getIdEvento());
+            if (!e.getValueIsAdjusting()) {
+                int row = listEventi.getSelectedIndex();
+                if (row != -1) {
+                    selezionaEvento(row);
+                    aggiornaTeam();
                 }
             }
         });
 
-        backButton.addActionListener(e -> parentFrame.showHome());
+        // TEAM
+        listTeam.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                String team = listTeam.getSelectedValue();
+                if (team != null) {
+                    Integer idTeam = estraiId(team);
+                    if (idTeam != null) {
+                        aggiornaProgressi(idTeam);
+                    }
+                }
+            }
+        });
 
-        saveButton.addActionListener(e -> salvaValutazione());
-
+        // PROGRESSI
+        listProgressi.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                saveButton.setEnabled(listProgressi.getSelectedIndex() != -1);
+            }
+        });
     }
 
-    /* ========================= EVENTI ========================= */
+    /* ================= SELEZIONE EVENTO ================= */
 
-    private void caricaEventi(){
+    private void selezionaEvento(int row) {
 
-        DefaultListModel<String> model = new DefaultListModel<>();
+        String evento = listEventi.getModel().getElementAt(row);
+        Integer id = estraiId(evento);
 
-        eventiGiudice = controller.listaEventiGiudice();
-
-        if(eventiGiudice != null){
-
-            for(Evento e : eventiGiudice){
-
-                model.addElement(e.getTitolo());
-            }
+        if (id != null) {
+            controller.selectEvento(id, Role.GIUDICE);
         }
-
-        listEventi.setModel(model);
     }
 
-    /* ========================= TEAM ========================= */
+    /* ================= AGGIORNAMENTI ================= */
 
-    private void caricaTeam(int idEvento){
+    private void aggiornaTeam() {
 
+        List<String> team = controller.listaTeamEvento();
         DefaultListModel<String> model = new DefaultListModel<>();
 
-        teamEvento = controller.listaTeamEvento(idEvento);
-
-        if(teamEvento != null){
-
-            for(Team t : teamEvento){
-
-                model.addElement(t.getNome());
-            }
+        if (team != null) {
+            for (String t : team) model.addElement(t);
         }
 
         listTeam.setModel(model);
+        listProgressi.setModel(new DefaultListModel<>());
     }
 
-    //VA RIPENSATO SENZA IL COMMENTO
-    private void salvaValutazione(){
+    private void aggiornaProgressi(int idTeam) {
 
-        int index = listTeam.getSelectedIndex();
+        List<String> progressi = controller.listaProgressiTeamGiudicato(idTeam);
+        DefaultListModel<String> model = new DefaultListModel<>();
 
-        if(index == -1){
+        if (progressi != null) {
+            for (String p : progressi) model.addElement(p);
+        }
 
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Seleziona un team",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        listProgressi.setModel(model);
+    }
+
+    /* ================= BOTTONI ================= */
+
+    private void inizializzaBottoni() {
+
+        backButton.addActionListener(e -> parentFrame.showHome());
+
+        saveButton.addActionListener(e -> salvaValutazione());
+    }
+
+    /* ================= SAVE ================= */
+
+    private void salvaValutazione() {
+
+        String teamStr = listTeam.getSelectedValue();
+        String progStr = listProgressi.getSelectedValue();
+
+        if (teamStr == null || progStr == null) {
+            mostraErrore("Seleziona team e progresso");
             return;
         }
 
-        Team team = teamEvento.get(index);
+        Integer idTeam = estraiId(teamStr);
+        Integer idProg = estraiId(progStr);
 
-        String testo = giudizio.getText();
-
-        Integer votoVal = null;
-
-        if(abilitaVoto.isSelected()){
-            votoVal = (Integer) voto.getValue();
+        if (idTeam == null || idProg == null) {
+            mostraErrore("Errore formato dati");
+            return;
         }
 
-        boolean ok = controller.salvaValutazione(
-                team.getIdTeam(),
-                votoVal,
-                testo
-        );
+        boolean ok = true;
 
-        if(ok){
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Valutazione salvata",
-                    "Successo",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-
-        }else{
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Errore durante il salvataggio",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        // VOTO
+        if (abilitaVoto.isSelected()) {
+            int votoVal = (Integer) voto.getValue();
+            ok &= controller.giveVotoTeam(idTeam, votoVal);
         }
+
+        // COMMENTO
+        if (abilitaGiudizio.isSelected()) {
+            String testo = giudizio.getText();
+            ok &= controller.commentaProgresso(idProg, testo);
+        }
+
+        if (ok) {
+            JOptionPane.showMessageDialog(mainPanel, "Salvato", "Successo", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            mostraErrore("Errore durante il salvataggio");
+        }
+    }
+
+    /* ================= UTILITY ================= */
+
+    private Integer estraiId(String valore) {
+        int spazio = valore.indexOf(" ");
+        if (spazio == -1) return null;
+
+        try {
+            return Integer.parseInt(valore.substring(0, spazio));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void mostraErrore(String msg) {
+        JOptionPane.showMessageDialog(mainPanel, msg, "Errore", JOptionPane.ERROR_MESSAGE);
     }
 
     public JPanel getMainPanel() {

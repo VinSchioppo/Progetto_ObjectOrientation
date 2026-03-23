@@ -4,6 +4,8 @@ import Controller.Controller;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class UserAreaFrame extends JFrame {
 
@@ -34,9 +36,20 @@ public class UserAreaFrame extends JFrame {
 
         setContentPane(container);
 
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         pack();
         setLocationRelativeTo(null);
+
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+                controller.exitApplication();
+
+                System.exit(0);
+            }
+        });
     }
 
     public void openSelectEvento() {

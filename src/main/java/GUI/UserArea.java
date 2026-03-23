@@ -1,6 +1,5 @@
 package GUI;
 
-import ClassModel.Evento;
 import Controller.Controller;
 
 import javax.swing.*;
@@ -9,21 +8,23 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 public class UserArea {
 
     private JPanel mainPanel;
     private JTable datiTable;
-    private JList<String> list1;
+    private JList<String> listEventiIscritti;
     private JButton setDatiButton;
     private JButton creaEventoButton;
     private JButton logOutButton;
     private JButton selectEventoButton;
     private JButton iscriviEventoButton;
     private JList ListaRichiesteTeam;
-    private ArrayList<Evento> eventiUtente;
+    private JList listRichiestaGiudice;
+    private List<String> eventiUtente;
 
-    private UserAreaFrame parentFrame;
+    private GUI.UserAreaFrame parentFrame;
     private Controller controller;
     private ArrayList<Integer> richiesteTeamId;
 
@@ -109,31 +110,20 @@ public class UserArea {
         datiTable.setFocusable(false);
         datiTable.setFillsViewportHeight(false);
 
-        inizializzaListaRichieste();
-
     }
 
-    /* ============================================================
-       ================= LISTA EVENTI (JLIST) =====================
-       ============================================================ */
+    //   ================= LISTA EVENTI (JLIST) =====================
+
     private void inizializzaListaEventi() {
 
-        DefaultListModel<String> model = new DefaultListModel<>();
         eventiUtente = controller.listaEventiPartecipante();
 
-        if (eventiUtente != null) {
-            for (Evento e : eventiUtente) {
-                model.addElement(e.getTitolo()); // SOLO titolo
-            }
-        }
 
-        list1.setModel(model);
-
-        list1.addMouseListener(new MouseAdapter() {
+        listEventiIscritti.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    int index = list1.locationToIndex(e.getPoint());
+                    int index = listEventiIscritti.locationToIndex(e.getPoint());
                     if (index != -1) {
                         mostraDettagliEvento(index);
                     }
@@ -147,14 +137,7 @@ public class UserArea {
         if (eventiUtente == null || index >= eventiUtente.size())
             return;
 
-        Evento evento = eventiUtente.get(index);
-
-        String testo =
-                "Titolo: " + evento.getTitolo() + "\n\n" +
-                        "Luogo: " + evento.getIndirizzoSede() + " " + evento.getNCivicoSede() + "\n\n" +
-                        "Date evento: " + evento.getDataInizio() + " → " + evento.getDataFine() + "\n\n" +
-                        "Registrazioni: " + evento.getDataInizioReg() + " → " + evento.getDataFineReg() + "\n\n" +
-                        "Descrizione:\n" + evento.getDescrizioneProblema();
+        String testo = controller.datiEvento();
 
         JOptionPane.showMessageDialog(
                 mainPanel,
@@ -164,91 +147,6 @@ public class UserArea {
         );
     }
 
-       //===================== BOTTONI ==============================
-
-    //NON SI PUÒ USARE RICHIESTE
-    private void inizializzaListaRichieste() {
-
-        DefaultListModel<String> model = new DefaultListModel<>();
-
-        richiesteTeamId = new ArrayList<>();
-
-        ArrayList<Object[]> richieste = controller.listaRichiesteTeam();
-
-        if (richieste != null) {
-
-            for (Object[] r : richieste) {
-
-                String nomeTeam = (String) r[0];
-                int idTeam = (int) r[1];
-
-                model.addElement(nomeTeam);
-                richiesteTeamId.add(idTeam);
-            }
-        }
-
-        ListaRichiesteTeam.setModel(model);
-
-        ListaRichiesteTeam.addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-                if (e.getClickCount() == 2) {
-
-                    int index = ListaRichiesteTeam.locationToIndex(e.getPoint());
-
-                    if (index != -1) {
-                        gestisciRichiesta(index);
-                    }
-                }
-            }
-        });
-    }
-
-    private void gestisciRichiesta(int index) {
-
-        int idTeam = richiesteTeamId.get(index);
-
-        int scelta = JOptionPane.showConfirmDialog(
-                mainPanel,
-                "Vuoi unirti al team?",
-                "Invito team",
-                JOptionPane.YES_NO_OPTION
-        );
-
-        boolean ok;
-
-        if (scelta == JOptionPane.YES_OPTION) {
-
-            ok = controller.accettaRichiestaTeam(idTeam);
-
-        } else {
-
-            ok = controller.rifiutaRichiestaTeam(idTeam);
-        }
-
-        if (ok) {
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Richiesta aggiornata",
-                    "Successo",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-
-            inizializzaListaRichieste();
-
-        } else {
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Errore nell'operazione",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
-    }
 
     private void inizializzaBottoni() {
 

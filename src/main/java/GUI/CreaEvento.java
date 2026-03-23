@@ -1,20 +1,19 @@
 package GUI;
 
-import Controller.*;
+import Controller.Controller;
 
 import javax.swing.*;
 
 public class CreaEvento {
 
     private JPanel mainPanel;
-    private JTextField textField1;     // Nome evento
-    private JSpinner spinner1;         // Max membri team
-    private JSpinner spinner2;         // Max squadre
-    private JTextArea textArea1;       // Descrizione
+    private JTextField NomeEventoJTextField;     // Nome evento
+    private JSpinner NumeroCivicoSpinner;         // Max squadre
+    private JTextArea IndirizzoJtextArea;       // Descrizione
     private JButton salvaButton;
     private JButton indietroButton;
 
-    private UserAreaFrame parentFrame;
+    private GUI.UserAreaFrame parentFrame;
     private Controller controller;
 
     public CreaEvento(UserAreaFrame parentFrame, Controller controller) {
@@ -27,8 +26,7 @@ public class CreaEvento {
 
     private void inizializzaSpinner() {
 
-        spinner1.setModel(new SpinnerNumberModel(1, 1, 10, 1));   // membri team
-        spinner2.setModel(new SpinnerNumberModel(1, 1, 100, 1));  // max squadre
+        NumeroCivicoSpinner.setModel(new SpinnerNumberModel(1, 1, 300, 1));
     }
 
     private void inizializzaBottoni() {
@@ -39,10 +37,9 @@ public class CreaEvento {
 
         salvaButton.addActionListener(e -> {
 
-            String nomeEvento = textField1.getText().trim();
-            int maxTeam = (int) spinner1.getValue();
-            int maxSquadre = (int) spinner2.getValue();
-            String descrizione = textArea1.getText().trim();
+            String nomeEvento = NomeEventoJTextField.getText().trim();
+            int NumeroCivico = (int) NumeroCivicoSpinner.getValue();
+            String indirizzo = IndirizzoJtextArea.getText().trim();
 
             if (nomeEvento.isEmpty()) {
                 JOptionPane.showMessageDialog(
@@ -54,11 +51,10 @@ public class CreaEvento {
                 return;
             }
 
-            boolean ok = controller.creaEventoBase(
+            boolean ok = controller.creaEvento(
                     nomeEvento,
-                    maxTeam,
-                    maxSquadre,
-                    descrizione
+                    indirizzo,
+                    NumeroCivico
             );
 
             if (!ok) {

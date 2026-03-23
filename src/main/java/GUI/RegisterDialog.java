@@ -10,7 +10,7 @@ public class RegisterDialog extends JDialog {
     public RegisterDialog(JFrame owner) {
         super(owner, "Registrazione", true);
 
-        Register registerView = new Register();
+        GUI.Register registerView = new Register();
         Controller controller = new Controller();
 
         JPanel panel = registerView.getMainPanel();

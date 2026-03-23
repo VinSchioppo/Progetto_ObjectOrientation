@@ -20,7 +20,7 @@ public class RecordList <T>
     public void addRecord(T record) {
         if(records == null) {
             current = 0;
-            records = new ArrayList<T>();
+            records = new ArrayList<>();
         }
         records.add(record);
     }

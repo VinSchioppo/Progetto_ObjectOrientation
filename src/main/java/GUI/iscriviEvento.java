@@ -1,23 +1,22 @@
 package GUI;
 
-import ClassModel.Evento;
-import Controller.*;
+import Controller.Controller;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import java.util.ArrayList;
+import java.util.List;
 
 public class iscriviEvento {
 
-    private UserAreaFrame parentFrame;
+    private GUI.UserAreaFrame parentFrame;
     private JPanel mainPanel;
     private JTable table1;
     private JButton backButton;
     private JButton confermaButton;
 
     private Controller controller;
-    private ArrayList<Evento> eventiCorrenti;
+    private List<String> eventiCorrenti;
 
     public iscriviEvento(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -27,7 +26,6 @@ public class iscriviEvento {
         inizializzaBottoni();
     }
 
-    //NON PUÒ USARE EVENTO
     private void inizializzaTabella() {
 
         String[] colonne = {
@@ -49,21 +47,27 @@ public class iscriviEvento {
 
         eventiCorrenti = controller.listaEventiAperti();
 
-        if (eventiCorrenti != null) {
-            for (Evento e : eventiCorrenti) {
-                model.addRow(new Object[]{
-                        e.getTitolo(),
-                        e.getIndirizzoSede() + " " + e.getNCivicoSede(),
-                        e.getDataInizio() + " → " + e.getDataFine(),
-                        e.getDataInizioReg() + " → " + e.getDataFineReg(),
-                        (e.getMaxTeam() > 1 ? "Team" : "Singolo"),
-                        e.getMaxTeam(),
-                        "Dettagli"
-                });
-            }
-        }
+        for (String evento : eventiCorrenti) {
 
-        table1.setModel(model);
+            String[] dati = evento.split(" ");
+
+            String id = dati[0];
+            String titolo = dati[1];
+            String luogo = dati[2] + " " + dati[3];
+            String dateEvento = dati[4] + " - " + dati[5];
+            String maxTeam = dati[7];
+            String dateReg = dati[8] + " - " + dati[9];
+
+            model.addRow(new Object[]{
+                    titolo,
+                    luogo,
+                    dateEvento,
+                    dateReg,
+                    "N/A",
+                    maxTeam,
+                    "Dettagli"
+            });
+        }
 
         // ===== SELEZIONE RIGA =====
         table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -97,7 +101,7 @@ public class iscriviEvento {
         // ===== BOTTONE DETTAGLI =====
         table1.getColumn("Dettagli").setCellRenderer(new ButtonRenderer());
         table1.getColumn("Dettagli").setCellEditor(
-                new ButtonEditor(table1, eventiCorrenti)
+                new ButtonEditor(table1, eventiCorrenti) //mi da un errore con "eventiCorrenti"
         );
 
         // ===== ABILITA CONFERMA ALLA SELEZIONE =====
@@ -129,8 +133,12 @@ public class iscriviEvento {
                 return;
             }
 
-            Evento eventoSelezionato = eventiCorrenti.get(selectedRow);
-            boolean ok = controller.iscriviEvento(eventoSelezionato.getIdEvento());
+            String eventoSelezionato = eventiCorrenti.get(selectedRow);
+
+            String[] dati = eventoSelezionato.split(" ");
+            int idEvento = Integer.parseInt(dati[0]);
+
+            boolean ok = controller.iscriviEvento(idEvento);
 
             if (ok) {
                 controller.exitApplication();

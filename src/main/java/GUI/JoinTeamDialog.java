@@ -1,24 +1,18 @@
 package GUI;
 
-import ClassModel.Evento;
-import ClassModel.Team;
 import Controller.Controller;
 
 import javax.swing.*;
-import java.util.ArrayList;
+import java.util.List;
 
 public class JoinTeamDialog extends JDialog {
 
     private JPanel mainPanel;
-    private JList<String> listEventi;
     private JList<String> listTeam;
     private JButton saveButton;
     private JButton backButton;
 
     private Controller controller;
-
-    private ArrayList<Evento> eventi;
-    private ArrayList<Team> teamEvento;
 
     public JoinTeamDialog(JFrame owner, Controller controller) {
 
@@ -30,108 +24,98 @@ public class JoinTeamDialog extends JDialog {
         pack();
         setLocationRelativeTo(owner);
 
-        caricaEventi();
+        inizializzaLista();
+        inizializzaBottoni();
+    }
 
-        listEventi.addListSelectionListener(e -> {
+    // ================== INIZIALIZZA LISTA =======================
+
+    private void inizializzaLista() {
+
+        List<String> team = controller.listaTeamEvento();
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        if (team != null) {
+            for (String t : team) {
+                model.addElement(t);
+            }
+        }
+
+        listTeam.setModel(model);
+
+        saveButton.setEnabled(false);
+
+        listTeam.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                caricaTeamEvento();
+                saveButton.setEnabled(listTeam.getSelectedIndex() != -1);
             }
         });
+    }
+
+    // ===================== BOTTONI ==============================
+
+    private void inizializzaBottoni() {
 
         saveButton.addActionListener(e -> joinTeam());
 
         backButton.addActionListener(e -> dispose());
     }
 
-    //NON PUÒ USARE EVENTO
-    private void caricaEventi() {
-
-        eventi = controller.listaEventiUtenteCompleti();
-
-        DefaultListModel<String> model = new DefaultListModel<>();
-
-        if (eventi != null) {
-            for (Evento e : eventi) {
-                model.addElement(e.getTitolo());
-            }
-        }
-
-        listEventi.setModel(model);
-    }
-
-    //NON SI PUÒ USARE TEAM
-    private void caricaTeamEvento() {
-
-        int index = listEventi.getSelectedIndex();
-
-        System.out.println("Index evento: " + index);
-
-        if (index == -1)
-            return;
-
-        Evento evento = eventi.get(index);
-
-        System.out.println("Evento selezionato: " + evento.getTitolo());
-        System.out.println("ID evento GUI: " + evento.getIdEvento());
-
-        teamEvento = controller.listaTeamDisponibili(evento.getIdEvento());
-
-        System.out.println("Team ricevuti: " +
-                (teamEvento == null ? "null" : teamEvento.size()));
-
-        DefaultListModel<String> model = new DefaultListModel<>();
-
-        if (teamEvento != null) {
-            for (Team t : teamEvento) {
-                System.out.println("Team: " + t.getNome());
-                model.addElement(t.getNome());
-            }
-        }
-
-        System.out.println("Team nel model: " + model.size());
-
-        listTeam.setModel(model);
-    }
+    // ===================== JOIN TEAM ============================
 
     private void joinTeam() {
 
-        int indexTeam = listTeam.getSelectedIndex();
+        String selezionato = listTeam.getSelectedValue();
 
-        if (indexTeam == -1) {
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Seleziona un team",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
-            );
-
+        if (selezionato == null) {
+            mostraErrore("Seleziona un team");
             return;
         }
 
-        Team team = teamEvento.get(indexTeam);
+        Integer idTeam = estraiId(selezionato);
 
-        boolean ok = controller.joinTeam(team.getIdTeam());
+        if (idTeam == null) {
+            mostraErrore("Errore nel formato del team");
+            return;
+        }
+
+        boolean ok = controller.joinTeam(idTeam);
 
         if (ok) {
-
             JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Entrato nel team",
+                    this,
+                    "Richiesta inviata al team",
                     "Successo",
                     JOptionPane.INFORMATION_MESSAGE
             );
-
             dispose();
-
         } else {
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Errore durante l'operazione",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            mostraErrore("Impossibile unirsi al team");
         }
+    }
+
+    // ===================== UTILITY ==============================
+
+    private Integer estraiId(String valore) {
+
+        int spazio = valore.indexOf(" ");
+
+        if (spazio == -1) return null;
+
+        try {
+            return Integer.parseInt(valore.substring(0, spazio));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private void mostraErrore(String messaggio) {
+        JOptionPane.showMessageDialog(
+                this,
+                messaggio,
+                "Errore",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 }

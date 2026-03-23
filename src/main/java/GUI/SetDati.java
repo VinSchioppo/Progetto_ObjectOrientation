@@ -1,12 +1,12 @@
 package GUI;
 
-import Controller.*;
+import Controller.Controller;
 
 import javax.swing.*;
-import java.util.Date;
-import java.util.Calendar;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 
 public class SetDati {
 
@@ -18,7 +18,7 @@ public class SetDati {
     private JButton saveButton;
     private JButton backButton;
 
-    private UserAreaFrame parentFrame;
+    private GUI.UserAreaFrame parentFrame;
 
     public SetDati(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;

@@ -1,6 +1,6 @@
 package GUI;
 
-import Controller.*;
+import Controller.Controller;
 
 import javax.swing.*;
 

@@ -4,6 +4,8 @@ import Controller.Controller;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class SelectEventoFrame extends JFrame {
 
@@ -38,9 +40,20 @@ public class SelectEventoFrame extends JFrame {
         container.add(giudicePanel.getMainPanel(), "GIUDICE");
 
         setContentPane(container);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         pack();
         setLocationRelativeTo(null);
+
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+                controller.exitApplication();
+
+                System.exit(0);
+            }
+        });
     }
 
     public void logout() {
@@ -70,10 +83,7 @@ public class SelectEventoFrame extends JFrame {
         cardLayout.show(container, "GIUDICE");
     }
 
-    public void showInvitaGiudice() {
-        invitaGiudicePanel.caricaListe(); //qua mi da l'errore
-        cardLayout.show(container, "INVITA_GIUDICE");
-    }
+    public void showInvitaGiudice() { cardLayout.show(container, "INVITA_GIUDICE"); }
 
     public void showSetDatiEvento() {
         cardLayout.show(container, "SET_DATI_EVENTO");

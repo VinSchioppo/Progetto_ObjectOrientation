@@ -1,125 +1,122 @@
 package GUI;
 
-import ClassModel.Evento;
-import Controller.*;
+import Controller.Controller;
 
 import javax.swing.*;
-import java.util.ArrayList;
+import java.util.List;
 
 public class InvitaGiudice {
 
     private JPanel mainPanel;
-    private JList<String> listGiudiciPossibili;
-    private JList<String> listGiudic;
+    private JList<String> listGiudiciPossibili;   // invitati
+    private JList<String> listGiudici;            // già giudici
     private JButton saveButton;
     private JButton backButton;
+    private JList<String> listPartecipantiEvento;
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
-
-    private Evento evento;
 
     public InvitaGiudice(SelectEventoFrame parentFrame, Controller controller) {
 
         this.parentFrame = parentFrame;
         this.controller = controller;
 
-        saveButton.addActionListener(e -> invitaGiudice());
-
-        backButton.addActionListener(e ->
-                parentFrame.showOrganizzatoreGUI()
-        );
+        inizializzaListe();
+        inizializzaBottoni();
     }
 
+    /* ============================================================
+       =================== INIZIALIZZAZIONE =======================
+       ============================================================ */
+    private void inizializzaListe() {
 
-    public void caricaListe() {
-
-
-        evento = controller.getEventoSelezionato();
-
-        if (evento == null) {
-            System.out.println("Nessun evento selezionato");
-            return;
-        }
-
-        System.out.println("Evento selezionato: " + evento.getTitolo());
-
-
-        if (evento == null)
-            return;
-
-        /* ===== GIUDICI EVENTO ===== */
+        // ===== GIUDICI ATTUALI =====
+        List<String> giudici = controller.listaGiudiciEvento();
 
         DefaultListModel<String> modelGiudici = new DefaultListModel<>();
-
-        ArrayList<String> giudici = controller.listaGiudiciEvento(evento.getIdEvento());
-
         if (giudici != null) {
             for (String g : giudici) {
                 modelGiudici.addElement(g);
             }
         }
+        listGiudici.setModel(modelGiudici);
 
-        listGiudic.setModel(modelGiudici);
+        // ===== PARTECIPANTI EVENTO =====
+        List<String> partecipanti = controller.listaPartecipantiEvento();
 
-        /* ===== GIUDICI POSSIBILI ===== */
-
-        DefaultListModel<String> modelPossibili = new DefaultListModel<>();
-
-        ArrayList<String> possibili = controller.listaUtentiPossibiliGiudici(evento.getIdEvento());
-
-        if (possibili != null) {
-            for (String u : possibili) {
-                modelPossibili.addElement(u);
+        DefaultListModel<String> modelPartecipanti = new DefaultListModel<>();
+        if (partecipanti != null) {
+            for (String p : partecipanti) {
+                modelPartecipanti.addElement(p);
             }
         }
+        listPartecipantiEvento.setModel(modelPartecipanti);
 
-        listGiudiciPossibili.setModel(modelPossibili);
+        // ===== INVITATI (placeholder) =====
+        DefaultListModel<String> modelInvitati = new DefaultListModel<>();
+        listGiudiciPossibili.setModel(modelInvitati);
     }
 
-    private void invitaGiudice() {
+    /* ============================================================
+       ======================= BOTTONI =============================
+       ============================================================ */
+    private void inizializzaBottoni() {
 
-        int index = listGiudiciPossibili.getSelectedIndex();
+        saveButton.setEnabled(false);
 
-        if (index == -1) {
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Seleziona un utente",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
-            );
-
-            return;
-        }
-
-        String nomeGiudice = listGiudiciPossibili.getSelectedValue();
-
-        boolean ok = controller.invitaGiudice(
-                nomeGiudice,
-                evento.getIdEvento()
+        backButton.addActionListener(e ->
+                parentFrame.showOrganizzatoreGUI()
         );
 
-        if (ok) {
+        // Abilita save solo se selezioni un partecipante
+        listPartecipantiEvento.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                saveButton.setEnabled(listPartecipantiEvento.getSelectedIndex() != -1);
+            }
+        });
 
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Giudice invitato correttamente",
-                    "Successo",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+        // ===== AZIONE SAVE =====
+        saveButton.addActionListener(e -> {
 
-            caricaListe();
+            String selezionato = listPartecipantiEvento.getSelectedValue();
 
-        } else {
+            if (selezionato == null) {
+                JOptionPane.showMessageDialog(
+                        mainPanel,
+                        "Seleziona un partecipante",
+                        "Errore",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
 
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Errore nell'invito del giudice",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }
+            boolean ok = controller.invitaGiudice(selezionato);
+
+            if (ok) {
+
+                JOptionPane.showMessageDialog(
+                        mainPanel,
+                        "Invito inviato",
+                        "Successo",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
+                // Aggiorna lista invitati (UI locale)
+                DefaultListModel<String> modelInvitati =
+                        (DefaultListModel<String>) listGiudiciPossibili.getModel();
+
+                modelInvitati.addElement(selezionato);
+
+            } else {
+                JOptionPane.showMessageDialog(
+                        mainPanel,
+                        "Errore durante l'invito",
+                        "Errore",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+        });
     }
 
     public JPanel getMainPanel() {

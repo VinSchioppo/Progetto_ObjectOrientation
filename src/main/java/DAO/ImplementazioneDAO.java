@@ -492,7 +492,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public void addOrganizzatoreDB(Organizzatore organizzatore) throws SQLException{
-        addOrganizzatoreDB(organizzatore.getNomeUtente(), organizzatore.getPasswordUtente(), organizzatore.getfNome(), organizzatore.getmNome(), organizzatore.getlNome(), organizzatore.getDataNascita());
+        addOrganizzatoreDB(organizzatore.getNomeUtente(), organizzatore.getPasswordUtente(), organizzatore.getFNome(), organizzatore.getMNome(), organizzatore.getLNome(), organizzatore.getDataNascita());
     }
 
     public void addOrganizzatoreDB(String nomeUtente, String password, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
