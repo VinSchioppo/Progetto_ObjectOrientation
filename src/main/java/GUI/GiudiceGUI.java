@@ -19,6 +19,7 @@ public class GiudiceGUI {
     private JTextPane giudizio;
     private JCheckBox abilitaVoto;
     private JCheckBox abilitaGiudizio;
+    private JList<String> listaProgressi;
 
     private SelectEventoFrame parentFrame;
     private Controller controller;

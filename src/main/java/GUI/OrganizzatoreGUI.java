@@ -48,24 +48,25 @@ public class OrganizzatoreGUI {
 
         eventiOrganizzatore = controller.listaEventiOrganizzatore();
 
-        // Mostra direttamente la stringa intera
-        for (String evento : eventiOrganizzatore) {
-            model.addRow(new Object[]{ evento });
+        if(eventiOrganizzatore != null) {
+            // Mostra direttamente la stringa intera
+            for (String evento : eventiOrganizzatore) {
+                model.addRow(new Object[]{evento});
+            }
+
+            table1.setModel(model);
+            table1.setRowHeight(32);
+            table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            table1.setRowSelectionAllowed(true);
+            table1.setColumnSelectionAllowed(false);
+
+            // ===== CENTRATURA =====
+            DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+            center.setHorizontalAlignment(SwingConstants.CENTER);
+            table1.getColumnModel().getColumn(0).setCellRenderer(center);
+
+            table1.getTableHeader().setReorderingAllowed(false);
         }
-
-        table1.setModel(model);
-        table1.setRowHeight(32);
-        table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table1.setRowSelectionAllowed(true);
-        table1.setColumnSelectionAllowed(false);
-
-        // ===== CENTRATURA =====
-        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
-        center.setHorizontalAlignment(SwingConstants.CENTER);
-        table1.getColumnModel().getColumn(0).setCellRenderer(center);
-
-        table1.getTableHeader().setReorderingAllowed(false);
-
         // ===== SELEZIONE =====
         table1.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {

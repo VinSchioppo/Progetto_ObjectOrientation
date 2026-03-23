@@ -45,9 +45,6 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     private static final String VALORE = "valore";
 
-    private static final String WHERE_UTENTE = " WHERE NomeUtente = ";
-    private static final String ORDER = " ORDER BY t.idTeam;";
-
     public ImplementazioneDAO() {
         try {
             connection = ConnessioneDatabase.getInstance().Connection;
@@ -414,14 +411,15 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void updatePartecipanteDB(String nomePartecipante, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
+    public void updatePartecipanteDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "UPDATE Partecipante SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
-                        WHERE_UTENTE + nomePartecipante + ";")) {
+                "UPDATE Partecipante SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ? " +
+                    "WHERE NomeUtente = ?;")) {
             ps.setString(1, fNome);
             ps.setString(2, mNome);
             ps.setString(3, lNome);
             ps.setObject(4, dataNascita);
+            ps.setString(5, nomeUtente);
             ps.executeUpdate();
         }
     }
@@ -534,12 +532,13 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void updateOrganizzatoreDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "UPDATE Organizzatore SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
-                        WHERE_UTENTE + nomeUtente + ";")) {
+                "UPDATE Organizzatore SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ? " +
+                    "WHERE NomeUtente = ?;")) {
             ps.setString(1, fNome);
             ps.setString(2, mNome);
             ps.setString(3, lNome);
             ps.setObject(4, dataNascita);
+            ps.setString(5, nomeUtente);
             ps.executeUpdate();
         }
     }
@@ -639,12 +638,13 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void updateGiudiceDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "UPDATE Giudice SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ?" +
-                        WHERE_UTENTE + nomeUtente + ";")) {
+                "UPDATE Giudice SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ? " +
+                    "WHERE NomeUtente = ?;")) {
             ps.setString(1, fNome);
             ps.setString(2, mNome);
             ps.setString(3, lNome);
             ps.setObject(4, dataNascita);
+            ps.setString(5, nomeUtente);
             ps.executeUpdate();
         }
     }
@@ -655,7 +655,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
                 "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
-                "WHERE t.idEvento = " + idEvento + ORDER)) {
+                "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 teams = new ArrayList<>();
@@ -696,7 +696,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
                 "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
-                "WHERE t.idEvento = " + idEvento + ORDER)) {
+                "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 teams = new ArrayList<>();
@@ -955,7 +955,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 "SELECT * FROM Team AS t " +
                 "JOIN Voto AS v ON t.IdTeam = v.idTeam " +
                 "WHERE t.idEvento = " + evento.getIdEvento() +
-                        ORDER)) {
+                " ORDER BY t.idTeam;")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 rs.next();

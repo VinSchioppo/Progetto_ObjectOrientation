@@ -47,62 +47,64 @@ public class iscriviEvento {
 
         eventiCorrenti = controller.listaEventiAperti();
 
-        for (String evento : eventiCorrenti) {
+        if(eventiCorrenti != null) {
+            for (String evento : eventiCorrenti) {
 
-            String[] dati = evento.split(" ");
+                String[] dati = evento.split(" ");
 
-            String id = dati[0];
-            String titolo = dati[1];
-            String luogo = dati[2] + " " + dati[3];
-            String dateEvento = dati[4] + " - " + dati[5];
-            String maxTeam = dati[7];
-            String dateReg = dati[8] + " - " + dati[9];
+                String id = dati[0];
+                String titolo = dati[1];
+                String luogo = dati[2] + " " + dati[3];
+                String dateEvento = dati[4] + " - " + dati[5];
+                String maxTeam = dati[7];
+                String dateReg = dati[8] + " - " + dati[9];
 
-            model.addRow(new Object[]{
-                    titolo,
-                    luogo,
-                    dateEvento,
-                    dateReg,
-                    "N/A",
-                    maxTeam,
-                    "Dettagli"
-            });
-        }
-
-        // ===== SELEZIONE RIGA =====
-        table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table1.setRowSelectionAllowed(true);
-        table1.setColumnSelectionAllowed(false);
-
-        table1.setRowHeight(30);
-        table1.setRowSelectionAllowed(true);
-        table1.getTableHeader().setReorderingAllowed(false);
-        table1.getTableHeader().setResizingAllowed(false);
-
-        // ===== COLORE SELEZIONE =====
-        table1.setSelectionBackground(new java.awt.Color(184, 207, 229));
-        table1.setSelectionForeground(java.awt.Color.BLACK);
-
-        // ===== CENTRATURA CELLE =====
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-
-        for (int i = 0; i < table1.getColumnCount(); i++) {
-            if (!table1.getColumnName(i).equals("Dettagli")) {
-                table1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+                model.addRow(new Object[]{
+                        titolo,
+                        luogo,
+                        dateEvento,
+                        dateReg,
+                        "N/A",
+                        maxTeam,
+                        "Dettagli"
+                });
             }
+
+            // ===== SELEZIONE RIGA =====
+            table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            table1.setRowSelectionAllowed(true);
+            table1.setColumnSelectionAllowed(false);
+
+            table1.setRowHeight(30);
+            table1.setRowSelectionAllowed(true);
+            table1.getTableHeader().setReorderingAllowed(false);
+            table1.getTableHeader().setResizingAllowed(false);
+
+            // ===== COLORE SELEZIONE =====
+            table1.setSelectionBackground(new java.awt.Color(184, 207, 229));
+            table1.setSelectionForeground(java.awt.Color.BLACK);
+
+            // ===== CENTRATURA CELLE =====
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+            for (int i = 0; i < table1.getColumnCount(); i++) {
+                if (!table1.getColumnName(i).equals("Dettagli")) {
+                    table1.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+                }
+            }
+
+            // ===== CENTRATURA HEADER =====
+            DefaultTableCellRenderer headerRenderer =
+                    (DefaultTableCellRenderer) table1.getTableHeader().getDefaultRenderer();
+            headerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+            // ===== BOTTONE DETTAGLI =====
+            table1.getColumn("Dettagli").setCellRenderer(new ButtonRenderer());
+            table1.getColumn("Dettagli").setCellEditor(
+                    new ButtonEditor(table1, eventiCorrenti) //mi da un errore con "eventiCorrenti"
+            );
         }
-
-        // ===== CENTRATURA HEADER =====
-        DefaultTableCellRenderer headerRenderer =
-                (DefaultTableCellRenderer) table1.getTableHeader().getDefaultRenderer();
-        headerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-
-        // ===== BOTTONE DETTAGLI =====
-        table1.getColumn("Dettagli").setCellRenderer(new ButtonRenderer());
-        table1.getColumn("Dettagli").setCellEditor(
-                new ButtonEditor(table1, eventiCorrenti) //mi da un errore con "eventiCorrenti"
-        );
 
         // ===== ABILITA CONFERMA ALLA SELEZIONE =====
         table1.getSelectionModel().addListSelectionListener(e -> {

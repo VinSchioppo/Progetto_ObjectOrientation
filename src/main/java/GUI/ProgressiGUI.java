@@ -25,4 +25,7 @@ public class ProgressiGUI {
     }
 
 
+    public JPanel getMainPanel() {
+        return mainPanel;
+    }
 }

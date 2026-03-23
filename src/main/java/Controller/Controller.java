@@ -69,9 +69,8 @@ public class Controller {
 
     //Metodi di verifica del ruolo
 
-    public boolean isOrganizzatore() {
-        return organizzatoreCorrente != null;
-    }
+    public boolean isPartecipante() {return partecipanteCorrente != null;}
+    public boolean isOrganizzatore() {return organizzatoreCorrente != null;}
     public boolean isGiudice() {
         return giudiceCorrente != null;
     }

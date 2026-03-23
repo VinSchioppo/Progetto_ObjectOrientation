@@ -25,6 +25,8 @@ public class SetDatiEvento {
     private JSpinner MaxPartecipantispinner;
     private JSpinner NumeroCivicospinner;
 
+    private JTextArea DescrizioneProblema;
+
     private SelectEventoFrame parentFrame;
     private Controller controller;
 
@@ -121,8 +123,6 @@ public class SetDatiEvento {
             mostraErrore();
         }
     }
-
-
 
     private void mostraErrore() {
         JOptionPane.showMessageDialog(
