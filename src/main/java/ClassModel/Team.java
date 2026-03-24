@@ -70,6 +70,11 @@ public class Team {
         return false;
     }
 
+    public boolean removeMembroTeam(String nomeUtente){
+        seekMembroTeam(nomeUtente);
+        return removeMembroTeam();
+    }
+
     public Partecipante getMembroTeam(){
         if(membriTeam != null){
             return membriTeam.getRecord();
@@ -117,7 +122,6 @@ public class Team {
     }
 
     public Partecipante seekAndRemoveMembroTeam(String nomeUtente){
-
         Partecipante membro = seekMembroTeam(nomeUtente);
         removeMembroTeam();
         return membro;

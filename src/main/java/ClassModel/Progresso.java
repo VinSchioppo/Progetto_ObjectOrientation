@@ -3,6 +3,7 @@ package ClassModel;
 import RecordList.RecordList;
 import java.util.ArrayList;
 import java.time.LocalDate;
+import java.util.List;
 
 public class Progresso {
 
@@ -29,7 +30,7 @@ public class Progresso {
     public void setIdTeam(int idTeam) {this.idTeam = idTeam;}
     public void setDataProgresso(LocalDate dataProgresso) {this.dataProgresso = dataProgresso;}
     public void setTestoDocumeto(String testoDocumento) {this.testoDocumeto = testoDocumento;}
-    public void setCommenti(ArrayList<Commento> commenti){
+    public void setCommenti(List<Commento> commenti){
         if(this.commenti == null)
             this.commenti = new RecordList<Commento>();
         this.commenti.setRecords(commenti);

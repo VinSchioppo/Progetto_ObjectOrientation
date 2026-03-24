@@ -26,13 +26,17 @@ public class Partecipante extends Utente {
 
     }
 
-    public boolean removeTeam(int idTeam) {
+    public boolean removeTeam() {
         if(teamUniti != null){
-            seekTeam(idTeam);
             teamUniti.removeRecord();
             return true;
         }
         return false;
+    }
+
+    public boolean removeTeam(int idTeam) {
+        seekTeam(idTeam);
+        return removeTeam();
     }
 
     public Team getTeam(){
@@ -80,6 +84,14 @@ public class Partecipante extends Utente {
         }
         return null;
     }
+
+    public Team seekAndRemoveTeam(int idTeam){
+        Team team = seekTeam(idTeam);
+        removeTeam();
+        return team;
+    }
+
+
 
     public Team seekTeamEvento(int idEvento){
         Team team = firstTeam();

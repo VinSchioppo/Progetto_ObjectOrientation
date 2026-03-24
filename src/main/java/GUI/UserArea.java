@@ -59,7 +59,7 @@ public class UserArea {
         }
 
         // ===== RUOLO =====
-        String ruolo = null;
+        String ruolo = "";
 
         boolean isPartecipante = controller.isPartecipante();
         boolean isOrganizzatore = controller.isOrganizzatore();
@@ -70,16 +70,16 @@ public class UserArea {
         }
 
         if (isOrganizzatore) {
-            if(ruolo != null) ruolo = ruolo + ", ";
+            if(!ruolo.isEmpty()) ruolo = ruolo + ", ";
             ruolo = ruolo + "Organizzatore";
         }
 
         if (isGiudice) {
-            if(ruolo != null) ruolo = ruolo + ", ";
+            if(!ruolo.isEmpty()) ruolo = ruolo + ", ";
             ruolo = ruolo + "Giudice";
         }
 
-        if(ruolo == null) ruolo = "-";
+        if(ruolo.isEmpty()) ruolo = "-";
 
         DefaultTableModel model = new DefaultTableModel(
                 new String[]{"Campo", "Dato"}, 0

@@ -7,6 +7,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class ImplementazioneDAO implements InterfacciaDAO {
     private Connection connection = null;
@@ -45,20 +46,12 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     private static final String VALORE = "valore";
 
-    public ImplementazioneDAO() {
-        try {
-            connection = ConnessioneDatabase.getInstance().Connection;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public ImplementazioneDAO() throws SQLException {
+        connection = ConnessioneDatabase.getInstance().Connection;
     }
 
-    public void disconnect() {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public void disconnect() throws SQLException{
+        connection.close();
     }
 
     public boolean checkLoginDB(String nomeUtente, String password) throws SQLException{
@@ -112,8 +105,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return evento;
     }
 
-    public ArrayList<Evento> getEventiApertiDB(String nomeUtente) throws SQLException{
-        ArrayList<Evento> eventi = null;
+    public List<Evento> getEventiApertiDB(String nomeUtente) throws SQLException{
+        List<Evento> eventi = null;
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM Evento " +
                 "WHERE DataInizioReg <= NOW() AND DataFineReg >= NOW()\n" +
@@ -216,7 +209,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void updateProblemaDB(ArrayList<Evento> eventiProblema) throws SQLException{
+    public void updateProblemaDB(List<Evento> eventiProblema) throws SQLException{
         if(eventiProblema != null){
             HashSet<Evento> eventi = new HashSet<>(eventiProblema);
             StringBuilder codiceSQL = new StringBuilder();
@@ -281,7 +274,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addInvitiGiudiceDB(ArrayList<Evento> eventiInvitati) throws SQLException{
+    public void addInvitiGiudiceDB(List<Evento> eventiInvitati) throws SQLException{
         if(eventiInvitati != null) {
             HashSet<Evento> eventi = new HashSet<>(eventiInvitati);
             StringBuilder codiceSQL = new StringBuilder();
@@ -310,7 +303,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 partecipante = new Partecipante(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
                 partecipante.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
-                ArrayList<Evento> eventi = new ArrayList<>();
+                List<Evento> eventi = new ArrayList<>();
                 Evento evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
                 evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
                 evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
@@ -394,7 +387,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addPartecipanteEventoDB(String nomePartecipante, ArrayList<Evento> partecipantiEvento) throws SQLException{
+    public void addPartecipanteEventoDB(String nomePartecipante, List<Evento> partecipantiEvento) throws SQLException{
         if(partecipantiEvento != null) {
             HashSet<Evento> eventi = new HashSet<>(partecipantiEvento);
             StringBuilder codiceSQL = new StringBuilder();
@@ -437,7 +430,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 organizzatore = new Organizzatore(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
                 organizzatore.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
-                ArrayList<Evento> eventi = new ArrayList<>();
+                List<Evento> eventi = new ArrayList<>();
                 Evento evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
                 evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
                 evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
@@ -494,12 +487,11 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public void addOrganizzatoreDB(String nomeUtente, String password, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
-        PreparedStatement ps =
-                connection.prepareStatement(
-                        "INSERT INTO Organizzatore(NomeUtente, Password," +
-                        " FNome, MNome, LNome, DataNascita, idEvento)" +
-                        "VALUES(?, ?, ?, ?, ?, ?, ?);");
-        try {
+        try (PreparedStatement ps = connection.prepareStatement(
+            "INSERT INTO Organizzatore(NomeUtente, Password, " +
+                "FNome, MNome, LNome, DataNascita)" +
+                "VALUES(?, ?, ?, ?, ?, ?) " +
+                "ON CONFLICT (NomeUtente) DO NOTHING;")) {
             ps.setString(1, nomeUtente);
             ps.setString(2, password);
             ps.setString(3, fNome);
@@ -508,12 +500,9 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             ps.setObject(6, dataNascita);
             ps.executeUpdate();
         }
-        finally{
-            ps.close();
-        }
     }
 
-    public void addOrganizzatoreEventoDB(String nomeOrganizzatore, ArrayList<Evento> eventiOrganizzatore) throws SQLException{
+    public void addOrganizzatoreEventoDB(String nomeOrganizzatore, List<Evento> eventiOrganizzatore) throws SQLException{
         if(eventiOrganizzatore != null) {
             HashSet<Evento> eventi = new HashSet<>(eventiOrganizzatore);
             StringBuilder codiceSQL = new StringBuilder();
@@ -555,7 +544,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 giudice = new Giudice(rs.getString(NOMEUTENTE), rs.getString(PASSWORD));
                 giudice.setDati(rs.getString(FNOME), rs.getString(MNOME), rs.getString(LNOME), rs.getObject(DATANASCITA, LocalDate.class));
-                ArrayList<Evento> eventi = new ArrayList<>();
+                List<Evento> eventi = new ArrayList<>();
                 Evento evento = new Evento(rs.getInt(IDEVENTO), rs.getString(TITOLO), rs.getString(INDIRIZZO), rs.getInt(NCIVICO));
                 evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
                 evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
@@ -593,8 +582,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return giudice;
     }
 
-    public ArrayList<Giudice> getAllGiudiciDB(Evento evento) throws SQLException{
-        ArrayList<Giudice> giudici = null;
+    public List<Giudice> getAllGiudiciDB(Evento evento) throws SQLException{
+        List<Giudice> giudici = null;
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM Giudice " +
@@ -615,8 +604,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return giudici;
     }
 
-    public ArrayList<Giudice> getAllGiudiciDB(Evento evento, Giudice giudice) throws SQLException{
-        ArrayList<Giudice> giudici = new ArrayList<>();
+    public List<Giudice> getAllGiudiciDB(Evento evento, Giudice giudice) throws SQLException{
+        List<Giudice> giudici = new ArrayList<>();
         giudici.add(giudice);
         try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Giudice " +
                 "JOIN GiudiceEvento ON NomeUtente = NomeGiudice " +
@@ -649,8 +638,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public ArrayList<Team> getAllTeamDB(Evento evento) throws SQLException{
-        ArrayList<Team> teams = null;
+    public List<Team> getAllTeamDB(Evento evento) throws SQLException{
+        List<Team> teams = null;
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
@@ -690,8 +679,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return teams;
     }
 
-    public ArrayList<Team> getAllTeamDB(Evento evento, Partecipante partecipante) throws SQLException{
-        ArrayList<Team> teams = null;
+    public List<Team> getAllTeamDB(Evento evento, Partecipante partecipante) throws SQLException{
+        List<Team> teams = null;
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
@@ -761,12 +750,20 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return getIdTeamDB();
     }
 
-    public void leaveTeamDB(String nomePartecipante, int idTeam) throws SQLException{
-        try (PreparedStatement ps = connection.prepareStatement(
-                "DELETE FROM CompTeam " +
-                    "WHERE NomePartecipante = '" + nomePartecipante + "' " +
-                    "AND idTeam = " + idTeam + ";")) {
-            ps.executeUpdate();
+    public void leaveTeamsDB(String nomePartecipante, List<Team> leaveTeam) throws SQLException{
+        if(leaveTeam != null){
+            HashSet<Team> teams = new HashSet<>(leaveTeam);
+            StringBuilder codiceSQL = new StringBuilder();
+            codiceSQL.append("DELETE FROM CompTeam(NomePartecipante, idTeam) VALUES");
+            for (Team team : teams) {
+                if(team != leaveTeam.getFirst())
+                    codiceSQL.append(",");
+                codiceSQL.append("('").append(nomePartecipante).append("',").append(team.getIdTeam()).append(")");
+            }
+            codiceSQL.append(";");
+            try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
+                ps.executeUpdate();
+            }
         }
     }
 
@@ -790,7 +787,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addRichiesteTeamDB(ArrayList<Team> richiesteTeam) throws SQLException{
+    public void addRichiesteTeamDB(List<Team> richiesteTeam) throws SQLException{
         if(richiesteTeam != null) {
             HashSet<Team> teams = new HashSet<>(richiesteTeam);
             StringBuilder codiceSQL = new StringBuilder();
@@ -818,8 +815,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 rs.next();
-                ArrayList<Progresso> progressi = new ArrayList<>();
-                ArrayList<Commento> commenti = new ArrayList<>();
+                List<Progresso> progressi = new ArrayList<>();
+                List<Commento> commenti = new ArrayList<>();
                 Team team = evento.seekTeam(rs.getInt(IDTEAM));
                 Progresso progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
                 commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
@@ -855,8 +852,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 rs.next();
-                ArrayList<Progresso> progressi = new ArrayList<>();
-                ArrayList<Commento> commenti = new ArrayList<>();
+                List<Progresso> progressi = new ArrayList<>();
+                List<Commento> commenti = new ArrayList<>();
                 Team team = partecipante.seekTeam(rs.getInt(IDTEAM));
                 Progresso progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
                 commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
@@ -903,8 +900,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return getIdProgressoDB();
     }
 
-    public ArrayList<Commento> getAllCommentiDB(String giudice) throws SQLException{
-        ArrayList<Commento> commenti = null;
+    public List<Commento> getAllCommentiDB(String giudice) throws SQLException{
+        List<Commento> commenti = null;
         try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Commento WHERE NomeGiudice = " + giudice + ";")) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -918,7 +915,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         return commenti;
     }
 
-    public void addAllCommentiDB(ArrayList<Commento> nuoviCommenti) throws SQLException{
+    public void addAllCommentiDB(List<Commento> nuoviCommenti) throws SQLException{
         if(nuoviCommenti != null){
             HashSet<Commento> commenti = new HashSet<>(nuoviCommenti);
             StringBuilder codiceSQL = new StringBuilder();
@@ -935,8 +932,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public ArrayList<Voto> getAllVotiDB(String giudice) throws SQLException{
-        ArrayList<Voto> voti = null;
+    public List<Voto> getAllVotiDB(String giudice) throws SQLException{
+        List<Voto> voti = null;
         try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Voto WHERE NomeGiudice = " + giudice + ";")) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -950,7 +947,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public void getAllVotiDB(Evento evento) throws SQLException{
-        ArrayList<Voto> voti = null;
+        List<Voto> voti = null;
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT * FROM Team AS t " +
                 "JOIN Voto AS v ON t.IdTeam = v.idTeam " +
@@ -976,7 +973,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public void getAllVotiDB(Partecipante partecipante) throws SQLException{
-        ArrayList<Voto> voti = null;
+        List<Voto> voti = null;
         try (PreparedStatement ps = connection.prepareStatement(
                 "SELECT t.IdTeam, v.Valore, v.NomeGiudice FROM Team AS t " +
                 "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
@@ -1004,7 +1001,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         }
     }
 
-    public void addAllVotiDB(ArrayList<Voto> nuoviVoti) throws SQLException{
+    public void addAllVotiDB(List<Voto> nuoviVoti) throws SQLException{
         if(nuoviVoti != null){
             HashSet<Voto> voti = new HashSet<>(nuoviVoti);
             StringBuilder codiceSQL = new StringBuilder();

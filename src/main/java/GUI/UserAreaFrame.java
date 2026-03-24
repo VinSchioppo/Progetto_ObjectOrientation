@@ -44,7 +44,6 @@ public class UserAreaFrame extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-
                 controller.exitApplication();
 
                 System.exit(0);
@@ -59,6 +58,7 @@ public class UserAreaFrame extends JFrame {
     }
 
     public void logout() {
+        controller.exitApplication();
         new LoginFrame().setVisible(true);
         dispose();
     }

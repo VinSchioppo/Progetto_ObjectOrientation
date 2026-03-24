@@ -13,8 +13,10 @@ public class RecordList <T>
     }
 
     public void setRecords(List<T> records) {
-        current = 0;
-        this.records = new ArrayList<>(records);
+        if(records != null) {
+            current = 0;
+            this.records = new ArrayList<>(records);
+        }
     }
 
     public void addRecord(T record) {

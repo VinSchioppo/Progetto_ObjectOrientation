@@ -3,6 +3,7 @@ package ClassModel;
 import java.util.ArrayList;
 import RecordList.*;
 import java.time.LocalDate;
+import java.util.List;
 
 public class Evento {
 
@@ -47,23 +48,23 @@ public class Evento {
     public void setIdEvento(int idEvento) {this.idEvento = idEvento;}
     public void setOrganizzatore(Organizzatore organizzatore) {this.organizzatore = organizzatore;}
 
-    public void setInvitiGiudici(ArrayList<Partecipante> inviti) {
+    public void setInvitiGiudici(List<Partecipante> inviti) {
         if(invitiGiudici == null)
             invitiGiudici = new InviteList<Partecipante>();
         invitiGiudici.setInvites(inviti);
     }
 
-    public void setGiudici(ArrayList<Giudice> giudici) {
+    public void setGiudici(List<Giudice> giudici) {
         if(this.giudici == null)
             this.giudici = new RecordList<Giudice>();
         this.giudici.setRecords(giudici);
     }
-    public void setPartecipanti(ArrayList<Partecipante> partecipanti) {
+    public void setPartecipanti(List<Partecipante> partecipanti) {
         if(this.partecipanti == null)
             this.partecipanti = new RecordList<Partecipante>();
         this.partecipanti.setRecords(partecipanti);
     }
-    public void setTeamIscritti(ArrayList<Team> team){
+    public void setTeamIscritti(List<Team> team){
         if(teamIscritti == null)
             teamIscritti = new RecordList<Team>();
         teamIscritti.setRecords(team);

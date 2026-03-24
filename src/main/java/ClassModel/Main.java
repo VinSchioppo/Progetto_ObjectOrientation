@@ -12,16 +12,16 @@ import java.util.HashSet;
 
 public class Main {
     public static void main(String[] args) {
-        ImplementazioneDAO d = new ImplementazioneDAO();
+        /*ImplementazioneDAO d = new ImplementazioneDAO();
 
-        /*Evento eventi = new Evento("Sans", "Sans Street", 34);
+        Evento eventi = new Evento("Sans", "Sans Street", 34);
         ArrayList<Evento> eventi = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             Evento evento = new Evento("Sans");
             evento.setIndirizzoSede("Sede");
             evento.setNCivicoSede(10);
             eventi.add(evento);
-        }*/
+        }
         try {
             Giudice giudice = d.getGiudiceDB("user13");
             Organizzatore organizzatore = d.getOrganizzatoreDB("user3");
@@ -137,12 +137,12 @@ public class Main {
             if(ruoli.size() >= 2 && ruoli.get(1) != null){System.out.println("Giudice.");}
             if(ruoli.size() >= 3 && ruoli.get(2) != null){System.out.println("Organizzatore.");}*/
 
-        }
+        /*}
         catch(SQLException e)
         {
             e.printStackTrace();
         }
-
+        */
         /*Controller controller = new Controller();
 
         controller.logInUtente("user1", "pwd");

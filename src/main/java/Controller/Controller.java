@@ -17,31 +17,43 @@ public class Controller {
     private Partecipante partecipanteCorrente = null;
     private Organizzatore organizzatoreCorrente = null;
     private Giudice giudiceCorrente = null;
-    private static final ImplementazioneDAO DAO = new ImplementazioneDAO();
+    private static ImplementazioneDAO dao;
 
     private boolean addOrganizzatore = false;
-    private ArrayList<Evento> updateInvitiGiudice = null;
-    private ArrayList<Evento> updateOrganizzatoreEvento = null;
-    private ArrayList<Evento> updatePartecipanteEvento = null;
-    private ArrayList<Team> updateRichiesteTeam = null;
-    private ArrayList<Evento> pubblicaProblema = null;
-    private ArrayList<Voto> addVoti = null;
-    private ArrayList<Commento> addCommenti = null;
+    private List<Evento> updateInvitiGiudice = null;
+    private List<Evento> updateOrganizzatoreEvento = null;
+    private List<Evento> updatePartecipanteEvento = null;
+    private List<Team> updateRichiesteTeam = null;
+    private List<Team> leaveTeam = null;
+    private List<Evento> pubblicaProblema = null;
+    private List<Voto> addVoti = null;
+    private List<Commento> addCommenti = null;
 
     private static final Logger logger = Logger.getLogger(Controller.class.getName());
+
+    //Questo metodo stabilisce una nuova connessione col database.
+
+    private static void connect(){
+        try{
+            dao = new ImplementazioneDAO();
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
+        }
+    }
 
     //Questo metodo verifica i dati di login inseriti e restituisce true se va a buon fine, altrimenti false.
 
     public boolean logInUtente(String nomeUtente, String password) {
         try {
-            boolean success = DAO.checkLoginDB(nomeUtente, password);
+            connect();
+            boolean success = dao.checkLoginDB(nomeUtente, password);
             if (success) {
-                utenteCorrente = DAO.getUtenteDB(nomeUtente);
+                utenteCorrente = dao.getUtenteDB(nomeUtente);
 
                 // ===== RICOSTRUZIONE RUOLI =====
-                partecipanteCorrente = DAO.getPartecipanteDB(nomeUtente);
-                organizzatoreCorrente = DAO.getOrganizzatoreDB(nomeUtente);
-                giudiceCorrente = DAO.getGiudiceDB(nomeUtente);
+                partecipanteCorrente = dao.getPartecipanteDB(nomeUtente);
+                organizzatoreCorrente = dao.getOrganizzatoreDB(nomeUtente);
+                giudiceCorrente = dao.getGiudiceDB(nomeUtente);
 
                 return true;
             }
@@ -57,7 +69,7 @@ public class Controller {
 
     public boolean registerUtente(String nomeUtente, String password) {
         try {
-            DAO.addUtenteDB(nomeUtente, password);
+            dao.addUtenteDB(nomeUtente, password);
             utenteCorrente = new Utente(nomeUtente, password);
         }
         catch(SQLException e){
@@ -163,17 +175,17 @@ public class Controller {
         try{
                 if(utenteCorrente != null) {
                     utenteCorrente.setDati(fNome, mNome, lNome, dataNascita);
-                    DAO.updatePartecipanteDB(utenteCorrente.getNomeUtente(), fNome, mNome, lNome, dataNascita);
+                    dao.updatePartecipanteDB(utenteCorrente.getNomeUtente(), fNome, mNome, lNome, dataNascita);
                 }
                 if(partecipanteCorrente != null)
                     partecipanteCorrente.setDati(fNome, mNome, lNome, dataNascita);
                 if(organizzatoreCorrente != null) {
                     organizzatoreCorrente.setDati(fNome, mNome, lNome, dataNascita);
-                    DAO.updateOrganizzatoreDB(organizzatoreCorrente.getNomeUtente(), fNome, mNome, lNome, dataNascita);
+                    dao.updateOrganizzatoreDB(organizzatoreCorrente.getNomeUtente(), fNome, mNome, lNome, dataNascita);
                 }
                 if(giudiceCorrente != null) {
                     giudiceCorrente.setDati(fNome, mNome, lNome, dataNascita);
-                    DAO.updateGiudiceDB(giudiceCorrente.getNomeUtente(), fNome, mNome, lNome, dataNascita);
+                    dao.updateGiudiceDB(giudiceCorrente.getNomeUtente(), fNome, mNome, lNome, dataNascita);
                 }
         }
         catch (DateTimeParseException _) {
@@ -195,7 +207,7 @@ public class Controller {
         List<String> listaEventi = null;
         if(utenteCorrente != null) {
             try {
-                ArrayList<Evento> eventi = DAO.getEventiApertiDB(utenteCorrente.getNomeUtente());
+                List<Evento> eventi = dao.getEventiApertiDB(utenteCorrente.getNomeUtente());
                 if (eventi != null) {
                     listaEventi = new ArrayList<>();
                     for (Evento evento : eventi) {
@@ -221,7 +233,7 @@ public class Controller {
     public boolean iscriviEvento(int idEvento){
         Evento evento = null;
         try{
-            evento = DAO.getEventoDB(idEvento);
+            evento = dao.getEventoDB(idEvento);
             if(evento != null && evento.sizePartecipanti() > evento.getMaxIscritti()) {
                 if (partecipanteCorrente == null)
                     partecipanteCorrente = utenteCorrente.becomePartecipante();
@@ -249,11 +261,10 @@ public class Controller {
                 organizzatore = utenteCorrente.becomeOrganizzatore();
                 addOrganizzatore = true;
             }
-            else
-                organizzatore = organizzatoreCorrente;
+            else organizzatore = organizzatoreCorrente;
             evento.setOrganizzatore(organizzatore);
             try {
-                DAO.addEventoDB(evento);
+                dao.addEventoDB(evento);
                 organizzatore.addEvento(evento);
                 organizzatoreCorrente = organizzatore;
                 if(updateOrganizzatoreEvento == null)
@@ -273,10 +284,10 @@ public class Controller {
     // MaxIscritti MaxTeam DataInzioReg DataFineReg
 
     public List<String> listaInvitiGiudice() {
-        ArrayList<String> invitiGiudice = null;
+        List<String> invitiGiudice = null;
         if(utenteCorrente != null && partecipanteCorrente != null) {
                 try {
-                    DAO.getAllInvitiGiudiceDB(utenteCorrente, partecipanteCorrente);
+                    dao.getAllInvitiGiudiceDB(utenteCorrente, partecipanteCorrente);
                     Evento evento = utenteCorrente.firstInvitoGiudiceEvento();
                     while (evento != null) {
                         if (invitiGiudice == null)
@@ -369,7 +380,7 @@ public class Controller {
             team.setEventoIscritto(partecipanteCorrente.getEvento());
             team.addMembroTeam(partecipanteCorrente);
             try {
-                team.setIdTeam(DAO.addTeamDB(team));
+                team.setIdTeam(dao.addTeamDB(team));
                 return true;
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
@@ -438,17 +449,13 @@ public class Controller {
 
     public boolean leaveTeam(int idTeam){
         if(partecipanteCorrente != null && partecipanteCorrente.getEvento().getDataFineReg() != null && partecipanteCorrente.getEvento().getDataFineReg().isAfter(LocalDate.now())) {
-            Team team = partecipanteCorrente.seekTeam(idTeam);
+            Team team = partecipanteCorrente.seekAndRemoveTeam(idTeam);
             if (team != null) {
-                try {
-                    DAO.leaveTeamDB(partecipanteCorrente.getNomeUtente(), idTeam);
-                    partecipanteCorrente.removeTeam(idTeam);
-                    return true;
-                }
-                catch(SQLException e)
-                {
-                    logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
-                }
+                team.removeMembroTeam(partecipanteCorrente.getNomeUtente());
+                if(leaveTeam == null)
+                    leaveTeam = new ArrayList<>();
+                leaveTeam.add(team);
+                return true;
             }
         }
         return false;
@@ -520,7 +527,7 @@ public class Controller {
     //Ogni elemento della lista segue il formato: IdProgresso Testo
 
     public List<String> listaProgressiTeam(){
-        ArrayList<String> listaProgressi = null;
+        List<String> listaProgressi = null;
         if (partecipanteCorrente != null) {
             Team team = partecipanteCorrente.getTeam();
             if (team != null) {
@@ -547,7 +554,7 @@ public class Controller {
             if (team != null && team.getTeamLeader().equals(partecipanteCorrente.getNomeUtente())) {
                     try {
                         progresso = new Progresso(testo, team.getIdTeam());
-                        DAO.addProgressoDB(progresso);
+                        dao.addProgressoDB(progresso);
                         team.addProgresso(progresso);
                         return true;
                     } catch (SQLException e) {
@@ -564,7 +571,7 @@ public class Controller {
 
     public List<String> listaCommentiProgresso(int idProgresso)
     {
-        ArrayList<String> listaCommenti = null;
+        List<String> listaCommenti = null;
         if (partecipanteCorrente != null) {
             Team team = partecipanteCorrente.getTeam();
             if (team != null) {
@@ -589,7 +596,7 @@ public class Controller {
 
     public List<String> listaVotiTeam()
     {
-        ArrayList<String> listaVoti = null;
+        List<String> listaVoti = null;
         if(partecipanteCorrente != null) {
             Team team = partecipanteCorrente.getTeam();
             if (team != null) {
@@ -647,7 +654,7 @@ public class Controller {
     public boolean inserisciDatiEvento(String indirizzoSede, int nCivico, int maxIscritti, int maxTeam){
         if(organizzatoreCorrente != null) {
             try {
-                DAO.updateEventoDB(organizzatoreCorrente.getEvento().getIdEvento(), indirizzoSede, nCivico, maxIscritti, maxTeam);
+                dao.updateEventoDB(organizzatoreCorrente.getEvento().getIdEvento(), indirizzoSede, nCivico, maxIscritti, maxTeam);
                 Evento evento = organizzatoreCorrente.getEvento();
                 evento.setIndirizzoSede(indirizzoSede);
                 evento.setnCivicoSede(nCivico);
@@ -668,7 +675,7 @@ public class Controller {
     public boolean setDateEvento(LocalDate dataInizio, LocalDate dataFine){
         if(organizzatoreCorrente != null) {
             try {
-                DAO.updateDateEventoDB(organizzatoreCorrente.getEvento().getIdEvento(), dataInizio, dataFine);
+                dao.updateDateEventoDB(organizzatoreCorrente.getEvento().getIdEvento(), dataInizio, dataFine);
                 organizzatoreCorrente.getEvento().setDate(dataInizio, dataFine);
                 return true;
             }catch(SQLException e){
@@ -688,7 +695,7 @@ public class Controller {
     public boolean setRegistrazioniEvento(LocalDate dataInizio, LocalDate dataFine){
         if(organizzatoreCorrente != null) {
             try {
-                DAO.updateDateRegEventoDB(organizzatoreCorrente.getEvento().getIdEvento(), dataInizio, dataFine);
+                dao.updateDateRegEventoDB(organizzatoreCorrente.getEvento().getIdEvento(), dataInizio, dataFine);
                 organizzatoreCorrente.getEvento().setDateReg(dataInizio, dataFine);
                 return true;
             }catch(SQLException e){
@@ -782,7 +789,7 @@ public class Controller {
     //Ogni elemento della lista segue il formato: IdTeam Nome
 
     public List<String> listaTeamGiudicati(){
-        ArrayList<String> listaTeam = null;
+        List<String> listaTeam = null;
         if(giudiceCorrente != null){
             Evento evento = giudiceCorrente.getEvento();
             if(evento != null){
@@ -823,10 +830,10 @@ public class Controller {
     //Ogni elemento della lista segue il formato: IdTeam Valore
 
     public List<String> listaVotiTeamGiudicati(){
-        ArrayList<String> listaVoti = null;
+        List<String> listaVoti = null;
         if(giudiceCorrente != null) {
             try {
-                ArrayList<Voto> voti = DAO.getAllVotiDB(giudiceCorrente.getNomeUtente());
+                List<Voto> voti = dao.getAllVotiDB(giudiceCorrente.getNomeUtente());
                 if (voti != null) {
                     for (Voto voto : voti) {
                         if (listaVoti == null)
@@ -846,7 +853,7 @@ public class Controller {
     //Ogni elemento della lista segue il formato: IdProgresso TestoDocumento
 
     public List<String> listaProgressiTeamGiudicato(int idTeam){
-        ArrayList<String> listaProgressi = null;
+        List<String> listaProgressi = null;
         if(giudiceCorrente != null) {
             Evento evento = giudiceCorrente.getEvento();
             if(evento != null){
@@ -893,10 +900,10 @@ public class Controller {
     //Ogni elemento della lista segue il formato: IdProgresso Testo
 
     public List<String> listaCommenti(){
-        ArrayList<String> listaCommenti = null;
+        List<String> listaCommenti = null;
         if(giudiceCorrente != null) {
             try{
-                ArrayList<Commento> commenti = DAO.getAllCommentiDB(giudiceCorrente.getNomeUtente());
+                List<Commento> commenti = dao.getAllCommentiDB(giudiceCorrente.getNomeUtente());
                 if (commenti != null) {
                     for (Commento commento : commenti) {
                         if (listaCommenti == null)
@@ -921,7 +928,7 @@ public class Controller {
             updatePartecipante();
             updateOrganizzatore();
             updateGiudice();
-            DAO.disconnect();
+            dao.disconnect();
             return true;
         }catch(SQLException e){
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
@@ -931,35 +938,37 @@ public class Controller {
 
     private void updateInviti() throws SQLException{
         if(utenteCorrente != null && updateInvitiGiudice != null)
-            DAO.addInvitiGiudiceDB(updateInvitiGiudice);
+            dao.addInvitiGiudiceDB(updateInvitiGiudice);
     }
 
     private void updatePartecipante() throws SQLException{
         if(partecipanteCorrente != null) {
             if(updatePartecipanteEvento != null)
-                DAO.addPartecipanteEventoDB(partecipanteCorrente.getNomeUtente(), updatePartecipanteEvento);
+                dao.addPartecipanteEventoDB(partecipanteCorrente.getNomeUtente(), updatePartecipanteEvento);
             if(updateRichiesteTeam != null)
-                DAO.addRichiesteTeamDB(updateRichiesteTeam);
+                dao.addRichiesteTeamDB(updateRichiesteTeam);
+            if(leaveTeam != null)
+                dao.leaveTeamsDB(partecipanteCorrente.getNomeUtente(), leaveTeam);
         }
     }
 
     private void updateOrganizzatore() throws SQLException{
         if(organizzatoreCorrente != null) {
             if (addOrganizzatore)
-                DAO.addOrganizzatoreDB(organizzatoreCorrente);
+                dao.addOrganizzatoreDB(organizzatoreCorrente);
             if(updateOrganizzatoreEvento != null)
-                DAO.addOrganizzatoreEventoDB(organizzatoreCorrente.getNomeUtente(), updateOrganizzatoreEvento);
+                dao.addOrganizzatoreEventoDB(organizzatoreCorrente.getNomeUtente(), updateOrganizzatoreEvento);
         }
     }
 
     private void updateGiudice() throws  SQLException{
         if(giudiceCorrente != null) {
             if(pubblicaProblema != null)
-                DAO.updateProblemaDB(pubblicaProblema);
+                dao.updateProblemaDB(pubblicaProblema);
             if(addVoti != null)
-                DAO.addAllVotiDB(addVoti);
+                dao.addAllVotiDB(addVoti);
             if(addCommenti != null)
-                DAO.addAllCommentiDB(addCommenti);
+                dao.addAllCommentiDB(addCommenti);
         }
     }
 }
