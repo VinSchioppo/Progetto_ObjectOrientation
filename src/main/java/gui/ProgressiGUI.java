@@ -1,0 +1,31 @@
+package gui;
+
+import controller.Controller;
+
+import javax.swing.*;
+
+
+public class ProgressiGUI {
+
+    private JPanel mainPanel;
+    private JTable TabellaProgresso;
+    private JLabel voto;
+    private JButton backButton;
+
+    private gui.SelectEventoFrame parentFrame;
+    private Controller controller;
+
+    public ProgressiGUI(SelectEventoFrame parentFrame, Controller controller, int idTeam) {
+
+        this.parentFrame = parentFrame;
+        this.controller = controller;
+
+        backButton.addActionListener(e -> parentFrame.showTeamGUI());
+
+    }
+
+
+    public JPanel getMainPanel() {
+        return mainPanel;
+    }
+}
