@@ -47,7 +47,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     private static final String VALORE = "valore";
 
     public ImplementazioneDAO() throws SQLException {
-        connection = ConnessioneDatabase.getInstance().Connection;
+        connection = ConnessioneDatabase.getInstance().getConnection();
     }
 
     public void disconnect() throws SQLException{
