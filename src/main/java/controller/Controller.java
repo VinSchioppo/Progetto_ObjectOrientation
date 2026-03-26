@@ -83,9 +83,7 @@ public class Controller {
 
     public boolean isPartecipante() {return partecipanteCorrente != null;}
     public boolean isOrganizzatore() {return organizzatoreCorrente != null;}
-    public boolean isGiudice() {
-        return giudiceCorrente != null;
-    }
+    public boolean isGiudice() {return giudiceCorrente != null;}
 
     //Questo metodo restiuisce una lista contenente l'id e il titolo di tutti gli eventi a cui l'utente partecipa.
     //Ogni elemento della lista segue il formato: IdEvento Titolo
