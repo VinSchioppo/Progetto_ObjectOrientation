@@ -141,13 +141,37 @@ public class Controller {
 
     public boolean selectEvento(int idEvento, Role ruolo) {
 
-        if(partecipanteCorrente != null && ruolo == Role.PARTECIPANTE && partecipanteCorrente.seekEvento(idEvento) != null)
-                return true;
+        if(partecipanteCorrente != null && ruolo == Role.PARTECIPANTE && partecipanteCorrente.seekEvento(idEvento) != null) {
+            return checkMembroTeam();
+        }
 
         if(organizzatoreCorrente != null && ruolo == Role.ORGANIZZATORE && organizzatoreCorrente.seekEvento(idEvento) != null)
                 return true;
 
         return giudiceCorrente != null && ruolo == Role.GIUDICE && giudiceCorrente.seekEvento(idEvento) != null;
+    }
+
+    //Questo metodo verifica che il partecipante sia in un team all'inizio dell'evento.
+    //Se il partecipante non fa parte di un team, viene creato un team con il solo partecipante.
+    //Tuttavia, se l'evento ha raggiunto il numero massimo di team viene negato l'accesso al partecipante.
+    //Restituisce true se l'operazione viene completata con successo, altrimenti restituisce false.
+
+    private boolean checkMembroTeam() {
+        if(partecipanteCorrente.getEvento().getDataFineReg().isBefore(LocalDate.now())
+        && partecipanteCorrente.getEvento().sizeTeamIscritti() + 1 <= partecipanteCorrente.getEvento().getMaxTeam()) {
+            String nomeTeam = "Team " + partecipanteCorrente.getNomeUtente();
+            Team team = new Team(-1, nomeTeam, partecipanteCorrente.getNomeUtente());
+            team.setEventoIscritto(partecipanteCorrente.getEvento());
+            team.addMembroTeam(partecipanteCorrente);
+            try {
+                team.setIdTeam(dao.addTeamDB(team));
+                return true;
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
+                return false;
+            }
+        }
+        else return partecipanteCorrente.getEvento().sizeTeamIscritti() + 1 <= partecipanteCorrente.getEvento().getMaxTeam();
     }
 
     //Questo metodo restituisce una stringa contenente i dati personali dell'utente.
@@ -373,7 +397,9 @@ public class Controller {
     //Restituisce true se l'operazione va a buon fine, altrimenti false.
 
     public boolean creaTeamPartecipante(String nome){
-        if(partecipanteCorrente != null && partecipanteCorrente.getEvento().getDataFineReg() != null && partecipanteCorrente.getEvento().getDataFineReg().isAfter(LocalDate.now())){
+        if(partecipanteCorrente != null && partecipanteCorrente.getEvento().getDataFineReg() != null
+        && partecipanteCorrente.getEvento().getDataFineReg().isAfter(LocalDate.now())
+        && partecipanteCorrente.getEvento().sizeTeamIscritti() + 1 <= partecipanteCorrente.getEvento().getMaxTeam()){
             Team team = new Team(-1, nome, partecipanteCorrente.getNomeUtente());
             team.setEventoIscritto(partecipanteCorrente.getEvento());
             team.addMembroTeam(partecipanteCorrente);
@@ -410,7 +436,7 @@ public class Controller {
     //Restituisce true se l'operazione va a buon fine, altrimenti false.
 
     public boolean joinTeam(int idTeam){
-        if(partecipanteCorrente != null && partecipanteCorrente.getEvento() != null && partecipanteCorrente.getEvento().getDataFineReg() != null && partecipanteCorrente.getEvento().getDataFineReg().isAfter(LocalDate.now())) {
+        if(partecipanteCorrente != null && partecipanteCorrente.getEvento().getDataFineReg() != null && partecipanteCorrente.getEvento().getDataFineReg().isAfter(LocalDate.now())) {
                 Team team = partecipanteCorrente.getEvento().seekTeam(idTeam);
                 if (team != null) {
                     team.addRichiesta(partecipanteCorrente);

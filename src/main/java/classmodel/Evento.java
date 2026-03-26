@@ -373,6 +373,12 @@ public class Evento {
         return partecipante;
     }
 
+    public int sizeTeamIscritti()
+    {
+        if(teamIscritti != null) return teamIscritti.size();
+        return 0;
+    }
+
     public void addTeam(Team team) {
 
         if(teamIscritti == null)
