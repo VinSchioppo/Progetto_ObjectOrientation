@@ -136,6 +136,25 @@ public class Controller {
         return listaEventi;
     }
 
+    //Questo metodo restituisce i dati di un evento a cui partecipa un utente.
+    //La stringa segue il formato: Titolo IndirizzoSede NCivicoSede DataInizio DataFine MaxIscritti MaxTeam
+    // DataInizioReg DataFineReg DescrizioneProblema
+
+    public String datiEventoPreSelezione(int idEvento) {
+        if(partecipanteCorrente != null){
+            Evento evento = partecipanteCorrente.seekEvento(idEvento);
+            if (evento != null) {
+                return evento.getTitolo() + " "
+                        + evento.getIndirizzoSede() + " " + evento.getnCivicoSede()
+                        + " " + evento.getDataInizio() + " " + evento.getDataFine()
+                        + " " + evento.getMaxIscritti() + " " + evento.getMaxTeam()
+                        + " " + evento.getDataInizioReg() + " " + evento.getDataFineReg()
+                        + " " + evento.getDescrizioneProblema();
+            }
+        }
+        return null;
+    }
+
     //Questo metodo riceve un input l'id di un evento e il ruolo del utente in quell'evento e selezione l'evento in memoria.
     //Restituisce true se l'operazione viene completata con successo, altrimenti restituisce false.
 
