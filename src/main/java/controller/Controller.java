@@ -412,6 +412,42 @@ public class Controller {
         return infoTeam;
     }
 
+    //Questo metodo restituisce l'id del team in esame.
+
+    public int idTeamCorrente(){
+        if(partecipanteCorrente != null) {
+            Team team = partecipanteCorrente.getTeam();
+            if (team != null) {
+                return team.getIdTeam();
+            }
+        }
+        return -1;
+    }
+
+    //Questo metodo restituisce il nome del team in esame.
+
+    public String nomeTeamCorrente(){
+        if(partecipanteCorrente != null) {
+            Team team = partecipanteCorrente.getTeam();
+            if (team != null) {
+                return team.getNome();
+            }
+        }
+        return null;
+    }
+
+    //Questo metodo restituisce il leader del team in esame.
+
+    public String teamLeaderCorrente(){
+        if(partecipanteCorrente != null) {
+            Team team = partecipanteCorrente.getTeam();
+            if (team != null) {
+                return team.getTeamLeader();
+            }
+        }
+        return null;
+    }
+
     //Questo metodo permette al partecipante di creare un team.
     //Restituisce true se l'operazione va a buon fine, altrimenti false.
 
@@ -429,7 +465,6 @@ public class Controller {
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
-
         return false;
     }
 

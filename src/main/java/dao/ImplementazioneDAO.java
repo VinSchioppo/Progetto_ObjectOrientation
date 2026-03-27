@@ -281,7 +281,15 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             for (Evento evento : eventi) {
                 Partecipante partecipante = evento.firstInvitoGiudice();
                 while(partecipante != null) {
-                    codiceSQL.append("CALL updateInvitoGiudice('").append(partecipante.getNomeUtente()).append("',").append(evento.getIdEvento()).append(",").append(evento.getInvitoGiudiceAnswer()).append(");");
+                    codiceSQL.append("INSERT INTO InvitoGiudice(NomePartecipante, idEvento, Risposta) VALUES('")
+                    .append(partecipante.getNomeUtente()).append("',").append(evento.getIdEvento()).append(",").append(evento.getInvitoGiudiceAnswer())
+                    .append(") ON CONFLICT (NomePartecipante, idEvento) DO NOTHING; UPDATE InvitoGiudice SET Risposta = ").append(evento.getInvitoGiudiceAnswer())
+                    .append("WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idEvento = ").append(evento.getIdEvento()).append(";");
+                    if(evento.getInvitoGiudiceAnswer() != null && evento.getInvitoGiudiceAnswer()) {
+                        codiceSQL.append("INSERT INTO Giudice SELECT * FROM Partecipante WHERE NomeUtente = '").append(partecipante.getNomeUtente()).append("' ON CONFLICT (NomePartecipante) DO NOTHING;")
+                        .append("INSERT INTO GiudiceEvento VALUES('").append(partecipante.getNomeUtente()).append("',").append(evento.getIdEvento()).append(");")
+                        .append("DELETE FROM PartecipanteEvento WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idEvento = ").append(evento.getIdEvento()).append(";");
+                    }
                     partecipante = evento.nextInvitoGiudice();
                 }
             }
@@ -744,10 +752,13 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public int addTeamDB(Team team) throws SQLException {
-        try (PreparedStatement ps = connection.prepareStatement("CALL CreaTeam('" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");")) {
+        int idTeam = getIdTeamDB();
+        try (PreparedStatement ps = connection.prepareStatement(
+        "INSERT INTO Team(Nome, TeamLeader, idEvento) VALUES('" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ")" +
+            "INSERT INTO CompTeam(NomePartecipante, idTeam) VALUES('" + team.getTeamLeader() + "'," + idTeam + ");")) {
             ps.executeUpdate();
         }
-        return getIdTeamDB();
+        return idTeam;
     }
 
     public void leaveTeamsDB(String nomePartecipante, List<Team> leaveTeam) throws SQLException{
@@ -797,7 +808,13 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             for (Team team : teams) {
                 Partecipante partecipante = team.firstRichiesta();
                 while(partecipante != null) {
-                    codiceSQL.append("CALL updateRichiestaTeam('").append(partecipante.getNomeUtente()).append("',").append(team.getIdTeam()).append(",").append(team.getRichiestaAnswer()).append(");");
+                    codiceSQL.append("INSERT INTO RichiestaTeam(NomePartecipante, idTeam, Risposta) VALUES('")
+                    .append(partecipante.getNomeUtente()).append("',").append(team.getIdTeam()).append(",").append(team.getRichiestaAnswer())
+                    .append(") ON CONFLICT (NomePartecipante, idTeam) DO NOTHING; UPDATE RichiestaTeam SET Risposta = ").append(team.getRichiestaAnswer())
+                    .append("WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idTeam = ").append(team.getIdTeam()).append(";");
+                    if(team.getRichiestaAnswer() != null && team.getRichiestaAnswer()) {
+                        codiceSQL.append("INSERT INTO CompTeam(NomePartecipante, idTeam) VALUES('").append(partecipante.getNomeUtente()).append("',").append(team.getIdTeam()).append(");");
+                    }
                     partecipante = team.nextRichiesta();
                 }
             }
