@@ -747,7 +747,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             rs.next();
             id = rs.getInt(1);
         }
-        return id;
+        return id + 1;
     }
 
     public int addTeamDB(Team team) throws SQLException {

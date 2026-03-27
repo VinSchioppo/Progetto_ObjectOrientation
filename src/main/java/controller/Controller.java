@@ -111,7 +111,7 @@ public class Controller {
             listaEventi = new ArrayList<>();
             organizzatoreCorrente.firstEvento();
             while(organizzatoreCorrente.getEvento() != null) {
-                String evento = organizzatoreCorrente.getEvento().getIdEvento() + " " + organizzatoreCorrente.getEvento().getTitolo();                listaEventi.add(evento);
+                String evento = organizzatoreCorrente.getEvento().getIdEvento() + " " + organizzatoreCorrente.getEvento().getTitolo();
                 listaEventi.add(evento);
                 organizzatoreCorrente.nextEvento();
             }
@@ -1021,7 +1021,6 @@ public class Controller {
             dao.disconnect();
             return true;
         }catch(SQLException e){
-            e.printStackTrace();
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
         }
         return false;
