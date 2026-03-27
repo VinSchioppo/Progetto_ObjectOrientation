@@ -284,7 +284,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     codiceSQL.append("INSERT INTO InvitoGiudice(NomePartecipante, idEvento, Risposta) VALUES('")
                     .append(partecipante.getNomeUtente()).append("',").append(evento.getIdEvento()).append(",").append(evento.getInvitoGiudiceAnswer())
                     .append(") ON CONFLICT (NomePartecipante, idEvento) DO NOTHING; UPDATE InvitoGiudice SET Risposta = ").append(evento.getInvitoGiudiceAnswer())
-                    .append("WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idEvento = ").append(evento.getIdEvento()).append(";");
+                    .append(" WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idEvento = ").append(evento.getIdEvento()).append(";");
                     if(evento.getInvitoGiudiceAnswer() != null && evento.getInvitoGiudiceAnswer()) {
                         codiceSQL.append("INSERT INTO Giudice SELECT * FROM Partecipante WHERE NomeUtente = '").append(partecipante.getNomeUtente()).append("' ON CONFLICT (NomePartecipante) DO NOTHING;")
                         .append("INSERT INTO GiudiceEvento VALUES('").append(partecipante.getNomeUtente()).append("',").append(evento.getIdEvento()).append(");")
@@ -812,7 +812,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     codiceSQL.append("INSERT INTO RichiestaTeam(NomePartecipante, idTeam, Risposta) VALUES('")
                     .append(partecipante.getNomeUtente()).append("',").append(team.getIdTeam()).append(",").append(team.getRichiestaAnswer())
                     .append(") ON CONFLICT (NomePartecipante, idTeam) DO NOTHING; UPDATE RichiestaTeam SET Risposta = ").append(team.getRichiestaAnswer())
-                    .append("WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idTeam = ").append(team.getIdTeam()).append(";");
+                    .append(" WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idTeam = ").append(team.getIdTeam()).append(";");
                     if(team.getRichiestaAnswer() != null && team.getRichiestaAnswer()) {
                         codiceSQL.append("INSERT INTO CompTeam(NomePartecipante, idTeam) VALUES('").append(partecipante.getNomeUtente()).append("',").append(team.getIdTeam()).append(");");
                     }

@@ -327,26 +327,25 @@ public class Controller {
     public List<String> listaInvitiGiudice() {
         List<String> invitiGiudice = null;
         if(utenteCorrente != null && partecipanteCorrente != null) {
-                try {
-                    dao.getAllInvitiGiudiceDB(utenteCorrente, partecipanteCorrente);
-                    Evento evento = utenteCorrente.firstInvitoGiudiceEvento();
-                    while (evento != null) {
-                        if (invitiGiudice == null)
-                            invitiGiudice = new ArrayList<>();
-                        String datiEvento = evento.getIdEvento() + " " + evento.getTitolo()
-                                + " " + evento.getIndirizzoSede() + " " + evento.getnCivicoSede()
-                                + " " + evento.getDataInizio() + " " + evento.getDataFine()
-                                + " " + evento.getMaxIscritti() + " " + evento.getMaxTeam()
-                                + " " + evento.getDataInizioReg() + " " + evento.getDataFineReg();
-                        invitiGiudice.add(datiEvento);
-                        evento = utenteCorrente.nextInvitoGiudiceEvento();
-                    }
-                }
-                catch(SQLException e){
-                    logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
+            try {
+                dao.getAllInvitiGiudiceDB(utenteCorrente, partecipanteCorrente);
+                Evento evento = utenteCorrente.firstInvitoGiudiceEvento();
+                while (evento != null) {
+                    if (invitiGiudice == null)
+                        invitiGiudice = new ArrayList<>();
+                    String datiEvento = evento.getIdEvento() + " " + evento.getTitolo()
+                            + " " + evento.getIndirizzoSede() + " " + evento.getnCivicoSede()
+                            + " " + evento.getDataInizio() + " " + evento.getDataFine()
+                            + " " + evento.getMaxIscritti() + " " + evento.getMaxTeam()
+                            + " " + evento.getDataInizioReg() + " " + evento.getDataFineReg();
+                    invitiGiudice.add(datiEvento);
+                    evento = utenteCorrente.nextInvitoGiudiceEvento();
                 }
             }
-
+            catch(SQLException e){
+                logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
+            }
+        }
         return invitiGiudice;
     }
 
@@ -357,19 +356,25 @@ public class Controller {
         if(utenteCorrente != null) {
             Evento evento = utenteCorrente.seekInvitoGiudiceEvento(idEvento);
             if (evento != null && utenteCorrente.getInvitoGiudiceEventoAnswer() == null) {
-                    utenteCorrente.setInvitoGiudiceEventoAnswer(true);
-                    evento.seekInvitoGiudice(utenteCorrente.getNomeUtente());
-                    evento.setInvitoGiudiceAnswer(true);
-                    if(giudiceCorrente == null)
-                        giudiceCorrente = utenteCorrente.becomeGiudice();
-                    evento.addGiudice(giudiceCorrente);
-                    giudiceCorrente.addEvento(evento);
-                    if(updateInvitiGiudice == null)
-                        updateInvitiGiudice = new ArrayList<>();
-                    updateInvitiGiudice.add(evento);
-                    return true;
+                utenteCorrente.setInvitoGiudiceEventoAnswer(true);
+                evento.seekInvitoGiudice(utenteCorrente.getNomeUtente());
+                evento.setInvitoGiudiceAnswer(true);
+                if(giudiceCorrente == null)
+                    giudiceCorrente = utenteCorrente.becomeGiudice();
+                evento.addGiudice(giudiceCorrente);
+                giudiceCorrente.addEvento(evento);
+                evento.seekAndRemovePartecipante(utenteCorrente.getNomeUtente());
+                if(partecipanteCorrente != null){
+                    partecipanteCorrente.seekEvento(idEvento);
+                    teamPartecipante();
+                    leaveTeam(idTeamCorrente());
+                    partecipanteCorrente.removeEvento();
                 }
-
+                if(updateInvitiGiudice == null)
+                    updateInvitiGiudice = new ArrayList<>();
+                updateInvitiGiudice.add(evento);
+                return true;
+            }
         }
         return false;
     }
@@ -381,15 +386,14 @@ public class Controller {
         if(utenteCorrente != null) {
             Evento evento = utenteCorrente.seekInvitoGiudiceEvento(idEvento);
             if (evento != null && utenteCorrente.getInvitoGiudiceEventoAnswer() == null) {
-                    utenteCorrente.setInvitoGiudiceEventoAnswer(false);
-                    evento.seekInvitoGiudice(utenteCorrente.getNomeUtente());
-                    evento.setInvitoGiudiceAnswer(false);
-                    if(updateInvitiGiudice == null)
-                        updateInvitiGiudice = new ArrayList<>();
-                    updateInvitiGiudice.add(evento);
-                    return true;
-                }
-
+                utenteCorrente.setInvitoGiudiceEventoAnswer(false);
+                evento.seekInvitoGiudice(utenteCorrente.getNomeUtente());
+                evento.setInvitoGiudiceAnswer(false);
+                if(updateInvitiGiudice == null)
+                    updateInvitiGiudice = new ArrayList<>();
+                updateInvitiGiudice.add(evento);
+                return true;
+            }
         }
         return false;
     }
@@ -463,7 +467,6 @@ public class Controller {
                 team.setIdTeam(dao.addTeamDB(team));
                 return true;
             } catch (SQLException e) {
-                e.printStackTrace();
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
