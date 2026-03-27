@@ -34,7 +34,7 @@ public class LogIn {
             boolean ok = controller.logInUtente(username, password);
 
             if (ok) {
-                parentFrame.openUserArea();
+                parentFrame.openUserArea(); //QUI è L'ERRORE
             } else {
                 JOptionPane.showMessageDialog(
                         mainPanel,

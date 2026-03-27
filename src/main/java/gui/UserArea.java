@@ -155,6 +155,15 @@ public class UserArea {
 
         eventiUtente = controller.listaEventiPartecipante();
 
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        if (eventiUtente != null) {
+            for (String evento : eventiUtente) {
+                model.addElement(evento);
+            }
+        }
+
+        listEventiIscritti.setModel(model);
 
         listEventiIscritti.addMouseListener(new MouseAdapter() {
             @Override
@@ -174,7 +183,22 @@ public class UserArea {
         if (eventiUtente == null || index >= eventiUtente.size())
             return;
 
-        String testo = controller.datiEvento();
+        String evento = eventiUtente.get(index);
+
+        // ===== ESTRAI ID =====
+        int spazio = evento.indexOf(" ");
+        if (spazio == -1) return;
+
+        int idEvento;
+        try {
+            idEvento = Integer.parseInt(evento.substring(0, spazio));
+        } catch (NumberFormatException e) {
+            System.out.println("Errore parsing ID evento: " + evento);
+            return;
+        }
+
+        // ===== USA NUOVO METODO =====
+        String testo = controller.datiEventoPreSelezione(idEvento);
 
         JOptionPane.showMessageDialog(
                 mainPanel,

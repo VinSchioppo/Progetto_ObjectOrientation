@@ -80,6 +80,12 @@ public class SetDati {
                         mainPanel,
                         "Dati aggiornati correttamente"
                 );
+                parentFrame.getUserArea().updateDatiUtente(
+                        nome,
+                        secondoNome,
+                        cognome,
+                        dataNascita.toString()
+                );
                 parentFrame.showHome();
             } else {
                 JOptionPane.showMessageDialog(

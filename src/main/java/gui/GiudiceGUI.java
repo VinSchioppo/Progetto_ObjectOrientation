@@ -13,7 +13,6 @@ public class GiudiceGUI {
     private JButton saveButton;
     private JList<String> listEventi;
     private JList<String> listTeam;
-    private JList<String> listProgressi;
 
     private JSpinner voto;
     private JTextPane giudizio;
@@ -92,9 +91,9 @@ public class GiudiceGUI {
         });
 
         // PROGRESSI
-        listProgressi.addListSelectionListener(e -> {
+        listaProgressi.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                saveButton.setEnabled(listProgressi.getSelectedIndex() != -1);
+                saveButton.setEnabled(listaProgressi.getSelectedIndex() != -1);
             }
         });
     }
@@ -123,7 +122,7 @@ public class GiudiceGUI {
         }
 
         listTeam.setModel(model);
-        listProgressi.setModel(new DefaultListModel<>());
+        listaProgressi.setModel(new DefaultListModel<>());
     }
 
     private void aggiornaProgressi(int idTeam) {
@@ -135,7 +134,7 @@ public class GiudiceGUI {
             for (String p : progressi) model.addElement(p);
         }
 
-        listProgressi.setModel(model);
+        listaProgressi.setModel(model);
     }
 
     /* ================= BOTTONI ================= */
@@ -152,7 +151,7 @@ public class GiudiceGUI {
     private void salvaValutazione() {
 
         String teamStr = listTeam.getSelectedValue();
-        String progStr = listProgressi.getSelectedValue();
+        String progStr = listaProgressi.getSelectedValue();
 
         if (teamStr == null || progStr == null) {
             mostraErrore("Seleziona team e progresso");

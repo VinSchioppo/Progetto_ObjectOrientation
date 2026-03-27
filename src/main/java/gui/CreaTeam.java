@@ -8,7 +8,6 @@ public class CreaTeam extends JDialog {
 
     private JPanel mainPanel;
     private JTextField NomeTeam;
-    private JList<String> ListaEventi;
     private JButton backButton;
     private JButton saveButton;
 
@@ -25,33 +24,17 @@ public class CreaTeam extends JDialog {
         pack();
         setLocationRelativeTo(owner);
 
-        caricaEventi();
-
         backButton.addActionListener(e -> dispose());
 
         saveButton.addActionListener(e -> creaTeam());
     }
-
-    /* ====================== EVENTI ====================== */
-
-    private void caricaEventi() {
-
-        DefaultListModel<String> model = new DefaultListModel<>();
-
-        controller.listaEventiAperti();
-
-        ListaEventi.setModel(model);
-    }
-
     /* ====================== CREA TEAM ====================== */
 
     private void creaTeam() {
 
         String nomeTeam = NomeTeam.getText().trim();
 
-        int index = ListaEventi.getSelectedIndex();
-
-        if (nomeTeam.isEmpty() || index == -1) {
+        if (nomeTeam.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     mainPanel,

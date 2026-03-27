@@ -275,7 +275,7 @@ public class Controller {
         Evento evento;
         try{
             evento = dao.getEventoDB(idEvento);
-            if(evento != null && evento.sizePartecipanti() > evento.getMaxIscritti()) {
+            if(evento != null && evento.sizePartecipanti() + 1 < evento.getMaxIscritti()) {
                 if (partecipanteCorrente == null)
                     partecipanteCorrente = utenteCorrente.becomePartecipante();
                 partecipanteCorrente.addEvento(evento);
@@ -456,12 +456,14 @@ public class Controller {
         && partecipanteCorrente.getEvento().getDataFineReg().isAfter(LocalDate.now())
         && partecipanteCorrente.getEvento().sizeTeamIscritti() + 1 <= partecipanteCorrente.getEvento().getMaxTeam()){
             Team team = new Team(-1, nome, partecipanteCorrente.getNomeUtente());
+            team.setTeamLeader(partecipanteCorrente.getNomeUtente());
             team.setEventoIscritto(partecipanteCorrente.getEvento());
             team.addMembroTeam(partecipanteCorrente);
             try {
                 team.setIdTeam(dao.addTeamDB(team));
                 return true;
             } catch (SQLException e) {
+                e.printStackTrace();
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -747,6 +749,7 @@ public class Controller {
                 return true;
             }
             catch (SQLException e) {
+                e.printStackTrace();
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -1015,6 +1018,7 @@ public class Controller {
             dao.disconnect();
             return true;
         }catch(SQLException e){
+            e.printStackTrace();
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
         }
         return false;

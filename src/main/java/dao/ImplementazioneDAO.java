@@ -57,7 +57,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public boolean checkLoginDB(String nomeUtente, String password) throws SQLException{
         boolean success = true;
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT NomeUtente, Password FROM Partecipante" +
+            "SELECT NomeUtente, Password FROM Partecipante" +
                 " WHERE NomeUtente = '" + nomeUtente + "' AND Password = '" + password + "';")) {
             ResultSet rs = ps.executeQuery();
             if (!rs.isBeforeFirst()) {
@@ -108,7 +108,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public List<Evento> getEventiApertiDB(String nomeUtente) throws SQLException{
         List<Evento> eventi = null;
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Evento " +
+            "SELECT * FROM Evento " +
                 "WHERE DataInizioReg <= NOW() AND DataFineReg >= NOW()\n" +
                 "AND IdEvento NOT IN( " +
                 "SELECT pe.idEvento FROM PartecipanteEvento AS pe " +
@@ -142,7 +142,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public int addEventoDB(String titolo, String indirizzo, int nCivico, LocalDate dataInizio, LocalDate dataFine, int maxIscritti, int maxTeam, LocalDate dataInizioReg, LocalDate dataFineReg, String descrizioneProb) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede, DataInizio, DataFine," +
+            "INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede, DataInizio, DataFine," +
                 " MaxIscritti, MaxTeam, DataInizioReg, DataFineReg, DescrizioneProb)" +
                 " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
             ps.setString(1, titolo);
@@ -171,7 +171,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void updateEventoDB(int idEvento, String indirizzo, int nCivico, int maxIscritti, int maxTeam) throws SQLException {
         try (PreparedStatement ps = connection.prepareStatement(
-                "UPDATE Evento SET Titolo = ?, IndirizzoSede = ?, NCivicoSede = ?, " +
+            "UPDATE Evento SET IndirizzoSede = ?, NCivicoSede = ?, " +
                 "MaxIscritti = ?, MaxTeam = ? WHERE IdEvento = ?;")) {
             ps.setString(1, indirizzo);
             if (nCivico == -1)
@@ -302,7 +302,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public Partecipante getPartecipanteDB(String nomePartecipante) throws SQLException{
         Partecipante partecipante = null;
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Partecipante AS p " +
+            "SELECT * FROM Partecipante AS p " +
                 "JOIN PartecipanteEvento AS pe ON p.NomeUtente = pe.NomePartecipante " +
                 "JOIN Evento AS e ON pe.idEvento = e.IdEvento " +
                 "WHERE e.DataFine >= NOW() AND p.NomeUtente = '" + nomePartecipante + "';")) {
@@ -351,7 +351,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public void getAllPartecipantiSingoliDB(Evento evento) throws SQLException{
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
+            "SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
                 "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN( " +
                 "SELECT ct.NomePartecipante FROM Team AS t " +
                 "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
@@ -372,7 +372,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public void getAllPartecipantiSingoliDB(Evento evento, Partecipante partecipante) throws SQLException{
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
+            "SELECT * FROM Partecipante JOIN PartecipanteEvento ON NomeUtente = NomePartecipante " +
                 "WHERE idEvento = " + idEvento + " AND NomeUtente NOT IN( " +
                 "SELECT ct.NomePartecipante FROM Team AS t " +
                 "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
@@ -428,7 +428,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public Organizzatore getOrganizzatoreDB(String nomeUtente) throws SQLException {
         Organizzatore organizzatore = null;
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Organizzatore AS o " +
+            "SELECT * FROM Organizzatore AS o " +
                 "JOIN OrganizzatoreEvento AS oe ON o.NomeUtente = oe.NomeOrganizzatore " +
                 "JOIN Evento AS e ON oe.idEvento = e.IdEvento " +
                 "WHERE (e.DataInizio IS NULL OR e.DataFine >= NOW()) " +
@@ -476,7 +476,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         Organizzatore organizzatore = null;
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Organizzatore JOIN OrganizzatoreEvento ON NomeUtente = NomeOrganizzatore " +
+            "SELECT * FROM Organizzatore JOIN OrganizzatoreEvento ON NomeUtente = NomeOrganizzatore " +
                 "WHERE idEvento =" + idEvento + ";")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
@@ -543,7 +543,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public Giudice getGiudiceDB(String nomeUtente) throws SQLException {
         Giudice giudice = null;
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Giudice AS g " +
+            "SELECT * FROM Giudice AS g " +
                 "JOIN GiudiceEvento AS ge ON g.NomeUtente = ge.NomeGiudice " +
                 "JOIN Evento AS e ON ge.idEvento = e.IdEvento " +
                 "WHERE e.DataFine >= NOW() AND g.NomeUtente = '" + nomeUtente + "';")) {
@@ -594,8 +594,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         List<Giudice> giudici = null;
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Giudice " +
-                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
+            "SELECT * FROM Giudice JOIN GiudiceEvento ON NomeUtente = NomeGiudice" +
                 " WHERE idEvento = " + idEvento + ";")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
@@ -615,8 +614,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public List<Giudice> getAllGiudiciDB(Evento evento, Giudice giudice) throws SQLException{
         List<Giudice> giudici = new ArrayList<>();
         giudici.add(giudice);
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Giudice " +
-                "JOIN GiudiceEvento ON NomeUtente = NomeGiudice " +
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT * FROM Giudice JOIN GiudiceEvento ON NomeUtente = NomeGiudice " +
                 "WHERE idEvento = " + evento.getIdEvento() +
                 " AND NomeGiudice <> '" + giudice.getNomeUtente() + "';")) {
             ResultSet rs = ps.executeQuery();
@@ -650,7 +649,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         List<Team> teams = null;
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+            "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
                 "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
                 "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;")) {
             ResultSet rs = ps.executeQuery();
@@ -691,7 +690,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
         List<Team> teams = null;
         int idEvento = evento.getIdEvento();
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
+            "SELECT * FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
                 "JOIN Partecipante AS p ON ct.NomePartecipante = p.NomeUtente " +
                 "WHERE t.idEvento = " + idEvento + " ORDER BY t.idTeam;")) {
             ResultSet rs = ps.executeQuery();
@@ -754,7 +753,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public int addTeamDB(Team team) throws SQLException {
         int idTeam = getIdTeamDB();
         try (PreparedStatement ps = connection.prepareStatement(
-        "INSERT INTO Team(Nome, TeamLeader, idEvento) VALUES('" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ")" +
+        "INSERT INTO Team(Nome, TeamLeader, idEvento) VALUES('" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");" +
             "INSERT INTO CompTeam(NomePartecipante, idTeam) VALUES('" + team.getTeamLeader() + "'," + idTeam + ");")) {
             ps.executeUpdate();
         }
@@ -783,7 +782,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void getAllRichiesteTeamDB(Partecipante partecipante) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM RichiestaTeam " +
+            "SELECT * FROM RichiestaTeam " +
                 "WHERE Risposta IS NULL AND idTeam IN(" +
                 "SELECT idTeam FROM CompTeam " +
                 "WHERE NomePartecipante = '" + partecipante.getNomeUtente() + "');")) {
@@ -791,11 +790,13 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             if (rs.isBeforeFirst()) {
                 rs.next();
                 Team team = partecipante.seekTeam(rs.getInt(IDTEAM));
-                team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString(NOMEPARTECIPANTE)));
-                while (rs.next()) {
-                    if (team.getIdTeam() != rs.getInt(IDTEAM))
-                        team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                if(team != null) {
                     team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString(NOMEPARTECIPANTE)));
+                    while (rs.next()) {
+                        if (team.getIdTeam() != rs.getInt(IDTEAM))
+                            team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                        team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString(NOMEPARTECIPANTE)));
+                    }
                 }
             }
         }
@@ -826,7 +827,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void getAllProgressiDB(Evento evento) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT t.IdTeam, p.IdProgresso, p.DataPubblicazione," +
+            "SELECT t.IdTeam, p.IdProgresso, p.DataPubblicazione," +
                 "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
                 "FROM Team AS t JOIN Progresso AS p ON t.IdTeam = p.idTeam " +
                 "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
@@ -861,7 +862,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void getAllProgressiDB(Partecipante partecipante) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT ct.idTeam, p.IdProgresso, p.DataPubblicazione," +
+            "SELECT ct.idTeam, p.IdProgresso, p.DataPubblicazione," +
                 "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
                 "FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
                 "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
@@ -969,7 +970,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public void getAllVotiDB(Evento evento) throws SQLException{
         List<Voto> voti = null;
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT * FROM Team AS t " +
+            "SELECT * FROM Team AS t " +
                 "JOIN Voto AS v ON t.IdTeam = v.idTeam " +
                 "WHERE t.idEvento = " + evento.getIdEvento() +
                 " ORDER BY t.idTeam;")) {
@@ -995,7 +996,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public void getAllVotiDB(Partecipante partecipante) throws SQLException{
         List<Voto> voti = null;
         try (PreparedStatement ps = connection.prepareStatement(
-                "SELECT t.IdTeam, v.Valore, v.NomeGiudice FROM Team AS t " +
+            "SELECT t.IdTeam, v.Valore, v.NomeGiudice FROM Team AS t " +
                 "JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
                 "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
                 "JOIN Voto AS v ON ct.idTeam = v.idTeam " +

@@ -12,6 +12,8 @@ public class UserAreaFrame extends JFrame {
     private CardLayout cardLayout;
     private JPanel container;
     private Controller controller;
+    private UserArea userAreaPanel;
+    private iscriviEvento iscriviEventoPanel;
 
     public UserAreaFrame(Controller controller) {
 
@@ -22,17 +24,15 @@ public class UserAreaFrame extends JFrame {
         container = new JPanel(cardLayout);
 
         // pannelli
-        UserArea userAreaPanel = new UserArea(this, controller);
+        userAreaPanel = new UserArea(this, controller);
         SetDati setDatiPanel = new SetDati(this, controller);
-        iscriviEvento iscriviEventoPanel = new iscriviEvento(this, controller);
+        iscriviEventoPanel = new iscriviEvento(this, controller);
         CreaEvento creaEventoPanel = new CreaEvento(this, controller);
 
         container.add(userAreaPanel.getMainPanel(), "HOME");
         container.add(setDatiPanel.getMainPanel(), "SET_DATI");
         container.add(iscriviEventoPanel.getMainPanel(), "ISCRIVI_EVENTO");
         container.add(creaEventoPanel.getMainPanel(), "CREA_EVENTO");
-
-
 
         setContentPane(container);
 
@@ -45,10 +45,13 @@ public class UserAreaFrame extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 controller.exitApplication();
-
                 System.exit(0);
             }
         });
+    }
+
+    public UserArea getUserArea() {
+        return userAreaPanel;
     }
 
     public void openSelectEvento() {
@@ -72,6 +75,7 @@ public class UserAreaFrame extends JFrame {
     }
 
     public void showIscriviEvento() {
+        iscriviEventoPanel.refreshTabella();
         cardLayout.show(container, "ISCRIVI_EVENTO");
     }
 

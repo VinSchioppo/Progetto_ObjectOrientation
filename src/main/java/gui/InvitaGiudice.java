@@ -16,6 +16,7 @@ public class InvitaGiudice {
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
+    private DefaultListModel<String> modelInvitati = new DefaultListModel<>();
 
     public InvitaGiudice(SelectEventoFrame parentFrame, Controller controller) {
 
@@ -31,30 +32,37 @@ public class InvitaGiudice {
        ============================================================ */
     private void inizializzaListe() {
 
-        // ===== GIUDICI ATTUALI =====
+        // ===== GIUDICI =====
         List<String> giudici = controller.listaGiudiciEvento();
-
         DefaultListModel<String> modelGiudici = new DefaultListModel<>();
+
         if (giudici != null) {
             for (String g : giudici) {
                 modelGiudici.addElement(g);
             }
         }
+
         listGiudici.setModel(modelGiudici);
 
-        // ===== PARTECIPANTI EVENTO =====
+        // ===== PARTECIPANTI FILTRATI =====
         List<String> partecipanti = controller.listaPartecipantiEvento();
-
         DefaultListModel<String> modelPartecipanti = new DefaultListModel<>();
+
         if (partecipanti != null) {
             for (String p : partecipanti) {
-                modelPartecipanti.addElement(p);
+
+                boolean isGiudice = giudici != null && giudici.contains(p);
+                boolean isInvitato = modelInvitati.contains(p);
+
+                if (!isGiudice && !isInvitato) {
+                    modelPartecipanti.addElement(p);
+                }
             }
         }
+
         listPartecipantiEvento.setModel(modelPartecipanti);
 
-        // ===== INVITATI (placeholder) =====
-        DefaultListModel<String> modelInvitati = new DefaultListModel<>();
+        // ===== INVITATI =====
         listGiudiciPossibili.setModel(modelInvitati);
     }
 
@@ -92,6 +100,8 @@ public class InvitaGiudice {
             }
 
             boolean ok = controller.invitaGiudice(selezionato);
+            System.out.println(controller.invitaGiudice(selezionato));
+
 
             if (ok) {
 
@@ -102,11 +112,14 @@ public class InvitaGiudice {
                         JOptionPane.INFORMATION_MESSAGE
                 );
 
-                // Aggiorna lista invitati (UI locale)
-                DefaultListModel<String> modelInvitati =
-                        (DefaultListModel<String>) listGiudiciPossibili.getModel();
-
+                // ===== AGGIUNGI A INVITATI =====
                 modelInvitati.addElement(selezionato);
+
+                // ===== RIMUOVI DAI PARTECIPANTI =====
+                DefaultListModel<String> modelPartecipanti =
+                        (DefaultListModel<String>) listPartecipantiEvento.getModel();
+
+                modelPartecipanti.removeElement(selezionato);
 
             } else {
                 JOptionPane.showMessageDialog(

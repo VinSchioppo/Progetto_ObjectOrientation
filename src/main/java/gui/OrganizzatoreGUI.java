@@ -36,8 +36,7 @@ public class OrganizzatoreGUI {
        ============================================================ */
     private void inizializzaTabella() {
 
-        // UNA SOLA COLONNA → niente parsing fragile
-        String[] colonne = { "Evento" };
+        String[] colonne = { "Titolo", "Stato" };
 
         DefaultTableModel model = new DefaultTableModel(colonne, 0) {
             @Override
@@ -48,25 +47,58 @@ public class OrganizzatoreGUI {
 
         eventiOrganizzatore = controller.listaEventiOrganizzatore();
 
-        if(eventiOrganizzatore != null) {
-            // Mostra direttamente la stringa intera
+        if (eventiOrganizzatore != null) {
+
             for (String evento : eventiOrganizzatore) {
-                model.addRow(new Object[]{evento});
+
+                try {
+                    // ===== ID =====
+                    int spazio = evento.indexOf(" ");
+                    if (spazio == -1) continue;
+
+                    int idEvento = Integer.parseInt(evento.substring(0, spazio));
+
+                    // ===== TITOLO =====
+                    String titolo = evento.substring(spazio + 1);
+
+                    // ===== DATI COMPLETI =====
+                    controller.selectEvento(idEvento, Role.ORGANIZZATORE);
+                    String dati = controller.datiEvento();
+
+                    // ===== STATO =====
+                    String stato;
+                    if (dati == null || dati.contains("null")) {
+                        stato = "❌";
+                    } else {
+                        stato = "✅";
+                    }
+
+                    model.addRow(new Object[]{ titolo, stato });
+
+                } catch (Exception ex) {
+                    System.out.println("Errore evento: " + evento);
+                }
             }
-
-            table1.setModel(model);
-            table1.setRowHeight(32);
-            table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            table1.setRowSelectionAllowed(true);
-            table1.setColumnSelectionAllowed(false);
-
-            // ===== CENTRATURA =====
-            DefaultTableCellRenderer center = new DefaultTableCellRenderer();
-            center.setHorizontalAlignment(SwingConstants.CENTER);
-            table1.getColumnModel().getColumn(0).setCellRenderer(center);
-
-            table1.getTableHeader().setReorderingAllowed(false);
         }
+
+        table1.setModel(model);
+
+        // ===== CONFIG TABELLA =====
+        table1.setRowHeight(32);
+        table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table1.setRowSelectionAllowed(true);
+        table1.setColumnSelectionAllowed(false);
+
+        // ===== CENTRATURA =====
+        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+        center.setHorizontalAlignment(SwingConstants.CENTER);
+
+        for (int i = 0; i < table1.getColumnCount(); i++) {
+            table1.getColumnModel().getColumn(i).setCellRenderer(center);
+        }
+
+        table1.getTableHeader().setReorderingAllowed(false);
+
         // ===== SELEZIONE =====
         table1.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -74,14 +106,13 @@ public class OrganizzatoreGUI {
 
                 if (row != -1) {
                     selezionaEvento(row);
-
                     setDatiEventoButton.setEnabled(true);
                     invitaGiudiceButton.setEnabled(true);
                 }
             }
         });
 
-        // ===== DOPPIO CLICK → DETTAGLI =====
+        // ===== DOPPIO CLICK =====
         table1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -102,7 +133,6 @@ public class OrganizzatoreGUI {
 
         String evento = eventiOrganizzatore.get(row);
 
-        // Parsing MINIMO e sicuro → solo ID
         int spazio = evento.indexOf(" ");
         if (spazio == -1) return;
 
@@ -150,7 +180,6 @@ public class OrganizzatoreGUI {
             }
         });
 
-        // Abilitazione bottoni
         table1.getSelectionModel().addListSelectionListener(e -> {
             boolean selected = table1.getSelectedRow() != -1;
             setDatiEventoButton.setEnabled(selected);

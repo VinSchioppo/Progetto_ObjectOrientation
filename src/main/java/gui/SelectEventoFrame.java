@@ -13,6 +13,7 @@ public class SelectEventoFrame extends JFrame {
     private JPanel container;
     private Controller controller;
     private InvitaGiudice invitaGiudicePanel;
+    private PartecipanteGUI partecipanteGUIPanel;
 
     public SelectEventoFrame(Controller controller) {
         this.controller = controller;
@@ -26,8 +27,8 @@ public class SelectEventoFrame extends JFrame {
         SelectEvento selectEventoPanel = new SelectEvento(this);
         OrganizzatoreGUI organizzatorePanel = new OrganizzatoreGUI(this, controller);
         invitaGiudicePanel = new InvitaGiudice(this, controller);
+        partecipanteGUIPanel = new PartecipanteGUI(this, controller);
         SetDatiEvento setDatiEventoPanel = new SetDatiEvento(this, controller);
-        PartecipanteGUI partecipanteGUIPanel = new PartecipanteGUI(this);
         TeamGUI teamGUIPanel = new TeamGUI(this, controller);
         GiudiceGUI giudicePanel = new GiudiceGUI(this, controller);
 
@@ -76,7 +77,10 @@ public class SelectEventoFrame extends JFrame {
     }
 
     public void showPartecipanteGUI() {
+
+        partecipanteGUIPanel.refreshListaEventi();
         cardLayout.show(container, "PARTECIPANTE");
+
     }
 
     public void showGiudiceGUI() {
