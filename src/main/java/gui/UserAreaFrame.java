@@ -13,7 +13,7 @@ public class UserAreaFrame extends JFrame {
     private JPanel container;
     private Controller controller;
     private UserArea userAreaPanel;
-    private iscriviEvento iscriviEventoPanel;
+    private IscriviEvento iscriviEventoPanel;
 
     public UserAreaFrame(Controller controller) {
 
@@ -45,7 +45,7 @@ public class UserAreaFrame extends JFrame {
 
         userAreaPanel = new UserArea(this, controller);
         SetDati setDatiPanel = new SetDati(this, controller);
-        iscriviEventoPanel = new iscriviEvento(this, controller);
+        iscriviEventoPanel = new IscriviEvento(this, controller);
         CreaEvento creaEventoPanel = new CreaEvento(this, controller);
 
         contenitore(setDatiPanel, creaEventoPanel);
