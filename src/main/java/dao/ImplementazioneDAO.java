@@ -753,8 +753,11 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public int addTeamDB(Team team) throws SQLException {
         int idTeam = getIdTeamDB();
         try (PreparedStatement ps = connection.prepareStatement(
-        "INSERT INTO Team(Nome, TeamLeader, idEvento) VALUES('" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");" +
-            "INSERT INTO CompTeam(NomePartecipante, idTeam) VALUES('" + team.getTeamLeader() + "'," + idTeam + ");")) {
+        "INSERT INTO Team(Nome, TeamLeader, idEvento) VALUES('" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");")) {
+            ps.executeUpdate();
+        }
+        try(PreparedStatement ps = connection.prepareStatement(
+        "INSERT INTO CompTeam(NomePartecipante, idTeam) VALUES('" + team.getTeamLeader() + "'," + idTeam + ");")){
             ps.executeUpdate();
         }
         return idTeam;
