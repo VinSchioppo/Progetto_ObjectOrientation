@@ -474,6 +474,7 @@ public class Controller{
             team.addMembroTeam(partecipanteCorrente);
             try {
                 team.setIdTeam(dao.addTeamDB(team));
+                teamPartecipante();
                 return true;
             } catch (SQLException e) {
                 logger.info(e.getMessage());
