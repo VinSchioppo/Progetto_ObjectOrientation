@@ -49,12 +49,10 @@ public class Register {
     private void registraUtente() {
 
         String username = textField1.getText().trim();
-
         String password = new String(passwordField1.getPassword());
         String conferma = new String(passwordField2.getPassword());
 
         // ===== VALIDAZIONI =====
-
         if (username.isEmpty() || password.isEmpty() || conferma.isEmpty()) {
             mostraErrore("Compila tutti i campi");
             return;
@@ -65,27 +63,37 @@ public class Register {
             return;
         }
 
-        // ===== CHIAMATA CONTROLLER =====
-        boolean ok = controller.registerUtente(username, password);
+        // ===== REGISTRA =====
+        boolean registrato = controller.registerUtente(username, password);
 
-        if (ok) {
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Registrazione completata",
-                    "Successo",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-
-            // chiude la finestra
-            Window window = SwingUtilities.getWindowAncestor(mainPanel);
-            if (window != null) {
-                window.dispose();
-            }
-
-        } else {
-
+        if (!registrato) {
             mostraErrore("Username già esistente o errore DB");
+            return;
+        }
+
+        // ===== LOGIN AUTOMATICO =====
+        boolean loginOk = controller.logInUtente(username, password);
+
+        if (!loginOk) {
+            mostraErrore("Errore durante login automatico");
+            return;
+        }
+
+        JOptionPane.showMessageDialog(
+                mainPanel,
+                "Registrazione completata",
+                "Successo",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+
+        // ===== APERTURA USER AREA =====
+        JFrame userFrame = new UserAreaFrame(controller);
+        userFrame.setVisible(true);
+
+        // ===== CHIUSURA REGISTER =====
+        Window window = SwingUtilities.getWindowAncestor(mainPanel);
+        if (window != null) {
+            window.dispose();
         }
     }
 

@@ -401,7 +401,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             StringBuilder codiceSQL = new StringBuilder();
             codiceSQL.append("INSERT INTO PartecipanteEvento(NomePartecipante, idEvento) VALUES");
             for (Evento evento : eventi) {
-                if (evento != partecipantiEvento.getFirst())
+                if(!evento.equals(partecipantiEvento.getFirst()))
                     codiceSQL.append(",");
                 codiceSQL.append("('").append(nomePartecipante).append("',").append(evento.getIdEvento()).append(")");
             }
@@ -516,7 +516,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             StringBuilder codiceSQL = new StringBuilder();
             codiceSQL.append("INSERT INTO OrganizzatoreEvento(NomeOrganizzatore, idEvento) VALUES");
             for (Evento evento : eventi) {
-                if (evento != eventiOrganizzatore.getFirst())
+                if (!evento.equals(eventiOrganizzatore.getFirst()))
                     codiceSQL.append(",");
                 codiceSQL.append("('").append(nomeOrganizzatore).append("',").append(evento.getIdEvento()).append(")");
             }
@@ -923,7 +923,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public List<Commento> getAllCommentiDB(String giudice) throws SQLException{
         List<Commento> commenti = null;
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Commento WHERE NomeGiudice = " + giudice + ";")) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Commento WHERE NomeGiudice = '" + giudice + "';")) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Commento commento = new Commento(rs.getInt(IDPROGRESSO), giudice, rs.getString("testo"));
@@ -942,7 +942,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             StringBuilder codiceSQL = new StringBuilder();
             codiceSQL.append("INSERT INTO Commento(NomeGiudice, idProgresso, Testo) VALUES");
             for (Commento commento : commenti) {
-                if(commento != nuoviCommenti.getFirst())
+                if(!commento.equals(nuoviCommenti.getFirst()))
                     codiceSQL.append(",");
                 codiceSQL.append("('").append(commento.getGiudice()).append("',").append(commento.getIdProgresso()).append(",'").append(commento.getTesto()).append("')");
             }
@@ -955,7 +955,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public List<Voto> getAllVotiDB(String giudice) throws SQLException{
         List<Voto> voti = null;
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Voto WHERE NomeGiudice = " + giudice + ";")) {
+        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Voto WHERE NomeGiudice = '" + giudice + "';")) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Voto voto = new Voto(rs.getInt(IDTEAM), rs.getInt(VALORE), giudice);
@@ -1028,7 +1028,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             StringBuilder codiceSQL = new StringBuilder();
             codiceSQL.append("INSERT INTO Voto(NomeGiudice, idTeam, Valore) VALUES");
             for (Voto voto : voti) {
-                if(voto != nuoviVoti.getFirst())
+                if(!voto.equals(nuoviVoti.getFirst()))
                     codiceSQL.append(",");
                 codiceSQL.append("('").append(voto.getGiudice()).append("',").append(voto.getIdTeam()).append(",").append(voto.getValore()).append(")");
             }

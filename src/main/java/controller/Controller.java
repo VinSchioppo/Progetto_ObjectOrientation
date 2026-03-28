@@ -419,10 +419,8 @@ public class Controller{
         String infoTeam = null;
         if(partecipanteCorrente != null) {
             Team team = partecipanteCorrente.seekTeamEvento(partecipanteCorrente.getEvento().getIdEvento());
-            System.out.println(partecipanteCorrente.getEvento().getIdEvento());
             if (team != null) {
                 infoTeam = team.getIdTeam() + " " + team.getNome() + " " + team.getTeamLeader();
-                System.out.println(infoTeam);
             }
         }
         return infoTeam;
@@ -853,6 +851,33 @@ public class Controller{
         }
         return false;
     }
+
+    //Questo metodo restituisce una lista contenente il nome di tutti i partecipanti
+    //che sono già stati invitati ad essere giudici.
+    //Ogni elemento della lista segue il formato: NomeUtente
+
+    public List<String> listaInvitiGiudiceOrganizzatore()
+    {
+        List<String> listaInvitiGiudice = null;
+        if(organizzatoreCorrente != null){
+            Evento evento = organizzatoreCorrente.getEvento();
+            if(evento != null){
+                Partecipante partecipante = evento.firstInvitoGiudice();
+                while (partecipante != null) {
+                    if (evento.firstInvitoGiudiceAnswer() == null) {
+                        if (listaInvitiGiudice == null)
+                            listaInvitiGiudice = new ArrayList<>();
+                        listaInvitiGiudice.add(partecipante.getNomeUtente());
+                    }
+                    partecipante = evento.nextInvitoGiudice();
+                }
+            }
+        }
+        return listaInvitiGiudice;
+    }
+
+    //Questo metodo restituisce una lista contenente i giudici di un evento.
+    //Ogni elemento della lista segue il formato: NomeUtente
 
     public List<String> listaGiudiciEvento(){
         List<String> listaGiudici = null;

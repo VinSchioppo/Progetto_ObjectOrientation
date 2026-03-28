@@ -20,8 +20,7 @@ public class Commento {
 
     public void setIdProgresso(int idProgresso) {this.idProgresso = idProgresso;}
     public void setTesto(String testo) {this.testo = testo;}
-    public void setGiudice(String giudice) {
-        this.giudice = giudice;}
+    public void setGiudice(String giudice) {this.giudice = giudice;}
 
     public int getIdProgresso(){return this.idProgresso;}
     public String getTesto() {return testo;}

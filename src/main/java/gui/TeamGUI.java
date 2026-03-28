@@ -62,7 +62,7 @@ public class TeamGUI {
         }
 
         // ===== TEAM =====
-        controller.teamPartecipante();
+        //controller.teamPartecipante();
         String nomeTeam = controller.nomeTeamCorrente();
         nomeTeamLabel.setText(nomeTeam != null ? nomeTeam : "Nessun team");
 

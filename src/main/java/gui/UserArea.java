@@ -28,6 +28,7 @@ public class UserArea {
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
     private ArrayList<Integer> richiesteTeamId;
+    private List<String> invitiCompleti;
 
     public UserArea(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -37,6 +38,7 @@ public class UserArea {
         inizializzaListaEventi();
         inizializzaBottoni();
         inizializzaListaInvitiGiudice();
+        System.out.println(controller.listaInvitiGiudice());
     }
 
     /* ============================================================
@@ -222,20 +224,27 @@ public class UserArea {
 
                     int index = listRichiestaGiudice.getSelectedIndex();
 
-                    if (index == -1) return;
+                    if (index == -1 || invitiCompleti == null) return;
 
-                    String invito = listRichiestaGiudice.getModel().getElementAt(index);
+                    String invitoCompleto = invitiCompleti.get(index);
 
-                    int idEvento = estraiId(invito);
+                    int spazio = invitoCompleto.indexOf(" ");
+                    if (spazio == -1) return;
 
-                    if (idEvento == -1) return;
+                    int idEvento;
+
+                    try {
+                        idEvento = Integer.parseInt(invitoCompleto.substring(0, spazio));
+                    } catch (Exception ex) {
+                        return;
+                    }
 
                     mostraDialogInvito(idEvento);
                 }
             }
         });
 
-        refreshInvitiGiudice(); // carica dati
+        refreshInvitiGiudice();
     }
 
     private void mostraDialogInvito(int idEvento) {
@@ -287,37 +296,32 @@ public class UserArea {
         }
     }
 
-    private int estraiId(String valore) {
-
-        int spazio = valore.indexOf(" ");
-
-        if (spazio == -1) return -1;
-
-        try {
-            return Integer.parseInt(valore.substring(0, spazio));
-        } catch (Exception e) {
-            return -1;
-        }
-    }
-
     private void refreshInvitiGiudice() {
 
         DefaultListModel<String> model = new DefaultListModel<>();
 
-        List<String> inviti = controller.listaInvitiGiudice();
+        invitiCompleti = controller.listaInvitiGiudice();
 
-        if (inviti != null) {
-            for (String invito : inviti) {
-                model.addElement(invito);
+        if (invitiCompleti != null) {
+
+            for (String invito : invitiCompleti) {
+
+                int spazio = invito.indexOf(" ");
+
+                if (spazio != -1) {
+
+                    // SOLO TITOLO (senza rompere nulla)
+                    String titolo = invito.substring(spazio + 1);
+
+                    model.addElement(titolo);
+                } else {
+                    // fallback (sicurezza)
+                    model.addElement(invito);
+                }
             }
         }
 
         listRichiestaGiudice.setModel(model);
-
-        // 🔥 forza repaint e selezione pulita
-        listRichiestaGiudice.clearSelection();
-        listRichiestaGiudice.revalidate();
-        listRichiestaGiudice.repaint();
     }
 
     private void inizializzaBottoni() {
