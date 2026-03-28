@@ -474,8 +474,10 @@ public class Controller{
             team.setEventoIscritto(partecipanteCorrente.getEvento());
             team.addMembroTeam(partecipanteCorrente);
             try {
+                if(updatePartecipanteEvento != null)
+                    dao.addPartecipanteEventoDB(partecipanteCorrente.getNomeUtente(), updatePartecipanteEvento);
+                updatePartecipanteEvento = null;
                 team.setIdTeam(dao.addTeamDB(team));
-                teamPartecipante();
                 return true;
             } catch (SQLException e) {
                 logger.info(e.getMessage());
