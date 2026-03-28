@@ -43,9 +43,9 @@ public class LogIn {
             }
         });
 
-        registrazioneButton.addActionListener(e -> {
-            parentFrame.openRegisterDialog();
-        });
+        registrazioneButton.addActionListener(e ->
+            parentFrame.openRegisterDialog()
+        );
     }
 
     public JPanel getMainPanel() {

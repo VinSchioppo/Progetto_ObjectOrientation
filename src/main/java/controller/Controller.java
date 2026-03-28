@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 //Questo enum serve a determinare la specializzazione che un utente assume.
 
-public class Controller {
+public class Controller{
 
     private Utente utenteCorrente = null;
     private Partecipante partecipanteCorrente = null;
@@ -37,6 +37,7 @@ public class Controller {
         try{
             dao = new ImplementazioneDAO();
         } catch (SQLException e) {
+            logger.info(e.getMessage());
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
         }
     }
@@ -59,6 +60,7 @@ public class Controller {
             }
 
         } catch (SQLException e) {
+            logger.info(e.getMessage());
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
         }
         return false;
@@ -73,6 +75,7 @@ public class Controller {
             utenteCorrente = new Utente(nomeUtente, password);
         }
         catch(SQLException e){
+            logger.info(e.getMessage());
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             return false;
         }
@@ -186,6 +189,7 @@ public class Controller {
                 team.setIdTeam(dao.addTeamDB(team));
                 return true;
             } catch (SQLException e) {
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
                 return false;
             }
@@ -234,6 +238,7 @@ public class Controller {
             return false;
         }
         catch (SQLException e) {
+            logger.info(e.getMessage());
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             return false;
         }
@@ -262,6 +267,7 @@ public class Controller {
                     }
                 }
             } catch (SQLException e) {
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -286,6 +292,7 @@ public class Controller {
             }
         }
         catch(SQLException e){
+            logger.info(e.getMessage());
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
         }
         return false;
@@ -313,6 +320,7 @@ public class Controller {
                 updateOrganizzatoreEvento.add(evento);
                 return true;
             } catch (SQLException e) {
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -343,6 +351,7 @@ public class Controller {
                 }
             }
             catch(SQLException e){
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -467,6 +476,7 @@ public class Controller {
                 team.setIdTeam(dao.addTeamDB(team));
                 return true;
             } catch (SQLException e) {
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -647,6 +657,7 @@ public class Controller {
                         team.addProgresso(progresso);
                         return true;
                     } catch (SQLException e) {
+                        logger.info(e.getMessage());
                         logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
                     }
                 }
@@ -752,7 +763,7 @@ public class Controller {
                 return true;
             }
             catch (SQLException e) {
-                e.printStackTrace();
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -769,6 +780,7 @@ public class Controller {
                 organizzatoreCorrente.getEvento().setDate(dataInizio, dataFine);
                 return true;
             }catch(SQLException e){
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             } catch (NullPointerException _) {
                 logger.log(Level.SEVERE, "Errore nel tentativo di accedere ai dati dell'evento.");
@@ -789,6 +801,7 @@ public class Controller {
                 organizzatoreCorrente.getEvento().setDateReg(dataInizio, dataFine);
                 return true;
             }catch(SQLException e){
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             } catch (NullPointerException _) {
                 logger.log(Level.SEVERE, "Errore nel tentativo di accedere ai dati dell'evento.");
@@ -933,6 +946,7 @@ public class Controller {
                 }
             }
             catch (SQLException e) {
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -1003,6 +1017,7 @@ public class Controller {
                 }
             }
             catch(SQLException e){
+                logger.info(e.getMessage());
                 logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
@@ -1021,6 +1036,7 @@ public class Controller {
             dao.disconnect();
             return true;
         }catch(SQLException e){
+            logger.info(e.getMessage());
             logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
         }
         return false;

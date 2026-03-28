@@ -7,9 +7,9 @@ import javax.swing.*;
 public class CreaEvento {
 
     private JPanel mainPanel;
-    private JTextField NomeEventoJTextField;     // Nome evento
-    private JSpinner NumeroCivicoSpinner;         // Max squadre
-    private JTextArea IndirizzoJtextArea;       // Descrizione
+    private JTextField nomeEventoJTextField;     // Nome evento
+    private JSpinner numeroCivicoSpinner;         // Max squadre
+    private JTextArea indirizzoJTextArea;       // Descrizione
     private JButton salvaButton;
     private JButton indietroButton;
 
@@ -26,7 +26,7 @@ public class CreaEvento {
 
     private void inizializzaSpinner() {
 
-        NumeroCivicoSpinner.setModel(new SpinnerNumberModel(1, 1, 300, 1));
+        numeroCivicoSpinner.setModel(new SpinnerNumberModel(1, 1, 300, 1));
     }
 
     private void inizializzaBottoni() {
@@ -37,9 +37,9 @@ public class CreaEvento {
 
         salvaButton.addActionListener(e -> {
 
-            String nomeEvento = NomeEventoJTextField.getText().trim();
-            int NumeroCivico = (int) NumeroCivicoSpinner.getValue();
-            String indirizzo = IndirizzoJtextArea.getText().trim();
+            String nomeEvento = nomeEventoJTextField.getText().trim();
+            int numeroCivico = (int) numeroCivicoSpinner.getValue();
+            String indirizzo = indirizzoJTextArea.getText().trim();
 
             if (nomeEvento.isEmpty()) {
                 JOptionPane.showMessageDialog(
@@ -54,7 +54,7 @@ public class CreaEvento {
             boolean ok = controller.creaEvento(
                     nomeEvento,
                     indirizzo,
-                    NumeroCivico
+                    numeroCivico
             );
 
             if (!ok) {

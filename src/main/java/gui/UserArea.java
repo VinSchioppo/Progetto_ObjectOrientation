@@ -7,8 +7,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class UserArea {
 
@@ -20,13 +20,12 @@ public class UserArea {
     private JButton logOutButton;
     private JButton selectEventoButton;
     private JButton iscriviEventoButton;
-    private JList ListaRichiesteTeam;
-    private JList listRichiestaGiudice;
     private List<String> eventiUtente;
 
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
-    private ArrayList<Integer> richiesteTeamId;
+
+    private static final Logger logger = Logger.getLogger(UserArea.class.getName());
 
     public UserArea(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -192,8 +191,8 @@ public class UserArea {
         int idEvento;
         try {
             idEvento = Integer.parseInt(evento.substring(0, spazio));
-        } catch (NumberFormatException e) {
-            System.out.println("Errore parsing ID evento: " + evento);
+        } catch (NumberFormatException _) {
+            logger.info("Errore parsing ID evento: " + evento);
             return;
         }
 

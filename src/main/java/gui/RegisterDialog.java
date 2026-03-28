@@ -24,19 +24,19 @@ public class RegisterDialog extends JDialog {
         // Recupero componenti dal pannello
         for (Component c : panel.getComponents()) {
 
-            if (c instanceof JTextField) {
+            if (c instanceof JTextField jtextfield) {
                 usernameField = (JTextField) c;
             }
 
-            if (c instanceof JPasswordField) {
+            if (c instanceof JPasswordField jpasswordField) {
                 if (passwordField1 == null)
                     passwordField1 = (JPasswordField) c;
                 else
                     passwordField2 = (JPasswordField) c;
             }
 
-            if (c instanceof JButton) {
-                JButton b = (JButton) c;
+            if (c instanceof JButton b) {
+                b = (JButton) c;
                 if ("Registrati".equalsIgnoreCase(b.getText())) {
                     registerButton = b;
                 }

@@ -3,21 +3,30 @@ package gui;
 import controller.Controller;
 
 import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class TeamGUI {
 
     private JButton backButton;
     private JPanel mainPanel;
-    private JLabel NomeEvento;
-    private JLabel DescrizioneEvento;
+    private JLabel nomeEvento;
+    private JLabel descrizioneEvento;
     private JList<String> listPartecipantiTeam;
     private JButton lasciaTeamButton;
     private JButton progressiButton;
     private JLabel nomeTeamLabel;
+    private JList<String> listRichiesteTeam;
+
+    private static final String ERRORE = "Errore";
+    private static final String ACCETTA = "Accetta";
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
+
+    private static final Logger logger = Logger.getLogger(TeamGUI.class.getName());
 
     public TeamGUI(SelectEventoFrame parentFrame, Controller controller) {
 
@@ -26,6 +35,7 @@ public class TeamGUI {
 
         inizializzaDati();
         inizializzaBottoni();
+        inizializzaRichieste();
     }
 
     /* ============================================================
@@ -41,30 +51,121 @@ public class TeamGUI {
             String[] dati = datiEvento.split(" ");
 
             try {
-                NomeEvento.setText(dati[0]);
+                nomeEvento.setText(dati[0]);
 
                 StringBuilder descrizione = new StringBuilder();
                 for (int i = 10; i < dati.length; i++) {
                     descrizione.append(dati[i]).append(" ");
                 }
 
-                DescrizioneEvento.setText(descrizione.toString().trim());
+                descrizioneEvento.setText(descrizione.toString().trim());
 
-            } catch (Exception e) {
-                NomeEvento.setText("Errore");
-                DescrizioneEvento.setText("Errore parsing");
+            } catch (Exception _) {
+                nomeEvento.setText(ERRORE);
+                descrizioneEvento.setText("Errore parsing");
             }
         }
 
         // ===== TEAM =====
         String nomeTeam = controller.nomeTeamCorrente();
-        if (nomeTeam != null) {
-            nomeTeamLabel.setText(nomeTeam);
-        } else {
-            nomeTeamLabel.setText("Nessun team");
+        nomeTeamLabel.setText(nomeTeam != null ? nomeTeam : "Nessun team");
+
+        aggiornaMembri();
+    }
+
+    /* ============================================================
+       =================== RICHIESTE TEAM =========================
+       ============================================================ */
+
+    private void inizializzaRichieste() {
+
+        aggiornaRichieste();
+
+        listRichiesteTeam.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+                if (e.getClickCount() == 2) {
+
+                    int index = listRichiesteTeam.locationToIndex(e.getPoint());
+
+                    if (index == -1) return;
+
+                    String utente = listRichiesteTeam.getModel().getElementAt(index);
+
+                    gestisciRichiesta(utente);
+                }
+            }
+        });
+    }
+
+    private void aggiornaRichieste() {
+
+        List<String> richieste = controller.requestTeamNotifications();
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        if (richieste != null) {
+            for (String r : richieste) {
+                model.addElement(r);
+            }
         }
 
-        // ===== MEMBRI =====
+        listRichiesteTeam.setModel(model);
+    }
+
+    private void gestisciRichiesta(String nomeUtente) {
+
+        int scelta = JOptionPane.showOptionDialog(
+                mainPanel,
+                "Gestire la richiesta di " + nomeUtente + "?",
+                "Richiesta Team",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new String[]{ACCETTA, "Rifiuta"},
+                ACCETTA
+        );
+
+        boolean ok = false;
+
+        if (scelta == 0) {
+            logger.info(ACCETTA);
+            ok = controller.acceptRichiestaTeam(nomeUtente);
+        } else if (scelta == 1) {
+            logger.info("Rifiuta");
+            ok = controller.refuseRichiestaTeam(nomeUtente);
+        }
+
+        if (ok) {
+
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Operazione completata",
+                    "Successo",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            aggiornaRichieste();
+            aggiornaMembri();
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Errore durante l'operazione",
+                    ERRORE,
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    /* ============================================================
+       =================== MEMBRI TEAM ============================
+       ============================================================ */
+
+    private void aggiornaMembri() {
+
         List<String> membri = controller.listaMembriTeam();
 
         DefaultListModel<String> model = new DefaultListModel<>();
@@ -88,6 +189,10 @@ public class TeamGUI {
                 parentFrame.showPartecipanteGUI()
         );
 
+        progressiButton.addActionListener(e ->
+                parentFrame.showProgressiGUI(controller.idTeamCorrente())
+        );
+
         lasciaTeamButton.addActionListener(e -> {
 
             int idTeam = controller.idTeamCorrente();
@@ -96,7 +201,7 @@ public class TeamGUI {
                 JOptionPane.showMessageDialog(
                         mainPanel,
                         "Nessun team selezionato",
-                        "Errore",
+                        ERRORE,
                         JOptionPane.ERROR_MESSAGE
                 );
                 return;
@@ -118,15 +223,11 @@ public class TeamGUI {
                 JOptionPane.showMessageDialog(
                         mainPanel,
                         "Impossibile lasciare il team",
-                        "Errore",
+                        ERRORE,
                         JOptionPane.ERROR_MESSAGE
                 );
             }
         });
-
-        /*progressiButton.addActionListener(e -> {
-            parentFrame.showProgressiTeam();
-        });*/
     }
 
     public JPanel getMainPanel() {

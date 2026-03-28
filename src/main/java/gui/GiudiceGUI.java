@@ -19,6 +19,8 @@ public class GiudiceGUI {
     private JCheckBox abilitaVoto;
     private JCheckBox abilitaGiudizio;
     private JList<String> listaProgressi;
+    private JList<String> listVotiTeam;
+    private JButton pubblicaProblemaButton;
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
@@ -42,13 +44,22 @@ public class GiudiceGUI {
         voto.setEnabled(false);
         giudizio.setEnabled(false);
 
-        abilitaVoto.addActionListener(e ->
-                voto.setEnabled(abilitaVoto.isSelected())
-        );
+        abilitaVoto.addActionListener(e -> {
+            voto.setEnabled(abilitaVoto.isSelected());
+            aggiornaStatoSave();
+        });
 
-        abilitaGiudizio.addActionListener(e ->
-                giudizio.setEnabled(abilitaGiudizio.isSelected())
-        );
+        abilitaGiudizio.addActionListener(e -> {
+            giudizio.setEnabled(abilitaGiudizio.isSelected());
+            aggiornaStatoSave();
+        });
+
+        giudizio.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+                aggiornaStatoSave();
+            }
+        });
 
         saveButton.setEnabled(false);
     }
@@ -57,7 +68,7 @@ public class GiudiceGUI {
 
     private void inizializzaListe() {
 
-        // EVENTI
+        // ===== EVENTI =====
         List<String> eventi = controller.listaEventiGiudice();
         DefaultListModel<String> modelEventi = new DefaultListModel<>();
 
@@ -77,23 +88,18 @@ public class GiudiceGUI {
             }
         });
 
-        // TEAM
+        // ===== TEAM =====
         listTeam.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                String team = listTeam.getSelectedValue();
-                if (team != null) {
-                    Integer idTeam = estraiId(team);
-                    if (idTeam != null) {
-                        aggiornaProgressi(idTeam);
-                    }
-                }
-            }
-        });
 
-        // PROGRESSI
-        listaProgressi.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                saveButton.setEnabled(listaProgressi.getSelectedIndex() != -1);
+                String team = listTeam.getSelectedValue();
+                if (team == null) return;
+
+                Integer idTeam = estraiId(team);
+                if (idTeam == null) return;
+
+                aggiornaProgressi(idTeam);
+                aggiornaVoti(idTeam);
             }
         });
     }
@@ -114,7 +120,8 @@ public class GiudiceGUI {
 
     private void aggiornaTeam() {
 
-        List<String> team = controller.listaTeamEvento();
+        List<String> team = controller.listaTeamGiudicati();
+
         DefaultListModel<String> model = new DefaultListModel<>();
 
         if (team != null) {
@@ -122,12 +129,15 @@ public class GiudiceGUI {
         }
 
         listTeam.setModel(model);
+
         listaProgressi.setModel(new DefaultListModel<>());
+        listVotiTeam.setModel(new DefaultListModel<>());
     }
 
     private void aggiornaProgressi(int idTeam) {
 
         List<String> progressi = controller.listaProgressiTeamGiudicato(idTeam);
+
         DefaultListModel<String> model = new DefaultListModel<>();
 
         if (progressi != null) {
@@ -137,6 +147,39 @@ public class GiudiceGUI {
         listaProgressi.setModel(model);
     }
 
+    private void aggiornaVoti(int idTeam) {
+
+        List<String> voti = controller.listaVotiTeamGiudicati();
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        if (voti != null) {
+            for (String v : voti) {
+
+                Integer id = estraiId(v);
+
+                if (id != null && id == idTeam) {
+                    model.addElement(v);
+                }
+            }
+        }
+
+        listVotiTeam.setModel(model);
+    }
+
+    /* ================= LOGICA SAVE ================= */
+
+    private void aggiornaStatoSave() {
+
+        boolean votoAttivo = abilitaVoto.isSelected();
+        boolean giudizioAttivo = abilitaGiudizio.isSelected();
+
+        boolean votoValido = votoAttivo;
+        boolean giudizioValido = giudizioAttivo && !giudizio.getText().trim().isEmpty();
+
+        saveButton.setEnabled(votoValido || giudizioValido);
+    }
+
     /* ================= BOTTONI ================= */
 
     private void inizializzaBottoni() {
@@ -144,6 +187,16 @@ public class GiudiceGUI {
         backButton.addActionListener(e -> parentFrame.showHome());
 
         saveButton.addActionListener(e -> salvaValutazione());
+
+        pubblicaProblemaButton.addActionListener(e -> {
+
+            JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(mainPanel);
+
+            PubblicaProblemaDialog dialog =
+                    new PubblicaProblemaDialog(frame, controller);
+
+            dialog.setVisible(true);
+        });
     }
 
     /* ================= SAVE ================= */
@@ -153,35 +206,56 @@ public class GiudiceGUI {
         String teamStr = listTeam.getSelectedValue();
         String progStr = listaProgressi.getSelectedValue();
 
-        if (teamStr == null || progStr == null) {
-            mostraErrore("Seleziona team e progresso");
+        if (teamStr == null) {
+            mostraErrore("Seleziona un team");
             return;
         }
 
         Integer idTeam = estraiId(teamStr);
-        Integer idProg = estraiId(progStr);
+        Integer idProg = progStr != null ? estraiId(progStr) : null;
 
-        if (idTeam == null || idProg == null) {
-            mostraErrore("Errore formato dati");
+        if (idTeam == null) {
+            mostraErrore("Errore ID team");
             return;
         }
 
         boolean ok = true;
 
-        // VOTO
+        // ===== VOTO =====
         if (abilitaVoto.isSelected()) {
             int votoVal = (Integer) voto.getValue();
             ok &= controller.giveVotoTeam(idTeam, votoVal);
         }
 
-        // COMMENTO
+        // ===== COMMENTO =====
         if (abilitaGiudizio.isSelected()) {
-            String testo = giudizio.getText();
+
+            if (idProg == null) {
+                mostraErrore("Seleziona un progresso");
+                return;
+            }
+
+            String testo = giudizio.getText().trim();
+
+            if (testo.isEmpty()) {
+                mostraErrore("Scrivi un commento");
+                return;
+            }
+
             ok &= controller.commentaProgresso(idProg, testo);
         }
 
         if (ok) {
-            JOptionPane.showMessageDialog(mainPanel, "Salvato", "Successo", JOptionPane.INFORMATION_MESSAGE);
+
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Salvato",
+                    "Successo",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            aggiornaVoti(idTeam);
+
         } else {
             mostraErrore("Errore durante il salvataggio");
         }
@@ -190,12 +264,13 @@ public class GiudiceGUI {
     /* ================= UTILITY ================= */
 
     private Integer estraiId(String valore) {
+
         int spazio = valore.indexOf(" ");
         if (spazio == -1) return null;
 
         try {
             return Integer.parseInt(valore.substring(0, spazio));
-        } catch (Exception e) {
+        } catch (Exception _) {
             return null;
         }
     }

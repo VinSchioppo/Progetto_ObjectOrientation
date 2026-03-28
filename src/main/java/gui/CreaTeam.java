@@ -7,12 +7,13 @@ import javax.swing.*;
 public class CreaTeam extends JDialog {
 
     private JPanel mainPanel;
-    private JTextField NomeTeam;
+    private JTextField nomeTeam;
     private JButton backButton;
     private JButton saveButton;
 
-    private Controller controller;
+    private static final String ERRORE = "Errore";
 
+    private Controller controller;
 
     public CreaTeam(JFrame owner, Controller controller) {
 
@@ -28,27 +29,41 @@ public class CreaTeam extends JDialog {
 
         saveButton.addActionListener(e -> creaTeam());
     }
+
     /* ====================== CREA TEAM ====================== */
 
     private void creaTeam() {
 
-        String nomeTeam = NomeTeam.getText().trim();
+        String nomeTeamTMP = nomeTeam.getText().trim();
 
-        if (nomeTeam.isEmpty()) {
+        // ===== CONTROLLO INPUT =====
+        if (nomeTeamTMP.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     mainPanel,
-                    "Inserisci nome team e seleziona evento",
-                    "Errore",
+                    "Inserisci nome team",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
 
             return;
         }
 
-        boolean ok = controller.creaTeamPartecipante(
-                nomeTeam
-        );
+        // 🔥 CONTROLLO: ESISTE GIÀ UN TEAM?
+        if (controller.teamPartecipante() != null) {
+
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Sei già in un team per questo evento",
+                    ERRORE,
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            return;
+        }
+
+        // ===== CREAZIONE TEAM =====
+        boolean ok = controller.creaTeamPartecipante(nomeTeamTMP);
 
         if (ok) {
 
@@ -66,7 +81,7 @@ public class CreaTeam extends JDialog {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Errore creazione team",
-                    "Errore",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
         }

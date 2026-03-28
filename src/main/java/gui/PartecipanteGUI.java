@@ -14,11 +14,10 @@ public class PartecipanteGUI {
     private JButton creaTeamButton;
     private JButton teamButton;
     private JButton backButton;
-    private JList listEventi;
+    private JList<String> listEventi;
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
-    private List<String> eventi;
     private List<Integer> idEventi;
 
     public PartecipanteGUI(SelectEventoFrame parentFrame, Controller controller) {
@@ -32,7 +31,7 @@ public class PartecipanteGUI {
 
     private void inizializzaLista() {
 
-        eventi = controller.listaEventiPartecipante();
+        List<String> eventi = controller.listaEventiPartecipante();
         idEventi = new ArrayList<>();
 
         DefaultListModel<String> model = new DefaultListModel<>();

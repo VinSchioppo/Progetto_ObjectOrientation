@@ -105,7 +105,7 @@ public class JoinTeamDialog extends JDialog {
 
         try {
             return Integer.parseInt(valore.substring(0, spazio));
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             return null;
         }
     }

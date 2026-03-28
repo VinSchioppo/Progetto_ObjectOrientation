@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class OrganizzatoreGUI {
 
@@ -22,6 +23,8 @@ public class OrganizzatoreGUI {
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
+
+    private static final Logger logger = Logger.getLogger(OrganizzatoreGUI.class.getName());
 
     public OrganizzatoreGUI(SelectEventoFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -75,8 +78,8 @@ public class OrganizzatoreGUI {
 
                     model.addRow(new Object[]{ titolo, stato });
 
-                } catch (Exception ex) {
-                    System.out.println("Errore evento: " + evento);
+                } catch (Exception _) {
+                    logger.info("Errore evento: " + evento);
                 }
             }
         }

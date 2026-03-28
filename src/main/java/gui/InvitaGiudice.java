@@ -100,7 +100,6 @@ public class InvitaGiudice {
             }
 
             boolean ok = controller.invitaGiudice(selezionato);
-            System.out.println(controller.invitaGiudice(selezionato));
 
 
             if (ok) {

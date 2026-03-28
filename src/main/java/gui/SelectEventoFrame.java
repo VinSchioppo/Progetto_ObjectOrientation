@@ -99,7 +99,7 @@ public class SelectEventoFrame extends JFrame {
 
     public void showProgressiGUI(int idTeam) {
 
-        ProgressiGUI progressiGUI = new ProgressiGUI(this, controller, idTeam);
+        ProgressiGUI progressiGUI = new ProgressiGUI(this, controller);
 
         container.add(progressiGUI.getMainPanel(), "PROGRESSI");
 
