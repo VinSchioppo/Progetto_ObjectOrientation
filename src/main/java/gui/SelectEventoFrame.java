@@ -23,22 +23,7 @@ public class SelectEventoFrame extends JFrame {
         cardLayout = new CardLayout();
         container = new JPanel(cardLayout);
 
-        // pannelli
-        SelectEvento selectEventoPanel = new SelectEvento(this);
-        OrganizzatoreGUI organizzatorePanel = new OrganizzatoreGUI(this, controller);
-        invitaGiudicePanel = new InvitaGiudice(this, controller);
-        partecipanteGUIPanel = new PartecipanteGUI(this, controller);
-        SetDatiEvento setDatiEventoPanel = new SetDatiEvento(this, controller);
-        TeamGUI teamGUIPanel = new TeamGUI(this, controller);
-        GiudiceGUI giudicePanel = new GiudiceGUI(this, controller);
-
-        container.add(selectEventoPanel.getMainPanel(), "HOME");
-        container.add(organizzatorePanel.getMainPanel(), "ORGANIZZATORE");
-        container.add(invitaGiudicePanel.getMainPanel(), "INVITA_GIUDICE");
-        container.add(setDatiEventoPanel.getMainPanel(), "SET_DATI_EVENTO");
-        container.add(partecipanteGUIPanel.getMainPanel(), "PARTECIPANTE");
-        container.add(teamGUIPanel.getMainPanel(), "TEAM");
-        container.add(giudicePanel.getMainPanel(), "GIUDICE");
+        Pannelli();
 
         setContentPane(container);
         pack();
@@ -55,6 +40,33 @@ public class SelectEventoFrame extends JFrame {
                 System.exit(0);
             }
         });
+    }
+
+    private void Pannelli(){
+
+        SelectEvento selectEventoPanel = new SelectEvento(this);
+        OrganizzatoreGUI organizzatorePanel = new OrganizzatoreGUI(this, controller);
+        invitaGiudicePanel = new InvitaGiudice(this, controller);
+        partecipanteGUIPanel = new PartecipanteGUI(this, controller);
+        SetDatiEvento setDatiEventoPanel = new SetDatiEvento(this, controller);
+        TeamGUI teamGUIPanel = new TeamGUI(this, controller);
+        GiudiceGUI giudicePanel = new GiudiceGUI(this, controller);
+
+        Contenitore(selectEventoPanel, organizzatorePanel, setDatiEventoPanel, teamGUIPanel, giudicePanel);
+
+    }
+
+    private void Contenitore(SelectEvento selectEventoPanel, OrganizzatoreGUI organizzatorePanel, SetDatiEvento setDatiEventoPanel,
+                           TeamGUI teamGUIPanel, GiudiceGUI giudicePanel) {
+
+        container.add(selectEventoPanel.getMainPanel(), "HOME");
+        container.add(organizzatorePanel.getMainPanel(), "ORGANIZZATORE");
+        container.add(invitaGiudicePanel.getMainPanel(), "INVITA_GIUDICE");
+        container.add(setDatiEventoPanel.getMainPanel(), "SET_DATI_EVENTO");
+        container.add(partecipanteGUIPanel.getMainPanel(), "PARTECIPANTE");
+        container.add(teamGUIPanel.getMainPanel(), "TEAM");
+        container.add(giudicePanel.getMainPanel(), "GIUDICE");
+
     }
 
     public void logout() {
@@ -99,7 +111,7 @@ public class SelectEventoFrame extends JFrame {
 
     public void showProgressiGUI(int idTeam) {
 
-        ProgressiGUI progressiGUI = new ProgressiGUI(this, controller);
+        ProgressiGUI progressiGUI = new ProgressiGUI(this, controller, idTeam);
 
         container.add(progressiGUI.getMainPanel(), "PROGRESSI");
 

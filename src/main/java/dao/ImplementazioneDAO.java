@@ -286,7 +286,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     .append(") ON CONFLICT (NomePartecipante, idEvento) DO NOTHING; UPDATE InvitoGiudice SET Risposta = ").append(evento.getInvitoGiudiceAnswer())
                     .append(" WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idEvento = ").append(evento.getIdEvento()).append(";");
                     if(evento.getInvitoGiudiceAnswer() != null && evento.getInvitoGiudiceAnswer()) {
-                        codiceSQL.append("INSERT INTO Giudice SELECT * FROM Partecipante WHERE NomeUtente = '").append(partecipante.getNomeUtente()).append("' ON CONFLICT (NomePartecipante) DO NOTHING;")
+                        codiceSQL.append("INSERT INTO Giudice SELECT * FROM Partecipante WHERE NomeUtente = '").append(partecipante.getNomeUtente()).append("' ON CONFLICT (NomeUtente) DO NOTHING;")
                         .append("INSERT INTO GiudiceEvento VALUES('").append(partecipante.getNomeUtente()).append("',").append(evento.getIdEvento()).append(");")
                         .append("DELETE FROM PartecipanteEvento WHERE NomePartecipante = '").append(partecipante.getNomeUtente()).append("' AND idEvento = ").append(evento.getIdEvento()).append(";");
                     }

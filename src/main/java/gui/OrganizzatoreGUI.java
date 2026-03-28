@@ -9,7 +9,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class OrganizzatoreGUI {
 
@@ -23,8 +22,6 @@ public class OrganizzatoreGUI {
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
-
-    private static final Logger logger = Logger.getLogger(OrganizzatoreGUI.class.getName());
 
     public OrganizzatoreGUI(SelectEventoFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -78,8 +75,8 @@ public class OrganizzatoreGUI {
 
                     model.addRow(new Object[]{ titolo, stato });
 
-                } catch (Exception _) {
-                    logger.info("Errore evento: " + evento);
+                } catch (Exception ex) {
+                    System.out.println("Errore evento: " + evento);
                 }
             }
         }
@@ -87,12 +84,29 @@ public class OrganizzatoreGUI {
         table1.setModel(model);
 
         // ===== CONFIG TABELLA =====
+        configurazioneTabella();
+
+        // ===== CENTRATURA =====
+        centratura();
+
+        // ===== SELEZIONE =====
+        selezione();
+
+        // ===== DOPPIO CLICK =====
+        doppioclick();
+    }
+
+    private void configurazioneTabella() {
+
         table1.setRowHeight(32);
         table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table1.setRowSelectionAllowed(true);
         table1.setColumnSelectionAllowed(false);
 
-        // ===== CENTRATURA =====
+    }
+
+    private void centratura(){
+
         DefaultTableCellRenderer center = new DefaultTableCellRenderer();
         center.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -102,7 +116,10 @@ public class OrganizzatoreGUI {
 
         table1.getTableHeader().setReorderingAllowed(false);
 
-        // ===== SELEZIONE =====
+    }
+
+    private void selezione(){
+
         table1.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = table1.getSelectedRow();
@@ -115,7 +132,10 @@ public class OrganizzatoreGUI {
             }
         });
 
-        // ===== DOPPIO CLICK =====
+    }
+
+    private void doppioclick(){
+
         table1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -127,6 +147,7 @@ public class OrganizzatoreGUI {
                 }
             }
         });
+
     }
 
     /* ============================================================

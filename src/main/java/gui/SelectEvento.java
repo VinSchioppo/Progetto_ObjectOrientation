@@ -9,26 +9,28 @@ public class SelectEvento {
     private JButton areaUtenteButton;
     private JPanel mainPanel;
 
+
+
     private SelectEventoFrame parentFrame;
 
     public SelectEvento(SelectEventoFrame parentFrame) {
         this.parentFrame = parentFrame;
 
-        areaUtenteButton.addActionListener(e ->
-            parentFrame.logout()
-        );
+        areaUtenteButton.addActionListener(e -> {
+            parentFrame.logout();
+        });
 
-        organizzatoreButton.addActionListener(e ->
-            parentFrame.showOrganizzatoreGUI()
-        );
+        organizzatoreButton.addActionListener(e -> {
+            parentFrame.showOrganizzatoreGUI();
+        });
 
-        partecipanteButton.addActionListener(e ->
-            parentFrame.showPartecipanteGUI()
-        );
+        partecipanteButton.addActionListener(e -> {
+            parentFrame.showPartecipanteGUI();
+        });
 
-        giudiceButton.addActionListener(e ->
-            parentFrame.showGiudiceGUI()
-        );
+        giudiceButton.addActionListener(e -> {
+            parentFrame.showGiudiceGUI();
+        });
 
     }
 

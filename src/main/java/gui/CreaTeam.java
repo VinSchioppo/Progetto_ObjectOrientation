@@ -7,11 +7,9 @@ import javax.swing.*;
 public class CreaTeam extends JDialog {
 
     private JPanel mainPanel;
-    private JTextField nomeTeam;
+    private JTextField NomeTeam;
     private JButton backButton;
     private JButton saveButton;
-
-    private static final String ERRORE = "Errore";
 
     private Controller controller;
 
@@ -34,36 +32,53 @@ public class CreaTeam extends JDialog {
 
     private void creaTeam() {
 
-        String nomeTeamTMP = nomeTeam.getText().trim();
+        String nomeTeam = NomeTeam.getText().trim();
 
         // ===== CONTROLLO INPUT =====
-        if (nomeTeamTMP.isEmpty()) {
+
+        ControlloInput(nomeTeam);
+
+        // 🔥 CONTROLLO: ESISTE GIÀ UN TEAM?
+
+        ExistTeam();
+
+        // ===== CREAZIONE TEAM =====
+        CreazioneTeam(nomeTeam);
+
+    }
+
+    private void ControlloInput(String nomeTeam) {
+
+        if (nomeTeam.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Inserisci nome team",
-                    ERRORE,
+                    "Errore",
                     JOptionPane.ERROR_MESSAGE
             );
 
             return;
         }
+    }
 
-        // 🔥 CONTROLLO: ESISTE GIÀ UN TEAM?
+    private void ExistTeam(){
+
         if (controller.teamPartecipante() != null) {
 
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Sei già in un team per questo evento",
-                    ERRORE,
+                    "Errore",
                     JOptionPane.ERROR_MESSAGE
             );
-
             return;
         }
+    }
 
-        // ===== CREAZIONE TEAM =====
-        boolean ok = controller.creaTeamPartecipante(nomeTeamTMP);
+    private void CreazioneTeam(String nomeTeam) {
+
+        boolean ok = controller.creaTeamPartecipante(nomeTeam);
 
         if (ok) {
 
@@ -81,9 +96,11 @@ public class CreaTeam extends JDialog {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Errore creazione team",
-                    ERRORE,
+                    "Errore",
                     JOptionPane.ERROR_MESSAGE
             );
         }
+
     }
+
 }

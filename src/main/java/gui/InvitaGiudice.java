@@ -45,6 +45,14 @@ public class InvitaGiudice {
         listGiudici.setModel(modelGiudici);
 
         // ===== PARTECIPANTI FILTRATI =====
+        FiltraPartecipantiEvento(giudici);
+
+        // ===== INVITATI =====
+        listGiudiciPossibili.setModel(modelInvitati);
+    }
+
+    private void FiltraPartecipantiEvento(List<String> giudici) {
+
         List<String> partecipanti = controller.listaPartecipantiEvento();
         DefaultListModel<String> modelPartecipanti = new DefaultListModel<>();
 
@@ -59,11 +67,7 @@ public class InvitaGiudice {
                 }
             }
         }
-
         listPartecipantiEvento.setModel(modelPartecipanti);
-
-        // ===== INVITATI =====
-        listGiudiciPossibili.setModel(modelInvitati);
     }
 
     /* ============================================================
@@ -78,11 +82,7 @@ public class InvitaGiudice {
         );
 
         // Abilita save solo se selezioni un partecipante
-        listPartecipantiEvento.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                saveButton.setEnabled(listPartecipantiEvento.getSelectedIndex() != -1);
-            }
-        });
+        AbilitazionePartecipantiEvento();
 
         // ===== AZIONE SAVE =====
         saveButton.addActionListener(e -> {
@@ -101,34 +101,49 @@ public class InvitaGiudice {
 
             boolean ok = controller.invitaGiudice(selezionato);
 
+            SalvaInvitoGiudice(ok, selezionato);
+        });
+    }
 
-            if (ok) {
+    private void AbilitazionePartecipantiEvento() {
 
-                JOptionPane.showMessageDialog(
-                        mainPanel,
-                        "Invito inviato",
-                        "Successo",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-
-                // ===== AGGIUNGI A INVITATI =====
-                modelInvitati.addElement(selezionato);
-
-                // ===== RIMUOVI DAI PARTECIPANTI =====
-                DefaultListModel<String> modelPartecipanti =
-                        (DefaultListModel<String>) listPartecipantiEvento.getModel();
-
-                modelPartecipanti.removeElement(selezionato);
-
-            } else {
-                JOptionPane.showMessageDialog(
-                        mainPanel,
-                        "Errore durante l'invito",
-                        "Errore",
-                        JOptionPane.ERROR_MESSAGE
-                );
+        listPartecipantiEvento.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                saveButton.setEnabled(listPartecipantiEvento.getSelectedIndex() != -1);
             }
         });
+
+    }
+
+    private void SalvaInvitoGiudice(boolean ok, String selezionato) {
+
+        if (ok) {
+
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Invito inviato",
+                    "Successo",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            // ===== AGGIUNGI A INVITATI =====
+            modelInvitati.addElement(selezionato);
+
+            // ===== RIMUOVI DAI PARTECIPANTI =====
+            DefaultListModel<String> modelPartecipanti =
+                    (DefaultListModel<String>) listPartecipantiEvento.getModel();
+
+            modelPartecipanti.removeElement(selezionato);
+
+        } else {
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Errore durante l'invito",
+                    "Errore",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+
     }
 
     public JPanel getMainPanel() {

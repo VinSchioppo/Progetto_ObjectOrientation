@@ -21,29 +21,42 @@ public class RegisterDialog extends JDialog {
         JPasswordField passwordField2 = null;
         JButton registerButton = null;
 
-        // Recupero componenti dal pannello
+        recuperoComponenti(panel, usernameField, passwordField1, passwordField2, registerButton);
+
+        listenerRegistrazione(controller, registerButton, usernameField, passwordField1, passwordField2);
+
+        pack();
+        setLocationRelativeTo(owner);
+
+    }
+
+    private void recuperoComponenti(JPanel panel, JTextField usernameField, JPasswordField passwordField1, JPasswordField passwordField2, JButton registerButton) {
+
         for (Component c : panel.getComponents()) {
 
-            if (c instanceof JTextField jtextfield) {
+            if (c instanceof JTextField) {
                 usernameField = (JTextField) c;
             }
 
-            if (c instanceof JPasswordField jpasswordField) {
+            if (c instanceof JPasswordField) {
                 if (passwordField1 == null)
                     passwordField1 = (JPasswordField) c;
                 else
                     passwordField2 = (JPasswordField) c;
             }
 
-            if (c instanceof JButton b) {
-                b = (JButton) c;
+            if (c instanceof JButton) {
+                JButton b = (JButton) c;
                 if ("Registrati".equalsIgnoreCase(b.getText())) {
                     registerButton = b;
                 }
             }
         }
 
-        // Listener registrazione
+    }
+
+    private void listenerRegistrazione(Controller controller, JButton registerButton, JTextField usernameField, JPasswordField passwordField1, JPasswordField passwordField2) {
+
         if (registerButton != null) {
             JTextField finalUsernameField = usernameField;
             JPasswordField finalPasswordField1 = passwordField1;
@@ -76,7 +89,7 @@ public class RegisterDialog extends JDialog {
             });
         }
 
-        pack();
-        setLocationRelativeTo(owner);
     }
+
+
 }

@@ -11,7 +11,7 @@ public class ProgressiGUI {
     private JPanel mainPanel;
     private JButton backButton;
     private JList<String> listprogressi;
-    private JLabel votomedioValore;
+    private JLabel VotomedioValore;
     private JTextPane textPaneProgressi;
     private JButton salvaButton;
     private JTable tableVoti;
@@ -20,9 +20,7 @@ public class ProgressiGUI {
     private SelectEventoFrame parentFrame;
     private Controller controller;
 
-    private static final String ERRORE = "Errore";
-
-    public ProgressiGUI(SelectEventoFrame parentFrame, Controller controller) {
+    public ProgressiGUI(SelectEventoFrame parentFrame, Controller controller, int idTeam) {
 
         this.parentFrame = parentFrame;
         this.controller = controller;
@@ -109,13 +107,19 @@ public class ProgressiGUI {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Inserisci testo progresso",
-                    ERRORE,
+                    "Errore",
                     JOptionPane.ERROR_MESSAGE
             );
             return;
         }
 
         boolean ok = controller.pubblicaProgresso(testo);
+
+        risultatoProgresso(ok);
+
+    }
+
+    private void risultatoProgresso(boolean ok){
 
         if (ok) {
 
@@ -135,10 +139,11 @@ public class ProgressiGUI {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Errore pubblicazione (devi essere team leader)",
-                    ERRORE,
+                    "Errore",
                     JOptionPane.ERROR_MESSAGE
             );
         }
+
     }
 
     /* ============================================================
@@ -181,6 +186,14 @@ public class ProgressiGUI {
         }
 
         // ===== POPOLAMENTO =====
+        popolamentoVoti(model, voti);
+
+        tableVoti.setModel(model);
+    }
+
+
+    private void popolamentoVoti(DefaultTableModel model, List<String> voti) {
+
         for (String v : voti) {
 
             int spazio = v.indexOf(" ");
@@ -192,7 +205,6 @@ public class ProgressiGUI {
             model.addRow(new Object[]{giudice, valore});
         }
 
-        tableVoti.setModel(model);
     }
 
     private void aggiornaMedia() {
@@ -200,15 +212,15 @@ public class ProgressiGUI {
         List<String> voti = controller.listaVotiTeam();
 
         if (voti == null || voti.isEmpty()) {
-            votomedioValore.setText("N/A");
+            VotomedioValore.setText("N/A");
             return;
         }
 
         try {
             int media = controller.mediaVotiTeam();
-            votomedioValore.setText(String.valueOf(media));
-        } catch (Exception _) {
-            votomedioValore.setText(ERRORE);
+            VotomedioValore.setText(String.valueOf(media));
+        } catch (Exception e) {
+            VotomedioValore.setText("Errore");
         }
     }
 

@@ -26,7 +26,7 @@
           <text value="Nome Evento"/>
         </properties>
       </component>
-      <component id="4ed95" class="javax.swing.JTextField" binding="nomeEventoJTextField">
+      <component id="4ed95" class="javax.swing.JTextField" binding="NomeEventoJTextField">
         <constraints>
           <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="-1"/>
@@ -60,7 +60,7 @@
           <text value="Indietro"/>
         </properties>
       </component>
-      <component id="922a8" class="javax.swing.JSpinner" binding="numeroCivicoSpinner">
+      <component id="922a8" class="javax.swing.JSpinner" binding="NumeroCivicoSpinner">
         <constraints>
           <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -82,7 +82,7 @@
           <text value="Indirizzo"/>
         </properties>
       </component>
-      <component id="617ac" class="javax.swing.JTextArea" binding="indirizzoJTextArea">
+      <component id="617ac" class="javax.swing.JTextArea" binding="IndirizzoJtextArea">
         <constraints>
           <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="50"/>

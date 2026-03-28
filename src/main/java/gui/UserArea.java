@@ -7,8 +7,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class UserArea {
 
@@ -20,12 +21,13 @@ public class UserArea {
     private JButton logOutButton;
     private JButton selectEventoButton;
     private JButton iscriviEventoButton;
+    private JList ListaRichiesteTeam;
+    private JList<String> listRichiestaGiudice;
     private List<String> eventiUtente;
 
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
-
-    private static final Logger logger = Logger.getLogger(UserArea.class.getName());
+    private ArrayList<Integer> richiesteTeamId;
 
     public UserArea(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -34,6 +36,7 @@ public class UserArea {
         inizializzaTabellaUtente();
         inizializzaListaEventi();
         inizializzaBottoni();
+        inizializzaListaInvitiGiudice();
     }
 
     /* ============================================================
@@ -191,8 +194,8 @@ public class UserArea {
         int idEvento;
         try {
             idEvento = Integer.parseInt(evento.substring(0, spazio));
-        } catch (NumberFormatException _) {
-            logger.info("Errore parsing ID evento: " + evento);
+        } catch (NumberFormatException e) {
+            System.out.println("Errore parsing ID evento: " + evento);
             return;
         }
 
@@ -207,6 +210,115 @@ public class UserArea {
         );
     }
 
+    private void inizializzaListaInvitiGiudice() {
+
+        listRichiestaGiudice.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        listRichiestaGiudice.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+                if (e.getClickCount() == 2) {
+
+                    int index = listRichiestaGiudice.getSelectedIndex();
+
+                    if (index == -1) return;
+
+                    String invito = listRichiestaGiudice.getModel().getElementAt(index);
+
+                    int idEvento = estraiId(invito);
+
+                    if (idEvento == -1) return;
+
+                    mostraDialogInvito(idEvento);
+                }
+            }
+        });
+
+        refreshInvitiGiudice(); // carica dati
+    }
+
+    private void mostraDialogInvito(int idEvento) {
+
+        Object[] opzioni = {"Accetta", "Rifiuta", "Annulla"};
+
+        int scelta = JOptionPane.showOptionDialog(
+                mainPanel,
+                "Vuoi accettare l'invito a diventare giudice?",
+                "Invito giudice",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                opzioni,
+                opzioni[0]
+        );
+
+        boolean ok = false;
+
+        if (scelta == 0) { // Accetta
+            ok = controller.acceptInvitoGiudiceEvento(idEvento);
+        }
+        else if (scelta == 1) { // Rifiuta
+            ok = controller.refuseInvitoGiudiceEvento(idEvento);
+        }
+        else {
+            return; // Annulla → niente
+        }
+
+        if (ok) {
+
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Operazione completata",
+                    "Successo",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            refreshInvitiGiudice();
+
+        } else {
+
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Errore operazione",
+                    "Errore",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private int estraiId(String valore) {
+
+        int spazio = valore.indexOf(" ");
+
+        if (spazio == -1) return -1;
+
+        try {
+            return Integer.parseInt(valore.substring(0, spazio));
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private void refreshInvitiGiudice() {
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        List<String> inviti = controller.listaInvitiGiudice();
+
+        if (inviti != null) {
+            for (String invito : inviti) {
+                model.addElement(invito);
+            }
+        }
+
+        listRichiestaGiudice.setModel(model);
+
+        // 🔥 forza repaint e selezione pulita
+        listRichiestaGiudice.clearSelection();
+        listRichiestaGiudice.revalidate();
+        listRichiestaGiudice.repaint();
+    }
 
     private void inizializzaBottoni() {
 

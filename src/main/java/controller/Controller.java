@@ -936,6 +936,8 @@ public class Controller{
         List<String> listaVoti = null;
         if(giudiceCorrente != null) {
             try {
+                dao.addAllVotiDB(addVoti);
+                addVoti = null;
                 List<Voto> voti = dao.getAllVotiDB(giudiceCorrente.getNomeUtente());
                 if (voti != null) {
                     for (Voto voto : voti) {
@@ -1007,6 +1009,8 @@ public class Controller{
         List<String> listaCommenti = null;
         if(giudiceCorrente != null) {
             try{
+                dao.addAllCommentiDB(addCommenti);
+                addCommenti = null;
                 List<Commento> commenti = dao.getAllCommentiDB(giudiceCorrente.getNomeUtente());
                 if (commenti != null) {
                     for (Commento commento : commenti) {

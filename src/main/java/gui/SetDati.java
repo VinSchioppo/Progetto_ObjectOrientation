@@ -68,32 +68,39 @@ public class SetDati {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
 
-            boolean ok = controller.inserisciDatiUtente(
+
+            messaggioRisposta(nome, secondoNome, cognome, dataNascita, controller);
+        });
+    }
+
+    private void messaggioRisposta(String nome, String secondoNome, String cognome, LocalDate dataNascita, Controller controller) {
+
+        boolean ok = controller.inserisciDatiUtente(
+                nome,
+                secondoNome,
+                cognome,
+                dataNascita
+        );
+
+        if (ok) {
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Dati aggiornati correttamente"
+            );
+            parentFrame.getUserArea().updateDatiUtente(
                     nome,
                     secondoNome,
                     cognome,
-                    dataNascita
+                    dataNascita.toString()
             );
+            parentFrame.showHome();
+        } else {
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Errore durante l'aggiornamento dei dati"
+            );
+        }
 
-            if (ok) {
-                JOptionPane.showMessageDialog(
-                        mainPanel,
-                        "Dati aggiornati correttamente"
-                );
-                parentFrame.getUserArea().updateDatiUtente(
-                        nome,
-                        secondoNome,
-                        cognome,
-                        dataNascita.toString()
-                );
-                parentFrame.showHome();
-            } else {
-                JOptionPane.showMessageDialog(
-                        mainPanel,
-                        "Errore durante l'aggiornamento dei dati"
-                );
-            }
-        });
     }
 
     public JPanel getMainPanel() {

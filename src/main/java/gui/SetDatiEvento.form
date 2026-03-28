@@ -98,13 +98,13 @@
           <text value="Save"/>
         </properties>
       </component>
-      <component id="1267c" class="javax.swing.JSpinner" binding="datafine">
+      <component id="1267c" class="javax.swing.JSpinner" binding="Datafine">
         <constraints>
           <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
       </component>
-      <component id="6bbce" class="javax.swing.JSpinner" binding="datainizio">
+      <component id="6bbce" class="javax.swing.JSpinner" binding="Datainizio">
         <constraints>
           <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -118,13 +118,13 @@
           <text value="Date della registrazione"/>
         </properties>
       </component>
-      <component id="3e6a3" class="javax.swing.JSpinner" binding="datainizioreg">
+      <component id="3e6a3" class="javax.swing.JSpinner" binding="Datainizioreg">
         <constraints>
           <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
       </component>
-      <component id="face0" class="javax.swing.JSpinner" binding="datafinereg">
+      <component id="face0" class="javax.swing.JSpinner" binding="Datafinereg">
         <constraints>
           <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -138,7 +138,7 @@
           <text value="Max partecipanti"/>
         </properties>
       </component>
-      <component id="84f10" class="javax.swing.JSpinner" binding="maxPartecipantispinner">
+      <component id="84f10" class="javax.swing.JSpinner" binding="MaxPartecipantispinner">
         <constraints>
           <grid row="4" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -152,7 +152,7 @@
           <text value="Numero civico"/>
         </properties>
       </component>
-      <component id="37a81" class="javax.swing.JSpinner" binding="numeroCivicospinner">
+      <component id="37a81" class="javax.swing.JSpinner" binding="NumeroCivicospinner">
         <constraints>
           <grid row="3" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>

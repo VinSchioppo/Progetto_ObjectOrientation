@@ -21,6 +21,7 @@ public class GiudiceGUI {
     private JList<String> listaProgressi;
     private JList<String> listVotiTeam;
     private JButton pubblicaProblemaButton;
+    private JButton commentiPassatiButton;
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
@@ -55,7 +56,6 @@ public class GiudiceGUI {
         });
 
         giudizio.addKeyListener(new java.awt.event.KeyAdapter() {
-            @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
                 aggiornaStatoSave();
             }
@@ -69,6 +69,15 @@ public class GiudiceGUI {
     private void inizializzaListe() {
 
         // ===== EVENTI =====
+        ListaEventi();
+
+        // ===== TEAM =====
+        ListaTeam();
+
+    }
+
+    private void ListaEventi(){
+
         List<String> eventi = controller.listaEventiGiudice();
         DefaultListModel<String> modelEventi = new DefaultListModel<>();
 
@@ -88,7 +97,10 @@ public class GiudiceGUI {
             }
         });
 
-        // ===== TEAM =====
+    }
+
+    private void ListaTeam(){
+
         listTeam.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
 
@@ -102,6 +114,7 @@ public class GiudiceGUI {
                 aggiornaVoti(idTeam);
             }
         });
+
     }
 
     /* ================= SELEZIONE EVENTO ================= */
@@ -197,6 +210,35 @@ public class GiudiceGUI {
 
             dialog.setVisible(true);
         });
+
+        commentiPassatiButton.addActionListener(e -> mostraCommentiPassati());
+
+    }
+
+    private void mostraCommentiPassati() {
+
+        List<String> commenti = controller.listaCommenti();
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        if (commenti != null) {
+            for (String c : commenti) {
+                model.addElement(c);
+            }
+        }
+
+        // 🔥 Lista visualizzazione
+        JList<String> list = new JList<>(model);
+
+        JScrollPane scrollPane = new JScrollPane(list);
+        scrollPane.setPreferredSize(new java.awt.Dimension(400, 300));
+
+        JOptionPane.showMessageDialog(
+                mainPanel,
+                scrollPane,
+                "Commenti già inseriti",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 
     /* ================= SAVE ================= */
@@ -222,12 +264,24 @@ public class GiudiceGUI {
         boolean ok = true;
 
         // ===== VOTO =====
+        SalvaVoto(ok, idTeam);
+
+        // ===== COMMENTO =====
+        SalvaCommento(ok, idProg);
+
+        MessaggioRisultato(ok, idTeam);
+    }
+
+    private void SalvaVoto(boolean ok, int idTeam){
+
         if (abilitaVoto.isSelected()) {
             int votoVal = (Integer) voto.getValue();
             ok &= controller.giveVotoTeam(idTeam, votoVal);
         }
+    }
 
-        // ===== COMMENTO =====
+    private void SalvaCommento(boolean ok, Integer idProg) {
+
         if (abilitaGiudizio.isSelected()) {
 
             if (idProg == null) {
@@ -244,6 +298,9 @@ public class GiudiceGUI {
 
             ok &= controller.commentaProgresso(idProg, testo);
         }
+    }
+
+    private void MessaggioRisultato(boolean ok, int idTeam) {
 
         if (ok) {
 
@@ -259,6 +316,7 @@ public class GiudiceGUI {
         } else {
             mostraErrore("Errore durante il salvataggio");
         }
+
     }
 
     /* ================= UTILITY ================= */
@@ -270,7 +328,7 @@ public class GiudiceGUI {
 
         try {
             return Integer.parseInt(valore.substring(0, spazio));
-        } catch (Exception _) {
+        } catch (Exception e) {
             return null;
         }
     }
