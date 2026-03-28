@@ -1,26 +1,106 @@
 package gui;
 
+import controller.Controller;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class Register {
 
-    private JPanel mainPanel;              // Root panel
-    private JTextField textField1;        // nomeutente
-    private JPasswordField passwordField1; // password
-    private JPasswordField passwordField2; //conferma della password
+    private JPanel mainPanel;
+    private JTextField textField1;          // username
+    private JPasswordField passwordField1;  // password
+    private JPasswordField passwordField2;  // conferma password
 
     private JButton registratiButton;
     private JButton backButton;
 
-    public Register() {
+    private Controller controller;
 
+    public Register(Controller controller) {
+
+        this.controller = controller;
+
+        inizializzaBottoni();
+    }
+
+    /* ============================================================
+       =================== BOTTONI ================================
+       ============================================================ */
+
+    private void inizializzaBottoni() {
+
+        // ===== BACK =====
         backButton.addActionListener(e -> {
             Window window = SwingUtilities.getWindowAncestor(mainPanel);
             if (window != null) {
                 window.dispose();
             }
         });
+
+        // ===== REGISTRA =====
+        registratiButton.addActionListener(e -> registraUtente());
+    }
+
+    /* ============================================================
+       =================== LOGICA REGISTRAZIONE ===================
+       ============================================================ */
+
+    private void registraUtente() {
+
+        String username = textField1.getText().trim();
+
+        String password = new String(passwordField1.getPassword());
+        String conferma = new String(passwordField2.getPassword());
+
+        // ===== VALIDAZIONI =====
+
+        if (username.isEmpty() || password.isEmpty() || conferma.isEmpty()) {
+            mostraErrore("Compila tutti i campi");
+            return;
+        }
+
+        if (!password.equals(conferma)) {
+            mostraErrore("Le password non coincidono");
+            return;
+        }
+
+        // ===== CHIAMATA CONTROLLER =====
+        boolean ok = controller.registerUtente(username, password);
+
+        if (ok) {
+
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Registrazione completata",
+                    "Successo",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            // chiude la finestra
+            Window window = SwingUtilities.getWindowAncestor(mainPanel);
+            if (window != null) {
+                window.dispose();
+            }
+
+        } else {
+
+            mostraErrore("Username già esistente o errore DB");
+        }
+    }
+
+
+    /* ============================================================
+       =================== UTILITY ================================
+       ============================================================ */
+
+    private void mostraErrore(String msg) {
+        JOptionPane.showMessageDialog(
+                mainPanel,
+                msg,
+                "Errore",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 
     public JPanel getMainPanel() {

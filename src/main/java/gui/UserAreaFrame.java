@@ -86,7 +86,6 @@ public class UserAreaFrame extends JFrame {
     }
 
     public void showIscriviEvento() {
-        iscriviEventoPanel.refreshTabella();
         cardLayout.show(container, "ISCRIVI_EVENTO");
     }
 

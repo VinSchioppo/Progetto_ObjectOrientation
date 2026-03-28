@@ -19,9 +19,11 @@ public class SetDati {
     private JButton backButton;
 
     private gui.UserAreaFrame parentFrame;
+    private Controller controller;
 
     public SetDati(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
+        this.controller = controller;
 
         // ===== JSpinner per data di nascita =====
         Calendar cal = Calendar.getInstance();
@@ -38,6 +40,7 @@ public class SetDati {
         dataNascitaNuovaSpinner.setEditor(
                 new JSpinner.DateEditor(dataNascitaNuovaSpinner, "dd/MM/yyyy")
         );
+        caricaDatiUtente();
 
         // ===== BACK =====
         backButton.addActionListener(e -> parentFrame.showHome());
@@ -50,7 +53,9 @@ public class SetDati {
             String cognome = cognomeNuovoField.getText().trim();
 
             // Validazione obbligatori
-            if (nome.isEmpty() || cognome.isEmpty()) {
+            String dati = controller.datiUtente();
+
+            if (dati == null && (nome.isEmpty() || cognome.isEmpty())) {
                 JOptionPane.showMessageDialog(
                         mainPanel,
                         "Nome e cognome sono obbligatori"
@@ -71,6 +76,46 @@ public class SetDati {
 
             messaggioRisposta(nome, secondoNome, cognome, dataNascita, controller);
         });
+    }
+
+    private void caricaDatiUtente() {
+
+        String dati = controller.datiUtente();
+
+        if (dati == null) return;
+
+        try {
+
+            String[] parti = dati.split(" ", 4);
+
+            // ===== NOME =====
+            if (parti.length > 0 && !parti[0].equals("null"))
+                nomeNuovoField.setText(parti[0]);
+
+            // ===== SECONDO NOME =====
+            if (parti.length > 1 && !parti[1].equals("null"))
+                secondoNomeNuovoField.setText(parti[1]);
+
+            // ===== COGNOME =====
+            if (parti.length > 2 && !parti[2].equals("null"))
+                cognomeNuovoField.setText(parti[2]);
+
+            // ===== DATA =====
+            if (parti.length > 3 && !parti[3].equals("null")) {
+
+                LocalDate data = LocalDate.parse(parti[3]);
+
+                Date date = Date.from(
+                        data.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                );
+
+                dataNascitaNuovaSpinner.setValue(date);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Errore parsing dati utente");
+            e.printStackTrace();
+        }
     }
 
     private void messaggioRisposta(String nome, String secondoNome, String cognome, LocalDate dataNascita, Controller controller) {

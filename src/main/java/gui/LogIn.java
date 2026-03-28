@@ -44,7 +44,7 @@ public class LogIn {
         });
 
         registrazioneButton.addActionListener(e -> {
-            parentFrame.openRegisterDialog();
+            parentFrame.showRegister();
         });
     }
 

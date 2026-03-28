@@ -71,6 +71,7 @@ public class Controller{
 
     public boolean registerUtente(String nomeUtente, String password) {
         try {
+            connect();
             dao.addUtenteDB(nomeUtente, password);
             utenteCorrente = new Utente(nomeUtente, password);
         }
@@ -204,7 +205,7 @@ public class Controller{
     public String datiUtente(){
         if(utenteCorrente != null){
             if(utenteCorrente.getFNome() == null && utenteCorrente.getMNome() == null &&
-                    utenteCorrente.getLNome() == null && utenteCorrente.getDataNascita() == null)
+                utenteCorrente.getLNome() == null && utenteCorrente.getDataNascita() == null)
                 return null;
             else
                 return utenteCorrente.getFNome() + " " + utenteCorrente.getMNome() + " "
@@ -418,8 +419,10 @@ public class Controller{
         String infoTeam = null;
         if(partecipanteCorrente != null) {
             Team team = partecipanteCorrente.seekTeamEvento(partecipanteCorrente.getEvento().getIdEvento());
+            System.out.println(partecipanteCorrente.getEvento().getIdEvento());
             if (team != null) {
                 infoTeam = team.getIdTeam() + " " + team.getNome() + " " + team.getTeamLeader();
+                System.out.println(infoTeam);
             }
         }
         return infoTeam;
@@ -648,7 +651,7 @@ public class Controller{
     //Restituisce true se l'operazione va a buon fine, altrimenti false.
 
     public boolean pubblicaProgresso(String testo){
-        Progresso progresso = null;
+        Progresso progresso;
         if (partecipanteCorrente != null) {
             Team team = partecipanteCorrente.getTeam();
             if (team != null && team.getTeamLeader().equals(partecipanteCorrente.getNomeUtente())) {

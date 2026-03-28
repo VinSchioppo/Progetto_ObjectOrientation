@@ -6,24 +6,33 @@ import javax.swing.*;
 
 public class LoginFrame extends JFrame {
 
-    private Controller controller;
+        private Controller controller;
 
     public LoginFrame() {
-        this.controller = new Controller();
+            this.controller = new Controller();
 
-        setTitle("Login");
-        setContentPane(new LogIn(this, controller).getMainPanel());
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        pack();
-        setLocationRelativeTo(null);
+            setTitle("Login");
+            setContentPane(new LogIn(this, controller).getMainPanel());
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            pack();
+            setLocationRelativeTo(null);
+        }
+
+    public void showRegister() {
+
+        JFrame frame = new JFrame("Registrazione");
+
+        Register register = new Register(controller);
+
+        frame.setContentPane(register.getMainPanel());
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(400, 300);
+        frame.setLocationRelativeTo(null);
+
+        frame.setVisible(true);
     }
 
-    public void openRegisterDialog() {
-        RegisterDialog dialog = new RegisterDialog(this);
-        dialog.setVisible(true);
-    }
-
-    public void openUserArea() {
+        public void openUserArea() {
         UserAreaFrame userAreaFrame = new UserAreaFrame(controller);
         userAreaFrame.setVisible(true);
         dispose();

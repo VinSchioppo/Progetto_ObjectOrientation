@@ -35,6 +35,8 @@ public class SetDatiEvento {
         this.controller = controller;
 
         inizializzaSpinnerDate();
+        inizializzaSpinnerDate();
+        caricaDatiEvento();
 
         backButton.addActionListener(e ->
                 parentFrame.showOrganizzatoreGUI()
@@ -76,20 +78,43 @@ public class SetDatiEvento {
     private void salvaDatiEvento() {
 
         try {
+
+            // ===== INPUT UTENTE =====
             String indirizzo = indirizzoSede.getText().trim();
+
             int nCivico = (int) NumeroCivicospinner.getValue();
             int MaxPartecipanti = (int) MaxPartecipantispinner.getValue();
             int MaxTeam = (int) maxTeamSpinner.getValue();
 
-            // ===== DATE EVENTO =====
+            // ===== DATE =====
             LocalDate dataInizioEvento = convertiData(Datainizio);
             LocalDate dataFineEvento   = convertiData(Datafine);
 
-            // ===== DATE REGISTRAZIONI =====
             LocalDate dataInizioReg = convertiData(Datainizioreg);
             LocalDate dataFineReg   = convertiData(Datafinereg);
 
-            controlloRegistrazione(indirizzo, nCivico, MaxPartecipanti, MaxTeam, dataInizioEvento, dataFineEvento, dataInizioReg, dataFineReg);
+            // ===== VALIDAZIONE =====
+            if (indirizzo.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        mainPanel,
+                        "Inserisci un indirizzo valido",
+                        "Errore",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            // ===== SALVATAGGIO =====
+            controlloRegistrazione(
+                    indirizzo,
+                    nCivico,
+                    MaxPartecipanti,
+                    MaxTeam,
+                    dataInizioEvento,
+                    dataFineEvento,
+                    dataInizioReg,
+                    dataFineReg
+            );
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -103,6 +128,94 @@ public class SetDatiEvento {
                 "Errore durante il salvataggio dei dati",
                 "Errore",
                 JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    private void caricaDatiEvento() {
+
+        String dati = controller.datiEvento();
+
+        if (dati == null) return;
+
+        try {
+
+            String[] d = dati.split(" ");
+
+            // ===== TROVA PRIMA DATA =====
+            int firstDateIndex = -1;
+
+            for (int i = 0; i < d.length; i++) {
+                if (d[i].matches("\\d{4}-\\d{2}-\\d{2}")) {
+                    firstDateIndex = i;
+                    break;
+                }
+            }
+
+            if (firstDateIndex == -1) {
+                throw new RuntimeException("Date non trovate");
+            }
+
+            // ===== CIVICO =====
+            int civicoIndex = firstDateIndex - 1;
+            int civico = Integer.parseInt(d[civicoIndex]);
+            NumeroCivicospinner.setValue(civico);
+
+            // ===== TROVA INIZIO INDIRIZZO =====
+            int startIndirizzo = 0;
+
+            for (int i = 0; i < civicoIndex; i++) {
+                String parola = d[i].toLowerCase();
+
+                if (parola.equals("via") ||
+                        parola.equals("viale") ||
+                        parola.equals("piazza") ||
+                        parola.equals("corso") ||
+                        parola.equals("largo")) {
+
+                    startIndirizzo = i;
+                    break;
+                }
+            }
+
+            // ===== COSTRUZIONE INDIRIZZO =====
+            StringBuilder indirizzoBuilder = new StringBuilder();
+
+            for (int i = startIndirizzo; i < civicoIndex; i++) {
+                indirizzoBuilder.append(d[i]).append(" ");
+            }
+
+            indirizzoSede.setText(indirizzoBuilder.toString().trim());
+
+            // ===== DATE EVENTO =====
+            Datainizio.setValue(convertToDate(LocalDate.parse(d[firstDateIndex])));
+            Datafine.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 1])));
+
+            // ===== NUMERI =====
+            MaxPartecipantispinner.setValue(Integer.parseInt(d[firstDateIndex + 2]));
+            maxTeamSpinner.setValue(Integer.parseInt(d[firstDateIndex + 3]));
+
+            // ===== DATE REG =====
+            Datainizioreg.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 4])));
+            Datafinereg.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 5])));
+
+            // ===== DESCRIZIONE =====
+            if (d.length > firstDateIndex + 6) {
+                StringBuilder desc = new StringBuilder();
+                for (int i = firstDateIndex + 6; i < d.length; i++) {
+                    desc.append(d[i]).append(" ");
+                }
+                DescrizioneProblema.setText(desc.toString().trim());
+            }
+
+        } catch (Exception e) {
+            System.out.println("Errore parsing dati evento");
+            e.printStackTrace();
+        }
+    }
+
+    private Date convertToDate(LocalDate localDate) {
+        return Date.from(
+                localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
         );
     }
 
