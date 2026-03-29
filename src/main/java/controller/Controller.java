@@ -549,6 +549,7 @@ public class Controller{
             team.setTeamLeader(partecipanteCorrente.getNomeUtente());
             team.setEventoIscritto(partecipanteCorrente.getEvento());
             team.addMembroTeam(partecipanteCorrente);
+            partecipanteCorrente.addTeam(team);
             try {
                 team.setIdTeam(dao.addTeamDB(team));
                 return true;
