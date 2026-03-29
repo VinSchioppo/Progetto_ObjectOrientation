@@ -176,41 +176,20 @@ public class Controller{
         return giudiceCorrente != null && ruolo == Role.GIUDICE && giudiceCorrente.seekEvento(idEvento) != null;
     }
 
-    //Questo metodo restituisce una lista contenente le classifiche ordinate in ordine decrescente di tutti gli eventi terminati.
-    //Ogni elemento della lista segue il formato: IdEvento Titolo|IdTeam Nome MediaVoto
-
-    public List<String> classificheEventiTerminati(){
-        List<String> listaEventi = null;
-        try {
-            if(eventiChiusi == null) {
-                eventiChiusi = new RecordList<>();
-                eventiChiusi.setRecords(dao.getClassificaEventiChiusiDB());
-            }
-            listaEventi = new ArrayList<>();
-            Evento evento = eventiChiusi.firstRecord();
-            while(evento != null){
-                String datiEvento = evento.getIdEvento() + " " + evento.getTitolo();
-                Team team = evento.firstTeam();
-                while (team != null) {
-                    String datiTeam = team.getIdTeam() + " " + team.getNome() + " " + team.getMediaVoti();
-                    listaEventi.add(datiEvento + "|" + datiTeam);
-                    team = evento.nextTeam();
-                }
-                evento = eventiChiusi.nextRecord();
-            }
-        }
-        catch (SQLException e) {
-            logger.info(e.getMessage());
-            logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
-        }
-        return listaEventi;
-    }
-
     //Questo metodo permette di trovare la classifica di un evento specifico.
     //Ogni elemento della lista segue il formato: IdEvento Titolo|IdTeam Nome MediaVoto
 
     public List<String> searchClassificaEvento(int idEvento){
         List<String> listaEventi = null;
+        if(eventiChiusi == null) {
+            try {
+                eventiChiusi = new RecordList<>();
+                eventiChiusi.setRecords(dao.getClassificaEventiChiusiDB());
+            } catch (SQLException e) {
+                logger.info(e.getMessage());
+                logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
+            }
+        }
         Evento evento = eventiChiusi.firstRecord();
         while(evento != null && evento.getIdEvento() != idEvento){
             evento = eventiChiusi.nextRecord();
