@@ -7,7 +7,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class UserArea {
@@ -20,11 +22,14 @@ public class UserArea {
     private JButton logOutButton;
     private JButton selectEventoButton;
     private JButton iscriviEventoButton;
-    private JList<String> listRichiestaGiudice;
+    private JList<String> ListRichiestaGiudice;
     private List<String> eventiUtente;
+    private Set<Integer> invitiGestiti = new HashSet<>();
 
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
+
+    // mantiene solo dati coerenti con la view (DEDUPLICATI)
     private List<String> invitiCompleti;
 
     private static final Logger logger = Logger.getLogger(UserArea.class.getName());
@@ -59,13 +64,11 @@ public class UserArea {
 
         datiTable.setModel(model);
 
-        // ===== DIMENSIONI COLONNE =====
         datiTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         datiTable.getColumnModel().getColumn(0).setPreferredWidth(180);
         datiTable.getColumnModel().getColumn(1).setPreferredWidth(360);
         datiTable.setRowHeight(36);
 
-        // ===== CENTRATURA TESTO =====
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -73,15 +76,12 @@ public class UserArea {
             datiTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
         }
 
-        // ===== BLOCCO COMPORTAMENTO =====
         datiTable.setRowSelectionAllowed(false);
         datiTable.getTableHeader().setReorderingAllowed(false);
         datiTable.setFocusable(false);
         datiTable.setFillsViewportHeight(false);
-
     }
 
-    // ===== RUOLO =====
     private String setRuolo() {
         String ruolo = "";
 
@@ -89,18 +89,16 @@ public class UserArea {
         boolean isOrganizzatore = controller.isOrganizzatore();
         boolean isGiudice = controller.isGiudice();
 
-        if (isPartecipante) {
-            ruolo = "Partecipante";
-        }
+        if (isPartecipante) ruolo = "Partecipante";
 
         if (isOrganizzatore) {
-            if(!ruolo.isEmpty()) ruolo = ruolo + ", ";
-            ruolo = ruolo + "Organizzatore";
+            if(!ruolo.isEmpty()) ruolo += ", ";
+            ruolo += "Organizzatore";
         }
 
         if (isGiudice) {
-            if(!ruolo.isEmpty()) ruolo = ruolo + ", ";
-            ruolo = ruolo + "Giudice";
+            if(!ruolo.isEmpty()) ruolo += ", ";
+            ruolo += "Giudice";
         }
 
         if(ruolo.isEmpty()) ruolo = "-";
@@ -108,7 +106,6 @@ public class UserArea {
         return ruolo;
     }
 
-    // ==== DATI ====
     private void setDatiUtente(String ruolo, DefaultTableModel model) {
         String nome = "-";
         String secondoNome = null;
@@ -125,6 +122,7 @@ public class UserArea {
             if (parti.length > 2) cognome = parti[2];
             if (parti.length > 3) dataNascita = parti[3];
         }
+
         model.addRow(new Object[]{"Nome", nome});
         if (secondoNome != null)
             model.addRow(new Object[]{"Secondo nome", secondoNome});
@@ -142,16 +140,18 @@ public class UserArea {
                 return false;
             }
         };
+
         model.addRow(new Object[]{"Nome", nome});
         if (secondoNome != null)
             model.addRow(new Object[]{"Secondo nome", secondoNome});
         model.addRow(new Object[]{"Cognome", cognome});
         model.addRow(new Object[]{"Data di nascita", dataNascita});
         model.addRow(new Object[]{"Ruolo", setRuolo()});
+
         datiTable.setModel(model);
     }
 
-    //   ================= LISTA EVENTI (JLIST) =====================
+    /* ================= LISTA EVENTI ================= */
 
     private void inizializzaListaEventi() {
 
@@ -182,16 +182,15 @@ public class UserArea {
 
     private void mostraDettagliEvento(int index) {
 
-        if (eventiUtente == null || index >= eventiUtente.size())
-            return;
+        if (eventiUtente == null || index >= eventiUtente.size()) return;
 
         String evento = eventiUtente.get(index);
 
-        // ===== ESTRAI ID =====
         int spazio = evento.indexOf(" ");
         if (spazio == -1) return;
 
         int idEvento;
+
         try {
             idEvento = Integer.parseInt(evento.substring(0, spazio));
         } catch (NumberFormatException _) {
@@ -199,7 +198,6 @@ public class UserArea {
             return;
         }
 
-        // ===== USA NUOVO METODO =====
         String testo = controller.datiEventoPreSelezione(idEvento);
 
         JOptionPane.showMessageDialog(
@@ -210,19 +208,22 @@ public class UserArea {
         );
     }
 
+    /* ================= INVITI GIUDICE ================= */
+
     private void inizializzaListaInvitiGiudice() {
 
-        listRichiestaGiudice.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ListRichiestaGiudice.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        listRichiestaGiudice.addMouseListener(new MouseAdapter() {
+        ListRichiestaGiudice.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
 
                 if (e.getClickCount() == 2) {
 
-                    int index = listRichiestaGiudice.getSelectedIndex();
+                    int index = ListRichiestaGiudice.getSelectedIndex();
 
-                    if (index == -1 || invitiCompleti == null) return;
+                    // PROTEZIONE FORTE
+                    if (index == -1 || invitiCompleti == null || index >= invitiCompleti.size()) return;
 
                     String invitoCompleto = invitiCompleti.get(index);
 
@@ -263,15 +264,17 @@ public class UserArea {
         boolean ok = false;
 
         switch(scelta) {
-            case 0 : // Accetta
+            case 0:
                 ok = controller.acceptInvitoGiudiceEvento(idEvento);
                 break;
-            case 1 : // Rifiuta
+            case 1:
                 ok = controller.refuseInvitoGiudiceEvento(idEvento);
                 break;
-            default :
-                return; // Annulla → niente
+            default:
+                return;
         }
+
+        invitiGestiti.add(idEvento);
 
         if (ok) {
 
@@ -282,45 +285,98 @@ public class UserArea {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            refreshInvitiGiudice();
-
         } else {
 
             JOptionPane.showMessageDialog(
                     mainPanel,
-                    "Errore operazione",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE
+                    "Hai già risposto a questa richiesta.",
+                    "Informazione",
+                    JOptionPane.WARNING_MESSAGE
             );
         }
+
+        refreshInvitiGiudice();
     }
 
     private void refreshInvitiGiudice() {
 
         DefaultListModel<String> model = new DefaultListModel<>();
 
-        invitiCompleti = controller.listaInvitiGiudice();
+        List<String> nuoviInviti = controller.listaInvitiGiudice();
 
-        if (invitiCompleti != null) {
+        List<String> invitiUnici = new java.util.ArrayList<>();
+        java.util.HashSet<String> visti = new java.util.HashSet<>();
 
-            for (String invito : invitiCompleti) {
+        if (nuoviInviti != null) {
+            for (String invito : nuoviInviti) {
+
+                if (invito == null || !visti.add(invito)) continue;
 
                 int spazio = invito.indexOf(" ");
+                if (spazio == -1) continue;
 
-                if (spazio != -1) {
-
-                    // SOLO TITOLO (senza rompere nulla)
-                    String titolo = invito.substring(spazio + 1);
-
-                    model.addElement(titolo);
-                } else {
-                    // fallback (sicurezza)
-                    model.addElement(invito);
+                // ===== ESTRAI ID =====
+                int idEvento;
+                try {
+                    idEvento = Integer.parseInt(invito.substring(0, spazio));
+                } catch (Exception _) {
+                    continue;
                 }
+
+                // ===== FILTRO INVITI GIÀ GESTITI =====
+                if (invitiGestiti.contains(idEvento)) continue;
+
+                invitiUnici.add(invito);
             }
         }
 
-        listRichiestaGiudice.setModel(model);
+        // ===== POPOLAMENTO =====
+        for (String invito : invitiUnici) {
+
+            int spazio = invito.indexOf(" ");
+
+            if (spazio != -1) {
+                model.addElement(invito.substring(spazio + 1));
+            } else {
+                model.addElement(invito);
+            }
+        }
+
+        this.invitiCompleti = invitiUnici;
+
+        ListRichiestaGiudice.setModel(model);
+    }
+
+    public void refreshDatiUtente() {
+
+        DefaultTableModel model = new DefaultTableModel(
+                new String[]{"Campo", "Dato"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+        };
+
+        String ruolo = setRuolo();
+        setDatiUtente(ruolo, model);
+
+        datiTable.setModel(model);
+    }
+
+    public void refreshEventiIscritti() {
+
+        eventiUtente = controller.listaEventiPartecipante();
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        if (eventiUtente != null) {
+            for (String evento : eventiUtente) {
+                model.addElement(evento);
+            }
+        }
+
+        listEventiIscritti.setModel(model);
     }
 
     private void inizializzaBottoni() {
@@ -328,9 +384,8 @@ public class UserArea {
         logOutButton.addActionListener(e -> parentFrame.logout());
         setDatiButton.addActionListener(e -> parentFrame.showSetDati());
         iscriviEventoButton.addActionListener(e -> parentFrame.showIscriviEvento());
-        selectEventoButton.addActionListener(e -> parentFrame.openSelectEvento());
+        selectEventoButton.addActionListener(e -> parentFrame.showSelectEvento());
         creaEventoButton.addActionListener(e -> parentFrame.showCreaEvento());
-
     }
 
     public JPanel getMainPanel() {

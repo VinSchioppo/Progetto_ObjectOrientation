@@ -1,6 +1,7 @@
 package controller;
 import classmodel.*;
 import dao.*;
+import recordlist.RecordList;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -17,6 +18,7 @@ public class Controller{
     private Partecipante partecipanteCorrente = null;
     private Organizzatore organizzatoreCorrente = null;
     private Giudice giudiceCorrente = null;
+    private RecordList<Evento> eventiChiusi = null;
     private static ImplementazioneDAO dao;
 
     private boolean addOrganizzatore = false;
@@ -174,6 +176,58 @@ public class Controller{
         return giudiceCorrente != null && ruolo == Role.GIUDICE && giudiceCorrente.seekEvento(idEvento) != null;
     }
 
+    //Questo metodo restituisce una lista contenente le classifiche ordinate in ordine decrescente di tutti gli eventi terminati.
+    //Ogni elemento della lista segue il formato: IdEvento Titolo|IdTeam Nome MediaVoto
+
+    public List<String> classificheEventiTerminati(){
+        List<String> listaEventi = null;
+        try {
+            if(eventiChiusi == null) {
+                eventiChiusi = new RecordList<>();
+                eventiChiusi.setRecords(dao.getClassificaEventiChiusiDB());
+            }
+            listaEventi = new ArrayList<>();
+            Evento evento = eventiChiusi.firstRecord();
+            while(evento != null){
+                String datiEvento = evento.getIdEvento() + " " + evento.getTitolo();
+                Team team = evento.firstTeam();
+                while (team != null) {
+                    String datiTeam = team.getIdTeam() + " " + team.getNome() + " " + team.getMediaVoti();
+                    listaEventi.add(datiEvento + "|" + datiTeam);
+                    team = evento.nextTeam();
+                }
+                evento = eventiChiusi.nextRecord();
+            }
+        }
+        catch (SQLException e) {
+            logger.info(e.getMessage());
+            logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
+        }
+        return listaEventi;
+    }
+
+    //Questo metodo permette di trovare la classifica di un evento specifico.
+    //Ogni elemento della lista segue il formato: IdEvento Titolo|IdTeam Nome MediaVoto
+
+    public List<String> searchClassificaEvento(int idEvento){
+        List<String> listaEventi = null;
+        Evento evento = eventiChiusi.firstRecord();
+        while(evento != null && evento.getIdEvento() != idEvento){
+            evento = eventiChiusi.nextRecord();
+        }
+        if(evento != null) {
+            listaEventi = new ArrayList<>();
+            String datiEvento = evento.getIdEvento() + " " + evento.getTitolo();
+            Team team = evento.firstTeam();
+            while (team != null) {
+                String datiTeam = team.getIdTeam() + " " + team.getNome() + " " + team.getMediaVoti();
+                listaEventi.add(datiEvento + "|" + datiTeam);
+                team = evento.nextTeam();
+            }
+        }
+        return listaEventi;
+    }
+
     //Questo metodo verifica che il partecipante sia in un team all'inizio dell'evento.
     //Se il partecipante non fa parte di un team, viene creato un team con il solo partecipante.
     //Tuttavia, se l'evento ha raggiunto il numero massimo di team viene negato l'accesso al partecipante.
@@ -280,23 +334,45 @@ public class Controller{
 
     public boolean iscriviEvento(int idEvento){
         Evento evento;
-        try{
-            evento = dao.getEventoDB(idEvento);
-            if(evento != null && evento.sizePartecipanti() + 1 < evento.getMaxIscritti()) {
-                if (partecipanteCorrente == null)
-                    partecipanteCorrente = utenteCorrente.becomePartecipante();
-                partecipanteCorrente.addEvento(evento);
-                if(updatePartecipanteEvento == null)
-                    updatePartecipanteEvento = new ArrayList<>();
-                updatePartecipanteEvento.add(evento);
-                return true;
+        if(!(checkIscrittoEvento(idEvento) || checkOrganizzaEvento(idEvento) || checkGiudicaEvento(idEvento))) {
+            try {
+                evento = dao.getEventoDB(idEvento);
+                if (evento != null && evento.sizePartecipanti() + 1 < evento.getMaxIscritti()) {
+                    if (partecipanteCorrente == null)
+                        partecipanteCorrente = utenteCorrente.becomePartecipante();
+                    partecipanteCorrente.addEvento(evento);
+                    if (updatePartecipanteEvento == null)
+                        updatePartecipanteEvento = new ArrayList<>();
+                    updatePartecipanteEvento.add(evento);
+                    return true;
+                }
+            } catch (SQLException e) {
+                logger.info(e.getMessage());
+                logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             }
         }
-        catch(SQLException e){
-            logger.info(e.getMessage());
-            logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
-        }
         return false;
+    }
+
+    //Questo metodo verifica se un utente è già iscritto ad un determinato evento.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    private boolean checkIscrittoEvento(int idEvento){
+        return partecipanteCorrente != null && partecipanteCorrente.seekEvento(idEvento) != null;
+    }
+
+    //Questo metodo verifica se un utente organizza un determinato evento.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    private boolean checkOrganizzaEvento(int idEvento){
+        return organizzatoreCorrente != null && organizzatoreCorrente.seekEvento(idEvento) != null;
+    }
+
+    //Questo metodo verifica se un utente giudica un determinato evento.
+    //Restituisce true se l'operazione va a buon fine, altrimenti false.
+
+    private boolean checkGiudicaEvento(int idEvento){
+        return giudiceCorrente != null && giudiceCorrente.seekEvento(idEvento) != null;
     }
 
     //Questo metodo permette ad un utente di creare un evento.
@@ -715,8 +791,8 @@ public class Controller{
 
     //Questo metodo restituisce la media di tutti i voti ricevuti da un team.
 
-    public int mediaVotiTeam(){
-        int mediaVoti = 0;
+    public float mediaVotiTeam(){
+        float mediaVoti = 0;
         if(partecipanteCorrente != null) {
             Team team = partecipanteCorrente.getTeam();
             if (team != null) {
@@ -758,7 +834,7 @@ public class Controller{
                 dao.updateEventoDB(organizzatoreCorrente.getEvento().getIdEvento(), indirizzoSede, nCivico, maxIscritti, maxTeam);
                 Evento evento = organizzatoreCorrente.getEvento();
                 evento.setIndirizzoSede(indirizzoSede);
-                evento.setnCivicoSede(nCivico);
+                evento.setNCivicoSede(nCivico);
                 evento.setMaxIscritti(maxIscritti);
                 evento.setMaxTeam(maxTeam);
                 return true;
@@ -944,10 +1020,10 @@ public class Controller{
             Evento evento = giudiceCorrente.getEvento();
             if (evento != null) {
                 Team team = evento.seekTeam(idTeam);
-                if (team != null) {
+                if (team != null && team.seekVoto(giudiceCorrente.getNomeUtente()) == null) {
                     Voto voto = new Voto(team.getIdTeam(), valore, giudiceCorrente.getNomeUtente());
                     team.addVoto(voto);
-                    if(addVoti == null)
+                    if (addVoti == null)
                         addVoti = new ArrayList<>();
                     addVoti.add(voto);
                     return true;
@@ -1016,18 +1092,24 @@ public class Controller{
                 Team team = evento.getTeam();
                 if(team != null){
                     Progresso progresso = team.seekProgresso(idProgresso);
-                    if(progresso != null) {
-                        Commento commento = new Commento(progresso.getIdProgresso(), testoCommento, giudiceCorrente.getNomeUtente());
-                        progresso.addCommento(commento);
-                        if(addCommenti == null)
-                            addCommenti = new ArrayList<>();
-                        addCommenti.add(commento);
+                    if(progresso != null && progresso.seekCommento(giudiceCorrente.getNomeUtente()) == null) {
+                        creaCommento(progresso, testoCommento);
                         return true;
                     }
                 }
             }
         }
         return false;
+    }
+
+    //Questo metodo istanzia un oggetto commento e lo aggiunge a un progresso.
+
+    private void creaCommento(Progresso progresso, String testoCommento) {
+        Commento commento = new Commento(progresso.getIdProgresso(), testoCommento, giudiceCorrente.getNomeUtente());
+        progresso.addCommento(commento);
+        if(addCommenti == null)
+            addCommenti = new ArrayList<>();
+        addCommenti.add(commento);
     }
 
     //Questo metodo restituisce un lista con tutti i commenti pubblicati da un giudice.
@@ -1065,6 +1147,7 @@ public class Controller{
             updatePartecipante();
             updateOrganizzatore();
             updateGiudice();
+            eventiChiusi = null;
             dao.disconnect();
             return true;
         }catch(SQLException e){
@@ -1077,16 +1160,20 @@ public class Controller{
     private void updateInviti() throws SQLException{
         if(utenteCorrente != null && updateInvitiGiudice != null)
             dao.addInvitiGiudiceDB(updateInvitiGiudice);
+        updateInvitiGiudice = null;
     }
 
     private void updatePartecipante() throws SQLException{
         if(partecipanteCorrente != null) {
             if(updatePartecipanteEvento != null)
                 dao.addPartecipanteEventoDB(partecipanteCorrente.getNomeUtente(), updatePartecipanteEvento);
+            updatePartecipanteEvento = null;
             if(updateRichiesteTeam != null)
                 dao.addRichiesteTeamDB(updateRichiesteTeam);
+            updateRichiesteTeam = null;
             if(leaveTeam != null)
                 dao.leaveTeamsDB(partecipanteCorrente.getNomeUtente(), leaveTeam);
+            leaveTeam = null;
         }
     }
 
@@ -1094,8 +1181,10 @@ public class Controller{
         if(organizzatoreCorrente != null) {
             if (addOrganizzatore)
                 dao.addOrganizzatoreDB(organizzatoreCorrente);
+            addOrganizzatore = false;
             if(updateOrganizzatoreEvento != null)
                 dao.addOrganizzatoreEventoDB(organizzatoreCorrente.getNomeUtente(), updateOrganizzatoreEvento);
+            updateOrganizzatoreEvento = null;
         }
     }
 
@@ -1103,10 +1192,13 @@ public class Controller{
         if(giudiceCorrente != null) {
             if(pubblicaProblema != null)
                 dao.updateProblemaDB(pubblicaProblema);
+            pubblicaProblema = null;
             if(addVoti != null)
                 dao.addAllVotiDB(addVoti);
+            addVoti = null;
             if(addCommenti != null)
                 dao.addAllCommentiDB(addCommenti);
+            addCommenti = null;
         }
     }
 }

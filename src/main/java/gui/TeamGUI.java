@@ -24,12 +24,12 @@ public class TeamGUI {
     private static final String RIFIUTA = "Rifiuta";
     private static final String ERRORE = "Errore";
 
-    private SelectEventoFrame parentFrame;
+    private UserAreaFrame parentFrame;
     private Controller controller;
 
     private static final Logger logger = Logger.getLogger(TeamGUI.class.getName());
 
-    public TeamGUI(SelectEventoFrame parentFrame, Controller controller) {
+    public TeamGUI(UserAreaFrame parentFrame, Controller controller) {
 
         this.parentFrame = parentFrame;
         this.controller = controller;

@@ -40,7 +40,7 @@ public class Evento {
 
     public void setTitolo(String titolo) {this.titolo = titolo;}
     public void setIndirizzoSede(String sede) {this.indirizzoSede = sede;}
-    public void setnCivicoSede(int sede) {this.nCivicoSede = sede;}
+    public void setNCivicoSede(int sede) {this.nCivicoSede = sede;}
     public void setMaxIscritti(int maxIscritti) {this.maxIscritti = maxIscritti;}
     public void setMaxTeam(int maxTeam) {this.maxTeam = maxTeam;}
     public void setDescrizioneProblema(String desctizioneProblema) {this.descrizioneProblema = desctizioneProblema;}
@@ -49,23 +49,23 @@ public class Evento {
 
     public void setInvitiGiudici(List<Partecipante> inviti) {
         if(invitiGiudici == null)
-            invitiGiudici = new InviteList<Partecipante>();
+            invitiGiudici = new InviteList<>();
         invitiGiudici.setInvites(inviti);
     }
 
     public void setGiudici(List<Giudice> giudici) {
         if(this.giudici == null)
-            this.giudici = new RecordList<Giudice>();
+            this.giudici = new RecordList<>();
         this.giudici.setRecords(giudici);
     }
     public void setPartecipanti(List<Partecipante> partecipanti) {
         if(this.partecipanti == null)
-            this.partecipanti = new RecordList<Partecipante>();
+            this.partecipanti = new RecordList<>();
         this.partecipanti.setRecords(partecipanti);
     }
     public void setTeamIscritti(List<Team> team){
         if(teamIscritti == null)
-            teamIscritti = new RecordList<Team>();
+            teamIscritti = new RecordList<>();
         teamIscritti.setRecords(team);
     }
     public void setDate(LocalDate inizio, LocalDate fine) {
@@ -101,13 +101,13 @@ public class Evento {
     public void addInvitoGiudice(Partecipante utente, Boolean answer)
     {
         if(invitiGiudici == null)
-            invitiGiudici = new InviteList<Partecipante>();
+            invitiGiudici = new InviteList<>();
         invitiGiudici.addInvite(utente, answer);
     }
 
     public void addInvitoGiudice(Partecipante utente) {
         if(invitiGiudici == null)
-            invitiGiudici = new InviteList<Partecipante>();
+            invitiGiudici = new InviteList<>();
         invitiGiudici.addInvite(utente);
     }
 
@@ -237,7 +237,7 @@ public class Evento {
 
     public void addGiudice(Giudice giudice) {
         if(giudici == null)
-            giudici = new RecordList<Giudice>();
+            giudici = new RecordList<>();
         giudici.addRecord(giudice);
     }
 
@@ -309,7 +309,7 @@ public class Evento {
 
     public void addPartecipante(Partecipante utente) {
         if(partecipanti == null)
-            partecipanti = new RecordList<Partecipante>();
+            partecipanti = new RecordList<>();
         partecipanti.addRecord(utente);
     }
 
@@ -382,7 +382,7 @@ public class Evento {
     public void addTeam(Team team) {
 
         if(teamIscritti == null)
-            teamIscritti = new RecordList<Team>();
+            teamIscritti = new RecordList<>();
         teamIscritti.addRecord(team);
 
     }

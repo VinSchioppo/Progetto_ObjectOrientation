@@ -13,14 +13,14 @@ public class Partecipante extends Utente {
 
     public void setTeamUniti(List<Team> teams) {
         if (teamUniti == null)
-            this.teamUniti = new RecordList<Team>();
+            this.teamUniti = new RecordList<>();
         teamUniti.setRecords(teams);
     }
 
     public void addTeam(Team team) {
 
         if(teamUniti == null)
-            teamUniti = new RecordList<Team>();
+            teamUniti = new RecordList<>();
 
         teamUniti.addRecord(team);
 

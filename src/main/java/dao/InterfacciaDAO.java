@@ -16,6 +16,7 @@ public interface InterfacciaDAO {
 
     Evento getEventoDB(int idEvento) throws SQLException;
     List<Evento> getEventiApertiDB(String nomeUtente) throws SQLException;
+    List<Evento> getClassificaEventiChiusiDB() throws SQLException;
     int getIdEventoDB() throws SQLException;
     void addEventoDB(Evento evento) throws SQLException;
     int addEventoDB(String titolo, String indirizzo, int nCivico, LocalDate dataInizio, LocalDate dataFine, int maxIscritti, int maxTeam, LocalDate dataInizioReg, LocalDate dataFineReg, String descrizioneProb) throws SQLException;

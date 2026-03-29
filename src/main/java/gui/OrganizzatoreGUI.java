@@ -21,12 +21,12 @@ public class OrganizzatoreGUI {
 
     private List<String> eventiOrganizzatore;
 
-    private SelectEventoFrame parentFrame;
+    private UserAreaFrame parentFrame;
     private Controller controller;
 
     private static final Logger logger = Logger.getLogger(OrganizzatoreGUI.class.getName());
 
-    public OrganizzatoreGUI(SelectEventoFrame parentFrame, Controller controller) {
+    public OrganizzatoreGUI(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
         this.controller = controller;
 

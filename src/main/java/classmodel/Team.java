@@ -8,6 +8,7 @@ public class Team {
     private int idTeam;
     private String nome;
     private String teamLeader = null;
+    private float mediaVoti = 0;
 
     private RecordList<Partecipante> membriTeam = null;
     private Evento eventoIscritto = null;
@@ -21,24 +22,31 @@ public class Team {
         this.teamLeader = teamLeader;
     }
 
+    public Team(int idTeam, String nome, float mediaVoti) {
+        this.idTeam = idTeam;
+        this.nome = nome;
+        this.mediaVoti = mediaVoti;
+    }
+
     public void setNome(String nome) {this.nome = nome;}
     public void setIdTeam(int idTeam) {this.idTeam = idTeam;}
     public void setTeamLeader(String teamLeader) {this.teamLeader = teamLeader;}
+    public void setMediaVoti(float media){this.mediaVoti = media;}
     public void setMembriTeam(List<Partecipante> partecipanti) {
         if(membriTeam == null)
-            membriTeam = new RecordList<Partecipante>();
+            membriTeam = new RecordList<>();
         membriTeam.setRecords(partecipanti);
     }
 
     public void setProgressi(List<Progresso> progressi) {
         if(this.progressi == null)
-            this.progressi = new RecordList<Progresso>();
+            this.progressi = new RecordList<>();
         this.progressi.setRecords(progressi);
     }
 
     public void setVoti(List<Voto> voti){
         if(this.voti == null)
-            this.voti = new RecordList<Voto>();
+            this.voti = new RecordList<>();
         this.voti.setRecords(voti);
     }
 
@@ -46,7 +54,7 @@ public class Team {
 
     public void setRichiestePartecipazione(List<Partecipante> richiestePartecipazione) {
         if(this.richiestePartecipazione == null)
-            this.richiestePartecipazione = new InviteList<Partecipante>();
+            this.richiestePartecipazione = new InviteList<>();
         this.richiestePartecipazione.setInvites(richiestePartecipazione);
     }
 
@@ -54,7 +62,7 @@ public class Team {
     public String getNome() {return this.nome;}
     public String getTeamLeader() {return this.teamLeader;}
     public Evento getEventoIscritto() {return this.eventoIscritto;}
-
+    public float getMediaVoti() {return this.mediaVoti;}
     public int sizeMembriTeam() {
         if(membriTeam != null)
             return this.membriTeam.size();
@@ -64,7 +72,7 @@ public class Team {
     public void addMembroTeam(Partecipante part) {
 
         if(membriTeam == null)
-            membriTeam = new RecordList<Partecipante>();
+            membriTeam = new RecordList<>();
         membriTeam.addRecord(part);
     }
 
@@ -142,13 +150,13 @@ public class Team {
 
     public void addRichiesta(Partecipante partecipante, Boolean answer) {
         if(richiestePartecipazione == null)
-            richiestePartecipazione = new InviteList<Partecipante>();
+            richiestePartecipazione = new InviteList<>();
         richiestePartecipazione.addInvite(partecipante, answer);
     }
 
     public void addRichiesta(Partecipante partecipante) {
         if(richiestePartecipazione == null)
-            richiestePartecipazione = new InviteList<Partecipante>();
+            richiestePartecipazione = new InviteList<>();
         richiestePartecipazione.addInvite(partecipante);
     }
 
@@ -282,7 +290,7 @@ public class Team {
     public void addProgresso(Progresso progressi) {
 
         if(this.progressi == null)
-            this.progressi = new RecordList<Progresso>();
+            this.progressi = new RecordList<>();
 
         this.progressi.addRecord(progressi);
     }
@@ -351,7 +359,7 @@ public class Team {
     public void addVoto(Voto voto) {
 
         if(voti == null)
-            voti = new RecordList<Voto>();
+            voti = new RecordList<>();
 
         voti.addRecord(voto);
     }
@@ -416,9 +424,9 @@ public class Team {
         return voto;
     }
 
-    public int mediaVoti()
+    public float mediaVoti()
     {
-        int media = 0;
+        float media = 0;
         if(voti.size() > 0) {
             Voto voto = firstVoto();
             while (voto != null) {

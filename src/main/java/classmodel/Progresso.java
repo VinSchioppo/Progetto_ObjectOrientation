@@ -32,7 +32,7 @@ public class Progresso {
     public void setTestoDocumeto(String testoDocumento) {this.testoDocumeto = testoDocumento;}
     public void setCommenti(List<Commento> commenti){
         if(this.commenti == null)
-            this.commenti = new RecordList<Commento>();
+            this.commenti = new RecordList<>();
         this.commenti.setRecords(commenti);
     }
 
@@ -44,7 +44,7 @@ public class Progresso {
     public void addCommento(Commento commento) {
 
         if(commenti == null)
-            commenti = new RecordList<Commento>();
+            commenti = new RecordList<>();
 
         commenti.addRecord(commento);
     }

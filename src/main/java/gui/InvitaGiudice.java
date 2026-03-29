@@ -14,11 +14,11 @@ public class InvitaGiudice {
     private JButton backButton;
     private JList<String> listPartecipantiEvento;
 
-    private SelectEventoFrame parentFrame;
+    private UserAreaFrame parentFrame;
     private Controller controller;
     private DefaultListModel<String> modelInvitati = new DefaultListModel<>();
 
-    public InvitaGiudice(SelectEventoFrame parentFrame, Controller controller) {
+    public InvitaGiudice(UserAreaFrame parentFrame, Controller controller) {
 
         this.parentFrame = parentFrame;
         this.controller = controller;

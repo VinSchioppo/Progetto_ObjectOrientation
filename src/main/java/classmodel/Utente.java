@@ -40,7 +40,7 @@ public class Utente {
     public void setDataNascita(LocalDate dataNascita) {this.dataNascita = dataNascita;}
     public void setEventi(List<Evento> eventi){
         if(this.eventi == null)
-            this.eventi = new RecordList<Evento>();
+            this.eventi = new RecordList<>();
         this.eventi.setRecords(eventi);
     }
 
@@ -87,7 +87,7 @@ public class Utente {
 
     public void addEvento(Evento evento) {
         if(eventi == null) {
-            eventi = new RecordList<Evento>();
+            eventi = new RecordList<>();
         }
         eventi.addRecord(evento);
     }
@@ -154,13 +154,13 @@ public class Utente {
 
     public void addInvitoGiudiceEvento(Evento evento, Boolean answer) {
         if(invitiGiudiceEvento == null)
-            invitiGiudiceEvento = new InviteList<Evento>();
+            invitiGiudiceEvento = new InviteList<>();
         invitiGiudiceEvento.addInvite(evento, answer);
     }
 
     public void addInvitoGiudiceEvento(Evento evento) {
         if(invitiGiudiceEvento == null)
-            invitiGiudiceEvento = new InviteList<Evento>();
+            invitiGiudiceEvento = new InviteList<>();
         invitiGiudiceEvento.addInvite(evento);
     }
 

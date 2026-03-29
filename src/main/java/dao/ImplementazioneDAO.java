@@ -37,6 +37,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     private static final String IDTEAM = "idteam";
     private static final String NOMETEAM = "nome";
     private static final String TEAMLEADER = "teamleader";
+    private static final String MEDIAVOTI = "voto";
 
     private static final String IDPROGRESSO = "idprogresso";
     private static final String DATAPUBBLICAZIONE = "datapubblicazione";
@@ -88,7 +89,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 rs.next();
                 evento.setTitolo(rs.getString(TITOLO));
                 evento.setIndirizzoSede(rs.getString(INDIRIZZO));
-                evento.setnCivicoSede(rs.getInt(NCIVICO));
+                evento.setNCivicoSede(rs.getInt(NCIVICO));
                 evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
                 evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
                 evento.setMaxTeam(rs.getInt(MAXTEAM));
@@ -122,7 +123,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     Evento evento = new Evento(rs.getInt(IDEVENTO));
                     evento.setTitolo(rs.getString(TITOLO));
                     evento.setIndirizzoSede(rs.getString(INDIRIZZO));
-                    evento.setnCivicoSede(rs.getInt(NCIVICO));
+                    evento.setNCivicoSede(rs.getInt(NCIVICO));
                     evento.setDate(rs.getObject(DATAINIZIO, LocalDate.class), rs.getObject(DATAFINE, LocalDate.class));
                     evento.setMaxIscritti(rs.getInt(MAXISCRITTI));
                     evento.setMaxTeam(rs.getInt(MAXTEAM));
@@ -130,6 +131,39 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     evento.setDescrizioneProblema(rs.getString(DESCRIZIONEPROBLEMA));
                     eventi.add(evento);
                 }
+                rs.close();
+            }
+        }
+        return eventi;
+    }
+
+    public List<Evento> getClassificaEventiChiusiDB() throws SQLException {
+        List<Evento> eventi = null;
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT e.IdEvento, e.Titolo, t.IdTeam, t.Nome, AVG(v.Valore) AS Voto " +
+                "FROM Evento AS e JOIN Team AS t ON e.IdEvento = t.idEvento " +
+                "JOIN Voto AS v ON t.IdTeam = v.idTeam " +
+                "WHERE e.DataFine < NOW() " +
+                "GROUP BY(e.IdEvento, t.IdTeam) " +
+                "ORDER BY e.IdEvento ASC, Voto DESC;")) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.isBeforeFirst()) {
+                rs.next();
+                eventi = new ArrayList<>();
+                int idEvento = rs.getInt(IDEVENTO);
+                Evento evento = new Evento(idEvento);
+                evento.setTitolo(rs.getString(TITOLO));
+                eventi.add(evento);
+                while (rs.next()) {
+                    if(evento.getIdEvento() != idEvento) {
+                        idEvento = rs.getInt(IDEVENTO);
+                        evento = new Evento(rs.getInt(idEvento));
+                        evento.setTitolo(rs.getString(TITOLO));
+                        eventi.add(evento);
+                    }
+                    evento.addTeam(new Team(rs.getInt(IDTEAM), rs.getString(NOMETEAM), rs.getFloat(MEDIAVOTI)));
+                }
+                eventi.add(evento);
                 rs.close();
             }
         }
@@ -397,15 +431,14 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void addPartecipanteEventoDB(String nomePartecipante, List<Evento> partecipantiEvento) throws SQLException{
         if(partecipantiEvento != null) {
-            HashSet<Evento> eventi = new HashSet<>(partecipantiEvento);
             StringBuilder codiceSQL = new StringBuilder();
             codiceSQL.append("INSERT INTO PartecipanteEvento(NomePartecipante, idEvento) VALUES");
-            for (Evento evento : eventi) {
+            for (Evento evento : partecipantiEvento) {
                 if(!evento.equals(partecipantiEvento.getFirst()))
                     codiceSQL.append(",");
                 codiceSQL.append("('").append(nomePartecipante).append("',").append(evento.getIdEvento()).append(")");
             }
-            codiceSQL.append(";");
+            codiceSQL.append("ON CONFLICT(NomePartecipante, idEvento) DO NOTHING;");
             try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
             }
@@ -946,7 +979,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     codiceSQL.append(",");
                 codiceSQL.append("('").append(commento.getGiudice()).append("',").append(commento.getIdProgresso()).append(",'").append(commento.getTesto()).append("')");
             }
-            codiceSQL.append(";");
+            codiceSQL.append("ON CONFLICT(NomeGiudice, idProgresso) DO NOTHING;");
             try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
             }
@@ -1032,7 +1065,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                     codiceSQL.append(",");
                 codiceSQL.append("('").append(voto.getGiudice()).append("',").append(voto.getIdTeam()).append(",").append(voto.getValore()).append(")");
             }
-            codiceSQL.append(";");
+            codiceSQL.append("ON CONFLICT(NomeGiudice, idTeam) DO NOTHING;");
             try (PreparedStatement ps = connection.prepareStatement(codiceSQL.toString())) {
                 ps.executeUpdate();
             }

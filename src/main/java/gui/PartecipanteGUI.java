@@ -16,12 +16,12 @@ public class PartecipanteGUI {
     private JButton backButton;
     private JList<String> listEventi;
 
-    private SelectEventoFrame parentFrame;
+    private UserAreaFrame parentFrame;
     private Controller controller;
     private List<String> eventi;
     private List<Integer> idEventi;
 
-    public PartecipanteGUI(SelectEventoFrame parentFrame, Controller controller) {
+    public PartecipanteGUI(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
         this.controller = controller;
 

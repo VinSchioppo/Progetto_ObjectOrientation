@@ -3,34 +3,33 @@ package gui;
 import javax.swing.*;
 
 public class SelectEvento {
+
     private JButton organizzatoreButton;
     private JButton partecipanteButton;
     private JButton giudiceButton;
     private JButton areaUtenteButton;
     private JPanel mainPanel;
 
+    public SelectEvento(UserAreaFrame parentFrame) {
 
-    public SelectEvento(SelectEventoFrame parentFrame) {
         areaUtenteButton.addActionListener(e ->
-            parentFrame.logout()
+                parentFrame.showHome()
         );
 
         organizzatoreButton.addActionListener(e ->
-            parentFrame.showOrganizzatoreGUI()
+                parentFrame.showOrganizzatoreGUI()
         );
 
         partecipanteButton.addActionListener(e ->
-            parentFrame.showPartecipanteGUI()
+                parentFrame.showPartecipanteGUI()
         );
 
         giudiceButton.addActionListener(e ->
-            parentFrame.showGiudiceGUI()
+                parentFrame.showGiudiceGUI()
         );
-
     }
 
     public JPanel getMainPanel() {
         return mainPanel;
     }
-
 }

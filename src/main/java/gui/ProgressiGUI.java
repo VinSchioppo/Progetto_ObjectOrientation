@@ -19,10 +19,10 @@ public class ProgressiGUI {
 
     private static final String ERRORE = "Errore";
 
-    private SelectEventoFrame parentFrame;
+    private UserAreaFrame parentFrame;
     private Controller controller;
 
-    public ProgressiGUI(SelectEventoFrame parentFrame, Controller controller) {
+    public ProgressiGUI(UserAreaFrame parentFrame, Controller controller) {
 
         this.parentFrame = parentFrame;
         this.controller = controller;
@@ -219,7 +219,7 @@ public class ProgressiGUI {
         }
 
         try {
-            int media = controller.mediaVotiTeam();
+            float media = controller.mediaVotiTeam();
             votomedioValore.setText(String.valueOf(media));
         } catch (Exception _) {
             votomedioValore.setText(ERRORE);

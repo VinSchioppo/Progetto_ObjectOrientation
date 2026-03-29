@@ -23,10 +23,10 @@ public class GiudiceGUI {
     private JButton pubblicaProblemaButton;
     private JButton commentiPassatiButton;
 
-    private SelectEventoFrame parentFrame;
     private Controller controller;
+    private UserAreaFrame parentFrame;
 
-    public GiudiceGUI(SelectEventoFrame parentFrame, Controller controller) {
+    public GiudiceGUI(UserAreaFrame parentFrame, Controller controller) {
 
         this.parentFrame = parentFrame;
         this.controller = controller;

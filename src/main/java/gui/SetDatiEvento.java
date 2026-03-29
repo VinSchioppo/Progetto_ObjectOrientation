@@ -32,12 +32,12 @@ public class SetDatiEvento {
 
     private static final String DATEFORMAT = "yyyy-MM-dd";
 
-    private SelectEventoFrame parentFrame;
+    private UserAreaFrame parentFrame;
     private Controller controller;
 
     private static final Logger logger = Logger.getLogger(SetDatiEvento.class.getName());
 
-    public SetDatiEvento(SelectEventoFrame parentFrame, Controller controller) {
+    public SetDatiEvento(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
         this.controller = controller;
 
