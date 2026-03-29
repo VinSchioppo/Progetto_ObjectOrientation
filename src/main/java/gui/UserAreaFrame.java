@@ -23,7 +23,7 @@ public class UserAreaFrame extends JFrame {
         cardLayout = new CardLayout();
         container = new JPanel(cardLayout);
 
-        Pannelli();
+        pannelli();
 
         setContentPane(container);
 
@@ -41,7 +41,7 @@ public class UserAreaFrame extends JFrame {
         });
     }
 
-    private void Pannelli(){
+    private void pannelli(){
 
         userAreaPanel = new UserArea(this, controller);
         SetDati setDatiPanel = new SetDati(this, controller);

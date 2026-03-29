@@ -5,7 +5,10 @@ import controller.Controller;
 import javax.swing.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SetDatiEvento {
 
@@ -14,21 +17,25 @@ public class SetDatiEvento {
     private JTextField indirizzoSede;   // Indirizzo
     private JSpinner maxTeamSpinner;        // Numero civico
 
-    private JSpinner Datainizio;        // Data inizio evento
-    private JSpinner Datafine;        // Data fine evento
+    private JSpinner datainizio;        // Data inizio evento
+    private JSpinner datafine;        // Data fine evento
 
-    private JSpinner Datainizioreg;        // Data inizio registrazioni
-    private JSpinner Datafinereg;        // Data fine registrazioni
+    private JSpinner datainizioreg;        // Data inizio registrazioni
+    private JSpinner datafinereg;        // Data fine registrazioni
 
     private JButton saveButton;
     private JButton backButton;
-    private JSpinner MaxPartecipantispinner;
-    private JSpinner NumeroCivicospinner;
+    private JSpinner maxPartecipantispinner;
+    private JSpinner numeroCivicospinner;
 
-    private JTextArea DescrizioneProblema;
+    private JTextArea descrizioneProblema;
+
+    private static final String DATEFORMAT = "yyyy-MM-dd";
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
+
+    private static final Logger logger = Logger.getLogger(SetDatiEvento.class.getName());
 
     public SetDatiEvento(SelectEventoFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -52,24 +59,24 @@ public class SetDatiEvento {
        ============================================================ */
     private void inizializzaSpinnerDate() {
 
-        Datafine.setModel(new SpinnerDateModel());
-        Datainizio.setModel(new SpinnerDateModel());
-        Datainizioreg.setModel(new SpinnerDateModel());
-        Datafinereg.setModel(new SpinnerDateModel());
+        datafine.setModel(new SpinnerDateModel());
+        datainizio.setModel(new SpinnerDateModel());
+        datainizioreg.setModel(new SpinnerDateModel());
+        datafinereg.setModel(new SpinnerDateModel());
 
-        JSpinner.DateEditor editor1 = new JSpinner.DateEditor(Datafine, "yyyy-MM-dd");
-        JSpinner.DateEditor editor2 = new JSpinner.DateEditor(Datainizio, "yyyy-MM-dd");
-        JSpinner.DateEditor editor3 = new JSpinner.DateEditor(Datainizioreg, "yyyy-MM-dd");
-        JSpinner.DateEditor editor4 = new JSpinner.DateEditor(Datafinereg, "yyyy-MM-dd");
+        JSpinner.DateEditor editor1 = new JSpinner.DateEditor(datafine, DATEFORMAT);
+        JSpinner.DateEditor editor2 = new JSpinner.DateEditor(datainizio, DATEFORMAT);
+        JSpinner.DateEditor editor3 = new JSpinner.DateEditor(datainizioreg, DATEFORMAT);
+        JSpinner.DateEditor editor4 = new JSpinner.DateEditor(datafinereg, DATEFORMAT);
 
-        Datafine.setEditor(editor1);
-        Datainizio.setEditor(editor2);
-        Datainizioreg.setEditor(editor3);
-        Datafinereg.setEditor(editor4);
+        datafine.setEditor(editor1);
+        datainizio.setEditor(editor2);
+        datainizioreg.setEditor(editor3);
+        datafinereg.setEditor(editor4);
 
-        NumeroCivicospinner.setModel(new SpinnerNumberModel(1, 1, 300, 1));
+        numeroCivicospinner.setModel(new SpinnerNumberModel(1, 1, 300, 1));
         maxTeamSpinner.setModel(new SpinnerNumberModel(1,1,50,1));
-        MaxPartecipantispinner.setModel(new SpinnerNumberModel(1,1,200,1));
+        maxPartecipantispinner.setModel(new SpinnerNumberModel(1,1,200,1));
     }
 
     /* ============================================================
@@ -82,16 +89,16 @@ public class SetDatiEvento {
             // ===== INPUT UTENTE =====
             String indirizzo = indirizzoSede.getText().trim();
 
-            int nCivico = (int) NumeroCivicospinner.getValue();
-            int MaxPartecipanti = (int) MaxPartecipantispinner.getValue();
-            int MaxTeam = (int) maxTeamSpinner.getValue();
+            int nCivico = (int) numeroCivicospinner.getValue();
+            int maxPartecipanti = (int) maxPartecipantispinner.getValue();
+            int maxTeam = (int) maxTeamSpinner.getValue();
 
             // ===== DATE =====
-            LocalDate dataInizioEvento = convertiData(Datainizio);
-            LocalDate dataFineEvento   = convertiData(Datafine);
+            LocalDate dataInizioEvento = convertiData(datainizio);
+            LocalDate dataFineEvento   = convertiData(datafine);
 
-            LocalDate dataInizioReg = convertiData(Datainizioreg);
-            LocalDate dataFineReg   = convertiData(Datafinereg);
+            LocalDate dataInizioReg = convertiData(datainizioreg);
+            LocalDate dataFineReg   = convertiData(datafinereg);
 
             // ===== VALIDAZIONE =====
             if (indirizzo.isEmpty()) {
@@ -108,8 +115,8 @@ public class SetDatiEvento {
             controlloRegistrazione(
                     indirizzo,
                     nCivico,
-                    MaxPartecipanti,
-                    MaxTeam,
+                    maxPartecipanti,
+                    maxTeam,
                     dataInizioEvento,
                     dataFineEvento,
                     dataInizioReg,
@@ -158,7 +165,7 @@ public class SetDatiEvento {
             // ===== CIVICO =====
             int civicoIndex = firstDateIndex - 1;
             int civico = Integer.parseInt(d[civicoIndex]);
-            NumeroCivicospinner.setValue(civico);
+            numeroCivicospinner.setValue(civico);
 
             // ===== TROVA INIZIO INDIRIZZO =====
             int startIndirizzo = 0;
@@ -187,16 +194,16 @@ public class SetDatiEvento {
             indirizzoSede.setText(indirizzoBuilder.toString().trim());
 
             // ===== DATE EVENTO =====
-            Datainizio.setValue(convertToDate(LocalDate.parse(d[firstDateIndex])));
-            Datafine.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 1])));
+            datainizio.setValue(convertToDate(LocalDate.parse(d[firstDateIndex])));
+            datafine.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 1])));
 
             // ===== NUMERI =====
-            MaxPartecipantispinner.setValue(Integer.parseInt(d[firstDateIndex + 2]));
+            maxPartecipantispinner.setValue(Integer.parseInt(d[firstDateIndex + 2]));
             maxTeamSpinner.setValue(Integer.parseInt(d[firstDateIndex + 3]));
 
             // ===== DATE REG =====
-            Datainizioreg.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 4])));
-            Datafinereg.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 5])));
+            datainizioreg.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 4])));
+            datafinereg.setValue(convertToDate(LocalDate.parse(d[firstDateIndex + 5])));
 
             // ===== DESCRIZIONE =====
             if (d.length > firstDateIndex + 6) {
@@ -204,12 +211,13 @@ public class SetDatiEvento {
                 for (int i = firstDateIndex + 6; i < d.length; i++) {
                     desc.append(d[i]).append(" ");
                 }
-                DescrizioneProblema.setText(desc.toString().trim());
+                descrizioneProblema.setText(desc.toString().trim());
             }
 
         } catch (Exception e) {
-            System.out.println("Errore parsing dati evento");
-            e.printStackTrace();
+            logger.info("Errore parsing dati utente");
+            logger.info(e.getMessage());
+            logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
         }
     }
 
@@ -219,14 +227,14 @@ public class SetDatiEvento {
         );
     }
 
-    private void controlloRegistrazione(String indirizzo, int nCivico, int MaxPartecipanti, int MaxTeam,
+    private void controlloRegistrazione(String indirizzo, int nCivico, int maxPartecipanti, int maxTeam,
                                         LocalDate dataInizioEvento, LocalDate dataFineEvento, LocalDate dataInizioReg, LocalDate dataFineReg) {
 
         boolean ok1 = controller.inserisciDatiEvento(
                 indirizzo,
                 nCivico,
-                MaxPartecipanti,
-                MaxTeam
+                maxPartecipanti,
+                maxTeam
         );
 
         boolean ok2 = controller.setDateEvento(

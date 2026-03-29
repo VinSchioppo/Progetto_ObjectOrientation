@@ -11,16 +11,18 @@ public class ProgressiGUI {
     private JPanel mainPanel;
     private JButton backButton;
     private JList<String> listprogressi;
-    private JLabel VotomedioValore;
+    private JLabel votomedioValore;
     private JTextPane textPaneProgressi;
     private JButton salvaButton;
     private JTable tableVoti;
     private JList<String> listCommenti;
 
+    private static final String ERRORE = "Errore";
+
     private SelectEventoFrame parentFrame;
     private Controller controller;
 
-    public ProgressiGUI(SelectEventoFrame parentFrame, Controller controller, int idTeam) {
+    public ProgressiGUI(SelectEventoFrame parentFrame, Controller controller) {
 
         this.parentFrame = parentFrame;
         this.controller = controller;
@@ -107,7 +109,7 @@ public class ProgressiGUI {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Inserisci testo progresso",
-                    "Errore",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
             return;
@@ -139,7 +141,7 @@ public class ProgressiGUI {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Errore pubblicazione (devi essere team leader)",
-                    "Errore",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
         }
@@ -212,15 +214,15 @@ public class ProgressiGUI {
         List<String> voti = controller.listaVotiTeam();
 
         if (voti == null || voti.isEmpty()) {
-            VotomedioValore.setText("N/A");
+            votomedioValore.setText("N/A");
             return;
         }
 
         try {
             int media = controller.mediaVotiTeam();
-            VotomedioValore.setText(String.valueOf(media));
-        } catch (Exception e) {
-            VotomedioValore.setText("Errore");
+            votomedioValore.setText(String.valueOf(media));
+        } catch (Exception _) {
+            votomedioValore.setText(ERRORE);
         }
     }
 

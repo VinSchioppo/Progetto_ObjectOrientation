@@ -11,13 +11,7 @@ public class LogIn {
     private JPanel mainPanel;
     private JButton registrazioneButton;
 
-    private LoginFrame parentFrame;
-    private Controller controller;
-
     public LogIn(LoginFrame parentFrame, Controller controller) {
-        this.parentFrame = parentFrame;
-        this.controller = controller;
-
         logInButton.addActionListener(e -> {
 
             String username = textField1.getText();
@@ -43,9 +37,8 @@ public class LogIn {
             }
         });
 
-        registrazioneButton.addActionListener(e -> {
-            parentFrame.showRegister();
-        });
+        registrazioneButton.addActionListener(e ->
+            parentFrame.showRegister());
     }
 
     public JPanel getMainPanel() {

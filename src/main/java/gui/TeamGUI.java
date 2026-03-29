@@ -5,23 +5,29 @@ import controller.Controller;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class TeamGUI {
 
     private JButton backButton;
     private JPanel mainPanel;
-    private JLabel NomeEvento;
-    private JLabel DescrizioneEvento;
+    private JLabel nomeEvento;
+    private JLabel descrizioneEvento;
     private JList<String> listPartecipantiTeam;
     private JButton lasciaTeamButton;
     private JButton progressiButton;
     private JLabel nomeTeamLabel;
     private JList<String> listRichiesteTeam;
 
+    private static final String ACCETTA = "Accetta";
+    private static final String RIFIUTA = "Rifiuta";
+    private static final String ERRORE = "Errore";
+
     private SelectEventoFrame parentFrame;
     private Controller controller;
+
+    private static final Logger logger = Logger.getLogger(TeamGUI.class.getName());
 
     public TeamGUI(SelectEventoFrame parentFrame, Controller controller) {
 
@@ -46,23 +52,22 @@ public class TeamGUI {
             String[] dati = datiEvento.split(" ");
 
             try {
-                NomeEvento.setText(dati[0]);
+                nomeEvento.setText(dati[0]);
 
                 StringBuilder descrizione = new StringBuilder();
                 for (int i = 10; i < dati.length; i++) {
                     descrizione.append(dati[i]).append(" ");
                 }
 
-                DescrizioneEvento.setText(descrizione.toString().trim());
+                descrizioneEvento.setText(descrizione.toString().trim());
 
-            } catch (Exception e) {
-                NomeEvento.setText("Errore");
-                DescrizioneEvento.setText("Errore parsing");
+            } catch (Exception _) {
+                nomeEvento.setText(ERRORE);
+                descrizioneEvento.setText("Errore parsing");
             }
         }
 
         // ===== TEAM =====
-        //controller.teamPartecipante();
         String nomeTeam = controller.nomeTeamCorrente();
         nomeTeamLabel.setText(nomeTeam != null ? nomeTeam : "Nessun team");
 
@@ -90,7 +95,7 @@ public class TeamGUI {
 
                     String utente = listRichiesteTeam.getModel().getElementAt(index);
 
-                    gestisciRichiesta(utente, index);
+                    gestisciRichiesta(utente);
                 }
             }
         });
@@ -111,7 +116,7 @@ public class TeamGUI {
         listRichiesteTeam.setModel(model);
     }
 
-    private void gestisciRichiesta(String nomeUtente, int index) {
+    private void gestisciRichiesta(String nomeUtente) {
 
         int scelta = JOptionPane.showOptionDialog(
                 mainPanel,
@@ -120,8 +125,8 @@ public class TeamGUI {
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                new String[]{"Accetta", "Rifiuta"},
-                "Accetta"
+                new String[]{ACCETTA, RIFIUTA},
+                ACCETTA
         );
 
         controlloRichiesta(scelta, nomeUtente);
@@ -132,10 +137,10 @@ public class TeamGUI {
         boolean ok = false;
 
         if (scelta == 0) {
-            System.out.println("Accetta");
+            logger.info(ACCETTA);
             ok = controller.acceptRichiestaTeam(nomeUtente);
         } else if (scelta == 1) {
-            System.out.println("Rifiuta");
+            logger.info(RIFIUTA);
             ok = controller.refuseRichiestaTeam(nomeUtente);
         }
 
@@ -156,7 +161,7 @@ public class TeamGUI {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Errore durante l'operazione",
-                    "Errore",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
         }
@@ -204,7 +209,7 @@ public class TeamGUI {
                 JOptionPane.showMessageDialog(
                         mainPanel,
                         "Nessun team selezionato",
-                        "Errore",
+                        ERRORE,
                         JOptionPane.ERROR_MESSAGE
                 );
                 return;
@@ -232,7 +237,7 @@ public class TeamGUI {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Impossibile lasciare il team",
-                    "Errore",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
         }

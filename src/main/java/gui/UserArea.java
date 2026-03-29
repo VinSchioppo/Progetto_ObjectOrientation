@@ -7,9 +7,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class UserArea {
 
@@ -21,14 +20,14 @@ public class UserArea {
     private JButton logOutButton;
     private JButton selectEventoButton;
     private JButton iscriviEventoButton;
-    private JList ListaRichiesteTeam;
     private JList<String> listRichiestaGiudice;
     private List<String> eventiUtente;
 
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
-    private ArrayList<Integer> richiesteTeamId;
     private List<String> invitiCompleti;
+
+    private static final Logger logger = Logger.getLogger(UserArea.class.getName());
 
     public UserArea(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -38,7 +37,6 @@ public class UserArea {
         inizializzaListaEventi();
         inizializzaBottoni();
         inizializzaListaInvitiGiudice();
-        System.out.println(controller.listaInvitiGiudice());
     }
 
     /* ============================================================
@@ -196,8 +194,8 @@ public class UserArea {
         int idEvento;
         try {
             idEvento = Integer.parseInt(evento.substring(0, spazio));
-        } catch (NumberFormatException e) {
-            System.out.println("Errore parsing ID evento: " + evento);
+        } catch (NumberFormatException _) {
+            logger.info("Errore parsing ID evento: " + evento);
             return;
         }
 
@@ -235,7 +233,7 @@ public class UserArea {
 
                     try {
                         idEvento = Integer.parseInt(invitoCompleto.substring(0, spazio));
-                    } catch (Exception ex) {
+                    } catch (Exception _) {
                         return;
                     }
 
@@ -264,14 +262,15 @@ public class UserArea {
 
         boolean ok = false;
 
-        if (scelta == 0) { // Accetta
-            ok = controller.acceptInvitoGiudiceEvento(idEvento);
-        }
-        else if (scelta == 1) { // Rifiuta
-            ok = controller.refuseInvitoGiudiceEvento(idEvento);
-        }
-        else {
-            return; // Annulla → niente
+        switch(scelta) {
+            case 0 : // Accetta
+                ok = controller.acceptInvitoGiudiceEvento(idEvento);
+                break;
+            case 1 : // Rifiuta
+                ok = controller.refuseInvitoGiudiceEvento(idEvento);
+                break;
+            default :
+                return; // Annulla → niente
         }
 
         if (ok) {

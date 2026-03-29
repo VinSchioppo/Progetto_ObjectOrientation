@@ -56,6 +56,7 @@ public class GiudiceGUI {
         });
 
         giudizio.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
                 aggiornaStatoSave();
             }
@@ -69,14 +70,14 @@ public class GiudiceGUI {
     private void inizializzaListe() {
 
         // ===== EVENTI =====
-        ListaEventi();
+        listaEventi();
 
         // ===== TEAM =====
-        ListaTeam();
+        listaTeam();
 
     }
 
-    private void ListaEventi(){
+    private void listaEventi(){
 
         List<String> eventi = controller.listaEventiGiudice();
         DefaultListModel<String> modelEventi = new DefaultListModel<>();
@@ -99,7 +100,7 @@ public class GiudiceGUI {
 
     }
 
-    private void ListaTeam(){
+    private void listaTeam(){
 
         listTeam.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -264,23 +265,23 @@ public class GiudiceGUI {
         boolean ok = true;
 
         // ===== VOTO =====
-        SalvaVoto(ok, idTeam);
+        salvaVoto(idTeam);
 
         // ===== COMMENTO =====
-        SalvaCommento(ok, idProg);
+        salvaCommento(idProg);
 
-        MessaggioRisultato(ok, idTeam);
+        messaggioRisultato(ok, idTeam);
     }
 
-    private void SalvaVoto(boolean ok, int idTeam){
+    private void salvaVoto(int idTeam){
 
         if (abilitaVoto.isSelected()) {
             int votoVal = (Integer) voto.getValue();
-            ok &= controller.giveVotoTeam(idTeam, votoVal);
+            controller.giveVotoTeam(idTeam, votoVal);
         }
     }
 
-    private void SalvaCommento(boolean ok, Integer idProg) {
+    private void salvaCommento(Integer idProg) {
 
         if (abilitaGiudizio.isSelected()) {
 
@@ -296,11 +297,11 @@ public class GiudiceGUI {
                 return;
             }
 
-            ok &= controller.commentaProgresso(idProg, testo);
+            controller.commentaProgresso(idProg, testo);
         }
     }
 
-    private void MessaggioRisultato(boolean ok, int idTeam) {
+    private void messaggioRisultato(boolean ok, int idTeam) {
 
         if (ok) {
 
@@ -328,7 +329,7 @@ public class GiudiceGUI {
 
         try {
             return Integer.parseInt(valore.substring(0, spazio));
-        } catch (Exception e) {
+        } catch (Exception _) {
             return null;
         }
     }

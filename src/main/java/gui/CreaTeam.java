@@ -7,9 +7,11 @@ import javax.swing.*;
 public class CreaTeam extends JDialog {
 
     private JPanel mainPanel;
-    private JTextField NomeTeam;
+    private JTextField nomeTeam;
     private JButton backButton;
     private JButton saveButton;
+
+    private static final String ERRORE = "Errore";
 
     private Controller controller;
 
@@ -32,51 +34,48 @@ public class CreaTeam extends JDialog {
 
     private void creaTeam() {
 
-        String nomeTeam = NomeTeam.getText().trim();
+        String nomeTeamTMP = this.nomeTeam.getText().trim();
 
         // ===== CONTROLLO INPUT =====
 
-        ControlloInput(nomeTeam);
+        controlloInput(nomeTeamTMP);
 
         // 🔥 CONTROLLO: ESISTE GIÀ UN TEAM?
 
-        ExistTeam();
+        existTeam();
 
         // ===== CREAZIONE TEAM =====
-        CreazioneTeam(nomeTeam);
+        creazioneTeam(nomeTeamTMP);
 
     }
 
-    private void ControlloInput(String nomeTeam) {
+    private void controlloInput(String nomeTeam) {
 
         if (nomeTeam.isEmpty()) {
 
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Inserisci nome team",
-                    "Errore",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
-
-            return;
         }
     }
 
-    private void ExistTeam(){
+    private void existTeam(){
 
         if (controller.teamPartecipante() != null) {
 
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Sei già in un team per questo evento",
-                    "Errore",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
-            return;
         }
     }
 
-    private void CreazioneTeam(String nomeTeam) {
+    private void creazioneTeam(String nomeTeam) {
 
         boolean ok = controller.creaTeamPartecipante(nomeTeam);
 
@@ -96,7 +95,7 @@ public class CreaTeam extends JDialog {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Errore creazione team",
-                    "Errore",
+                    ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
         }

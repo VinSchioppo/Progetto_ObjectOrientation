@@ -5,8 +5,11 @@ import controller.Controller;
 import javax.swing.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SetDati {
 
@@ -20,6 +23,8 @@ public class SetDati {
 
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
+
+    private static final Logger logger = Logger.getLogger(SetDati.class.getName());
 
     public SetDati(UserAreaFrame parentFrame, Controller controller) {
         this.parentFrame = parentFrame;
@@ -113,8 +118,9 @@ public class SetDati {
             }
 
         } catch (Exception e) {
-            System.out.println("Errore parsing dati utente");
-            e.printStackTrace();
+            logger.info("Errore parsing dati utente");
+            logger.info(e.getMessage());
+            logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
         }
     }
 

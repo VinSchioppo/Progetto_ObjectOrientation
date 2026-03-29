@@ -14,7 +14,7 @@ public class PartecipanteGUI {
     private JButton creaTeamButton;
     private JButton teamButton;
     private JButton backButton;
-    private JList listEventi;
+    private JList<String> listEventi;
 
     private SelectEventoFrame parentFrame;
     private Controller controller;
@@ -70,7 +70,7 @@ public class PartecipanteGUI {
     }
 
     public void refreshListaEventi() {
-        List<String> eventi = controller.listaEventiPartecipante();
+        eventi = controller.listaEventiPartecipante();
 
         DefaultListModel<String> model = new DefaultListModel<>();
 

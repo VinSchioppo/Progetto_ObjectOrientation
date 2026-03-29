@@ -45,13 +45,13 @@ public class InvitaGiudice {
         listGiudici.setModel(modelGiudici);
 
         // ===== PARTECIPANTI FILTRATI =====
-        FiltraPartecipantiEvento(giudici);
+        filtraPartecipantiEvento(giudici);
 
         // ===== INVITATI =====
         listGiudiciPossibili.setModel(modelInvitati);
     }
 
-    private void FiltraPartecipantiEvento(List<String> giudici) {
+    private void filtraPartecipantiEvento(List<String> giudici) {
 
         List<String> partecipanti = controller.listaPartecipantiEvento();
         DefaultListModel<String> modelPartecipanti = new DefaultListModel<>();
@@ -82,7 +82,7 @@ public class InvitaGiudice {
         );
 
         // Abilita save solo se selezioni un partecipante
-        AbilitazionePartecipantiEvento();
+        abilitazionePartecipantiEvento();
 
         // ===== AZIONE SAVE =====
         saveButton.addActionListener(e -> {
@@ -101,11 +101,11 @@ public class InvitaGiudice {
 
             boolean ok = controller.invitaGiudice(selezionato);
 
-            SalvaInvitoGiudice(ok, selezionato);
+            salvaInvitoGiudice(ok, selezionato);
         });
     }
 
-    private void AbilitazionePartecipantiEvento() {
+    private void abilitazionePartecipantiEvento() {
 
         listPartecipantiEvento.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -115,7 +115,7 @@ public class InvitaGiudice {
 
     }
 
-    private void SalvaInvitoGiudice(boolean ok, String selezionato) {
+    private void salvaInvitoGiudice(boolean ok, String selezionato) {
 
         if (ok) {
 

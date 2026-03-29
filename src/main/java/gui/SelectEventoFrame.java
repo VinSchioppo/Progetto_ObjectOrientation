@@ -23,7 +23,7 @@ public class SelectEventoFrame extends JFrame {
         cardLayout = new CardLayout();
         container = new JPanel(cardLayout);
 
-        Pannelli();
+        pannelli();
 
         setContentPane(container);
         pack();
@@ -42,7 +42,7 @@ public class SelectEventoFrame extends JFrame {
         });
     }
 
-    private void Pannelli(){
+    private void pannelli(){
 
         SelectEvento selectEventoPanel = new SelectEvento(this);
         OrganizzatoreGUI organizzatorePanel = new OrganizzatoreGUI(this, controller);
@@ -52,12 +52,12 @@ public class SelectEventoFrame extends JFrame {
         TeamGUI teamGUIPanel = new TeamGUI(this, controller);
         GiudiceGUI giudicePanel = new GiudiceGUI(this, controller);
 
-        Contenitore(selectEventoPanel, organizzatorePanel, setDatiEventoPanel, teamGUIPanel, giudicePanel);
+        contenitore(selectEventoPanel, organizzatorePanel, setDatiEventoPanel, teamGUIPanel, giudicePanel);
 
     }
 
-    private void Contenitore(SelectEvento selectEventoPanel, OrganizzatoreGUI organizzatorePanel, SetDatiEvento setDatiEventoPanel,
-                           TeamGUI teamGUIPanel, GiudiceGUI giudicePanel) {
+    private void contenitore(SelectEvento selectEventoPanel, OrganizzatoreGUI organizzatorePanel, SetDatiEvento setDatiEventoPanel,
+                             TeamGUI teamGUIPanel, GiudiceGUI giudicePanel) {
 
         container.add(selectEventoPanel.getMainPanel(), "HOME");
         container.add(organizzatorePanel.getMainPanel(), "ORGANIZZATORE");
@@ -111,7 +111,7 @@ public class SelectEventoFrame extends JFrame {
 
     public void showProgressiGUI(int idTeam) {
 
-        ProgressiGUI progressiGUI = new ProgressiGUI(this, controller, idTeam);
+        ProgressiGUI progressiGUI = new ProgressiGUI(this, controller);
 
         container.add(progressiGUI.getMainPanel(), "PROGRESSI");
 
