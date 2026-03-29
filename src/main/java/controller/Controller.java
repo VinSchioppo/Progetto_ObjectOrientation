@@ -919,7 +919,7 @@ public class Controller{
             if(evento != null){
                 Partecipante partecipante = evento.firstInvitoGiudice();
                 while (partecipante != null) {
-                    if (evento.firstInvitoGiudiceAnswer() == null) {
+                    if (evento.getInvitoGiudiceAnswer() == null) {
                         if (listaInvitiGiudice == null)
                             listaInvitiGiudice = new ArrayList<>();
                         listaInvitiGiudice.add(partecipante.getNomeUtente());
