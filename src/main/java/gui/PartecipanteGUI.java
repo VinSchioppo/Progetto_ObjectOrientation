@@ -53,14 +53,20 @@ public class PartecipanteGUI {
 
         listEventi.setModel(model);
 
-        // ===== BLOCCA SELEZIONE MULTIPLA =====
+        // ===== SELEZIONE SINGOLA =====
         listEventi.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // ===== LISTENER =====
+        // ===== RESET BOTTONI =====
+        creaTeamButton.setEnabled(false);
+        joinTeamButton.setEnabled(false);
+        teamButton.setEnabled(false);
+
+        // ===== LISTENER SELEZIONE =====
         listEventi.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
 
-                boolean selezionato = listEventi.getSelectedIndex() != -1;
+                int index = listEventi.getSelectedIndex();
+                boolean selezionato = index != -1;
 
                 creaTeamButton.setEnabled(selezionato);
                 joinTeamButton.setEnabled(selezionato);
@@ -70,17 +76,40 @@ public class PartecipanteGUI {
     }
 
     public void refreshListaEventi() {
+
         eventi = controller.listaEventiPartecipante();
+        idEventi = new ArrayList<>();
 
         DefaultListModel<String> model = new DefaultListModel<>();
 
         if (eventi != null) {
             for (String e : eventi) {
-                model.addElement(e);
+
+                int spazio = e.indexOf(" ");
+                if (spazio == -1) continue;
+
+                int id = Integer.parseInt(e.substring(0, spazio));
+                String titolo = e.substring(spazio + 1);
+
+                idEventi.add(id);
+                model.addElement(titolo);
             }
         }
 
         listEventi.setModel(model);
+
+        listEventi.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+
+                int index = listEventi.getSelectedIndex();
+
+                boolean selezionato = index != -1;
+
+                creaTeamButton.setEnabled(selezionato);
+                joinTeamButton.setEnabled(selezionato);
+                teamButton.setEnabled(selezionato);
+            }
+        });
     }
 
     private void inizializzaBottoni() {
@@ -97,7 +126,7 @@ public class PartecipanteGUI {
             if (index != -1) {
                 int idEvento = idEventi.get(index);
                 controller.selectEvento(idEvento, Role.PARTECIPANTE);
-                parentFrame.openCreaTeamDialog();
+                parentFrame.openCreaTeamDialog(idEvento);
             }
         });
 
@@ -113,12 +142,29 @@ public class PartecipanteGUI {
         });
 
         teamButton.addActionListener(e -> {
+
             int index = listEventi.getSelectedIndex();
-            if (index != -1) {
-                int idEvento = idEventi.get(index);
-                controller.selectEvento(idEvento, Role.PARTECIPANTE);
-                parentFrame.showTeamGUI();
+            if (index == -1) return;
+
+            int idEvento = idEventi.get(index);
+
+            controller.selectEvento(idEvento, Role.PARTECIPANTE);
+
+            String teamInfo = controller.teamPartecipante();
+
+            if (teamInfo == null) {
+
+                JOptionPane.showMessageDialog(
+                        mainPanel,
+                        "Non sei in un team per questo evento",
+                        "Informazione",
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                return;
             }
+
+            parentFrame.showTeamGUI();
         });
     }
 

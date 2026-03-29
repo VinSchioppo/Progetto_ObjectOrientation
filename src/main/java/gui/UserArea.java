@@ -22,9 +22,13 @@ public class UserArea {
     private JButton logOutButton;
     private JButton selectEventoButton;
     private JButton iscriviEventoButton;
-    private JList<String> ListRichiestaGiudice;
+    private JList<String> listRichiestaGiudice;
+    private JButton classificaButton;
     private List<String> eventiUtente;
     private Set<Integer> invitiGestiti = new HashSet<>();
+
+    private static final String CAMPO = "Campo";
+    private static final String DATO = "Dato";
 
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
@@ -52,7 +56,7 @@ public class UserArea {
         String ruolo = setRuolo();
 
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Campo", "Dato"}, 0
+                new String[]{CAMPO, DATO}, 0
         ) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -133,7 +137,7 @@ public class UserArea {
 
     public void updateDatiUtente(String nome, String secondoNome, String cognome, String dataNascita) {
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Campo", "Dato"}, 0
+                new String[]{CAMPO, DATO}, 0
         ) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -212,15 +216,15 @@ public class UserArea {
 
     private void inizializzaListaInvitiGiudice() {
 
-        ListRichiestaGiudice.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listRichiestaGiudice.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        ListRichiestaGiudice.addMouseListener(new MouseAdapter() {
+        listRichiestaGiudice.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
 
                 if (e.getClickCount() == 2) {
 
-                    int index = ListRichiestaGiudice.getSelectedIndex();
+                    int index = listRichiestaGiudice.getSelectedIndex();
 
                     // PROTEZIONE FORTE
                     if (index == -1 || invitiCompleti == null || index >= invitiCompleti.size()) return;
@@ -344,13 +348,13 @@ public class UserArea {
 
         this.invitiCompleti = invitiUnici;
 
-        ListRichiestaGiudice.setModel(model);
+        listRichiestaGiudice.setModel(model);
     }
 
     public void refreshDatiUtente() {
 
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Campo", "Dato"}, 0
+                new String[]{CAMPO, DATO}, 0
         ) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -386,6 +390,34 @@ public class UserArea {
         iscriviEventoButton.addActionListener(e -> parentFrame.showIscriviEvento());
         selectEventoButton.addActionListener(e -> parentFrame.showSelectEvento());
         creaEventoButton.addActionListener(e -> parentFrame.showCreaEvento());
+        classificaButton.addActionListener(e -> {
+
+            String input = JOptionPane.showInputDialog(
+                    mainPanel,
+                    "Inserisci ID evento",
+                    "Classifica",
+                    JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (input == null) return;
+
+            int idEvento;
+
+            try {
+                idEvento = Integer.parseInt(input);
+            } catch (NumberFormatException _) {
+
+                JOptionPane.showMessageDialog(
+                        mainPanel,
+                        "ID non valido",
+                        "Errore",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            parentFrame.showClassificaGUI(idEvento);
+        });
     }
 
     public JPanel getMainPanel() {

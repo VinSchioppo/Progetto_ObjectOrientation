@@ -1,6 +1,7 @@
 package gui;
 
 import controller.Controller;
+import controller.Role;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,10 +17,12 @@ public class UserAreaFrame extends JFrame {
     private UserArea userAreaPanel;
     private IscriviEvento iscriviEventoPanel;
 
+    private static final String INVITA_GIUDICE = "INVITA_GIUDICE";
+
     // NUOVI PANEL SELECT EVENTO
-    private SelectEvento selectEventoPanel;
     private InvitaGiudice invitaGiudicePanel;
     private PartecipanteGUI partecipanteGUIPanel;
+    private TeamGUI teamGUIPanel;
 
     public UserAreaFrame(Controller controller) {
 
@@ -56,12 +59,11 @@ public class UserAreaFrame extends JFrame {
         CreaEvento creaEventoPanel = new CreaEvento(this, controller);
 
         // ===== SELECT EVENTO =====
-        selectEventoPanel = new SelectEvento(this);
+        SelectEvento selectEventoPanel = new SelectEvento(this);
         OrganizzatoreGUI organizzatorePanel = new OrganizzatoreGUI(this, controller);
         invitaGiudicePanel = new InvitaGiudice(this, controller);
         partecipanteGUIPanel = new PartecipanteGUI(this, controller);
         SetDatiEvento setDatiEventoPanel = new SetDatiEvento(this, controller);
-        TeamGUI teamGUIPanel = new TeamGUI(this, controller);
         GiudiceGUI giudicePanel = new GiudiceGUI(this, controller);
 
         // ===== AGGIUNTA =====
@@ -72,11 +74,16 @@ public class UserAreaFrame extends JFrame {
 
         container.add(selectEventoPanel.getMainPanel(), "SELECT_EVENTO");
         container.add(organizzatorePanel.getMainPanel(), "ORGANIZZATORE");
-        container.add(invitaGiudicePanel.getMainPanel(), "INVITA_GIUDICE");
+        container.add(invitaGiudicePanel.getMainPanel(), INVITA_GIUDICE);
         container.add(setDatiEventoPanel.getMainPanel(), "SET_DATI_EVENTO");
         container.add(partecipanteGUIPanel.getMainPanel(), "PARTECIPANTE");
-        container.add(teamGUIPanel.getMainPanel(), "TEAM");
         container.add(giudicePanel.getMainPanel(), "GIUDICE");
+    }
+
+    public void forceReloadPartecipanteArea() {
+
+        showPartecipanteGUI();
+
     }
 
     // ================= NAVIGAZIONE =================
@@ -98,6 +105,9 @@ public class UserAreaFrame extends JFrame {
     }
 
     public void showIscriviEvento() {
+
+        iscriviEventoPanel.refreshEventi();
+
         cardLayout.show(container, "ISCRIVI_EVENTO");
     }
 
@@ -118,8 +128,15 @@ public class UserAreaFrame extends JFrame {
         cardLayout.show(container, "GIUDICE");
     }
 
-    public void showInvitaGiudice() {
-        cardLayout.show(container, "INVITA_GIUDICE");
+    public void showInvitaGiudice(int idEvento) {
+
+        controller.selectEvento(idEvento, Role.ORGANIZZATORE); // oppure ORGANIZZATORE
+
+        invitaGiudicePanel = new InvitaGiudice(this, controller);
+
+        container.add(invitaGiudicePanel.getMainPanel(), INVITA_GIUDICE);
+
+        cardLayout.show(container, INVITA_GIUDICE);
     }
 
     public void showSetDatiEvento() {
@@ -127,10 +144,18 @@ public class UserAreaFrame extends JFrame {
     }
 
     public void showTeamGUI() {
+
+        if (teamGUIPanel == null) {
+            teamGUIPanel = new TeamGUI(this, controller);
+            container.add(teamGUIPanel.getMainPanel(), "TEAM");
+        }
+
+        teamGUIPanel.refresh();
+
         cardLayout.show(container, "TEAM");
     }
 
-    public void showProgressiGUI(int idTeam) {
+    public void showProgressiGUI() {
 
         ProgressiGUI progressiGUI = new ProgressiGUI(this, controller);
 
@@ -139,9 +164,18 @@ public class UserAreaFrame extends JFrame {
         cardLayout.show(container, "PROGRESSI");
     }
 
-    public void openCreaTeamDialog() {
-        CreaTeam dialog = new CreaTeam(this, controller);
+    public void openCreaTeamDialog(int idEvento) {
+        CreaTeam dialog = new CreaTeam(this, controller, idEvento);
         dialog.setVisible(true);
+    }
+
+    public void showClassificaGUI(int idEvento) {
+
+        ClassificaGUI classificaGUI = new ClassificaGUI(this, controller, idEvento);
+
+        container.add(classificaGUI.getMainPanel(), "CLASSIFICA");
+
+        cardLayout.show(container, "CLASSIFICA");
     }
 
     public void logout() {

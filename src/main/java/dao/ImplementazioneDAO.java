@@ -153,11 +153,12 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 int idEvento = rs.getInt(IDEVENTO);
                 Evento evento = new Evento(idEvento);
                 evento.setTitolo(rs.getString(TITOLO));
+                evento.addTeam(new Team(rs.getInt(IDTEAM), rs.getString(NOMETEAM), rs.getFloat(MEDIAVOTI)));
                 eventi.add(evento);
                 while (rs.next()) {
-                    if(evento.getIdEvento() != idEvento) {
+                    if(evento.getIdEvento() != rs.getInt(IDEVENTO) ) {
                         idEvento = rs.getInt(IDEVENTO);
-                        evento = new Evento(rs.getInt(idEvento));
+                        evento = new Evento(idEvento);
                         evento.setTitolo(rs.getString(TITOLO));
                         eventi.add(evento);
                     }

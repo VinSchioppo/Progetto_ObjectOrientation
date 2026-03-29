@@ -27,8 +27,7 @@ public class SetDatiEvento {
     private JButton backButton;
     private JSpinner maxPartecipantispinner;
     private JSpinner numeroCivicospinner;
-
-    private JTextArea descrizioneProblema;
+    private JTextArea descrizioneproblema;
 
     private static final String DATEFORMAT = "yyyy-MM-dd";
 
@@ -123,8 +122,9 @@ public class SetDatiEvento {
                     dataFineReg
             );
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
             mostraErrore();
         }
     }
@@ -211,7 +211,7 @@ public class SetDatiEvento {
                 for (int i = firstDateIndex + 6; i < d.length; i++) {
                     desc.append(d[i]).append(" ");
                 }
-                descrizioneProblema.setText(desc.toString().trim());
+                descrizioneproblema.setText(desc.toString().trim());
             }
 
         } catch (Exception e) {

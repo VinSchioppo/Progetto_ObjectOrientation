@@ -1,6 +1,7 @@
 package gui;
 
 import controller.Controller;
+import controller.Role;
 
 import javax.swing.*;
 
@@ -14,19 +15,20 @@ public class CreaTeam extends JDialog {
     private static final String ERRORE = "Errore";
 
     private Controller controller;
+    private int idEvento;
 
-    public CreaTeam(JFrame owner, Controller controller) {
+    public CreaTeam(JFrame owner, Controller controller, int idEvento) {
 
         super(owner, "Crea Team", true);
 
         this.controller = controller;
+        this.idEvento = idEvento;
 
         setContentPane(mainPanel);
         pack();
         setLocationRelativeTo(owner);
 
         backButton.addActionListener(e -> dispose());
-
         saveButton.addActionListener(e -> creaTeam());
     }
 
@@ -36,50 +38,37 @@ public class CreaTeam extends JDialog {
 
         String nomeTeamTMP = this.nomeTeam.getText().trim();
 
-        // ===== CONTROLLO INPUT =====
-
-        controlloInput(nomeTeamTMP);
-
-        // 🔥 CONTROLLO: ESISTE GIÀ UN TEAM?
-
-        existTeam();
-
-        // ===== CREAZIONE TEAM =====
-        creazioneTeam(nomeTeamTMP);
-
-    }
-
-    private void controlloInput(String nomeTeam) {
-
-        if (nomeTeam.isEmpty()) {
-
+        // ===== 1. VALIDAZIONE INPUT =====
+        if (nomeTeamTMP.isEmpty()) {
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Inserisci nome team",
                     ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
+            return;
         }
-    }
 
-    private void existTeam(){
+        // ===== 2. SET EVENTO CORRENTE =====
+        controller.selectEvento(idEvento, Role.PARTECIPANTE);
 
+        // ===== 3. CONTROLLO TEAM ESISTENTE =====
         if (controller.teamPartecipante() != null) {
-
             JOptionPane.showMessageDialog(
                     mainPanel,
                     "Sei già in un team per questo evento",
                     ERRORE,
                     JOptionPane.ERROR_MESSAGE
             );
+            return;
         }
-    }
 
-    private void creazioneTeam(String nomeTeam) {
-
-        boolean ok = controller.creaTeamPartecipante(nomeTeam);
+        // ===== 4. CREAZIONE TEAM =====
+        boolean ok = controller.creaTeamPartecipante(nomeTeamTMP);
 
         if (ok) {
+
+            controller.selectEvento(idEvento, Role.PARTECIPANTE);
 
             JOptionPane.showMessageDialog(
                     mainPanel,
@@ -99,7 +88,5 @@ public class CreaTeam extends JDialog {
                     JOptionPane.ERROR_MESSAGE
             );
         }
-
     }
-
 }

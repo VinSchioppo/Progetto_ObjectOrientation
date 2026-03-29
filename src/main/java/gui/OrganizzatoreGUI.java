@@ -202,9 +202,18 @@ public class OrganizzatoreGUI {
         });
 
         invitaGiudiceButton.addActionListener(e -> {
-            if (table1.getSelectedRow() != -1) {
-                parentFrame.showInvitaGiudice();
-            }
+
+            int row = table1.getSelectedRow();
+            if (row == -1) return;
+
+            String evento = eventiOrganizzatore.get(row);
+
+            int spazio = evento.indexOf(" ");
+            if (spazio == -1) return;
+
+            int idEvento = Integer.parseInt(evento.substring(0, spazio));
+
+            parentFrame.showInvitaGiudice(idEvento);
         });
 
         table1.getSelectionModel().addListSelectionListener(e -> {

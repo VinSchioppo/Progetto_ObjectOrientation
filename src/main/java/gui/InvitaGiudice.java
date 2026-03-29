@@ -16,7 +16,6 @@ public class InvitaGiudice {
 
     private UserAreaFrame parentFrame;
     private Controller controller;
-    private DefaultListModel<String> modelInvitati = new DefaultListModel<>();
 
     public InvitaGiudice(UserAreaFrame parentFrame, Controller controller) {
 
@@ -44,30 +43,48 @@ public class InvitaGiudice {
 
         listGiudici.setModel(modelGiudici);
 
+        //  INVITATI DAL CONTROLLER
+        aggiornaInvitati();
+
         // ===== PARTECIPANTI FILTRATI =====
         filtraPartecipantiEvento(giudici);
-
-        // ===== INVITATI =====
-        listGiudiciPossibili.setModel(modelInvitati);
     }
 
     private void filtraPartecipantiEvento(List<String> giudici) {
 
         List<String> partecipanti = controller.listaPartecipantiEvento();
+        List<String> invitati = controller.listaInvitiGiudiceOrganizzatore();
+
         DefaultListModel<String> modelPartecipanti = new DefaultListModel<>();
 
         if (partecipanti != null) {
             for (String p : partecipanti) {
 
                 boolean isGiudice = giudici != null && giudici.contains(p);
-                boolean isInvitato = modelInvitati.contains(p);
+                boolean isInvitato = invitati != null && invitati.contains(p);
 
                 if (!isGiudice && !isInvitato) {
                     modelPartecipanti.addElement(p);
                 }
             }
         }
+
         listPartecipantiEvento.setModel(modelPartecipanti);
+    }
+
+    private void aggiornaInvitati() {
+
+        List<String> invitati = controller.listaInvitiGiudiceOrganizzatore();
+
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        if (invitati != null) {
+            for (String i : invitati) {
+                model.addElement(i);
+            }
+        }
+
+        listGiudiciPossibili.setModel(model);
     }
 
     /* ============================================================
@@ -101,7 +118,7 @@ public class InvitaGiudice {
 
             boolean ok = controller.invitaGiudice(selezionato);
 
-            salvaInvitoGiudice(ok, selezionato);
+            salvaInvitoGiudice(ok);
         });
     }
 
@@ -115,7 +132,7 @@ public class InvitaGiudice {
 
     }
 
-    private void salvaInvitoGiudice(boolean ok, String selezionato) {
+    private void salvaInvitoGiudice(boolean ok) {
 
         if (ok) {
 
@@ -126,14 +143,8 @@ public class InvitaGiudice {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            // ===== AGGIUNGI A INVITATI =====
-            modelInvitati.addElement(selezionato);
-
-            // ===== RIMUOVI DAI PARTECIPANTI =====
-            DefaultListModel<String> modelPartecipanti =
-                    (DefaultListModel<String>) listPartecipantiEvento.getModel();
-
-            modelPartecipanti.removeElement(selezionato);
+            //  RICARICA TUTTO DAL CONTROLLER
+            inizializzaListe();
 
         } else {
             JOptionPane.showMessageDialog(
@@ -143,7 +154,6 @@ public class InvitaGiudice {
                     JOptionPane.ERROR_MESSAGE
             );
         }
-
     }
 
     public JPanel getMainPanel() {

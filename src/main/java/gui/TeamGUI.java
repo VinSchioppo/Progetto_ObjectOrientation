@@ -5,7 +5,9 @@ import controller.Controller;
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class TeamGUI {
@@ -19,6 +21,7 @@ public class TeamGUI {
     private JButton progressiButton;
     private JLabel nomeTeamLabel;
     private JList<String> listRichiesteTeam;
+    private Set<String> richiesteGestite = new HashSet<>();
 
     private static final String ACCETTA = "Accetta";
     private static final String RIFIUTA = "Rifiuta";
@@ -26,8 +29,6 @@ public class TeamGUI {
 
     private UserAreaFrame parentFrame;
     private Controller controller;
-
-    private static final Logger logger = Logger.getLogger(TeamGUI.class.getName());
 
     public TeamGUI(UserAreaFrame parentFrame, Controller controller) {
 
@@ -37,6 +38,7 @@ public class TeamGUI {
         inizializzaDati();
         inizializzaBottoni();
         inizializzaRichieste();
+        inizializzaListenerRichieste();
     }
 
     /* ============================================================
@@ -44,6 +46,12 @@ public class TeamGUI {
        ============================================================ */
 
     private void inizializzaDati() {
+
+        if (controller.datiEvento() == null) {
+            nomeEvento.setText("Nessun evento selezionato");
+            nomeTeamLabel.setText("Nessun team");
+            return;
+        }
 
         // ===== EVENTO =====
         String datiEvento = controller.datiEvento();
@@ -68,9 +76,18 @@ public class TeamGUI {
         }
 
         // ===== TEAM =====
-        String nomeTeam = controller.nomeTeamCorrente();
-        nomeTeamLabel.setText(nomeTeam != null ? nomeTeam : "Nessun team");
 
+        String infoTeam = controller.teamPartecipante();
+
+        if (infoTeam != null) {
+
+            String[] dati = infoTeam.split(" ");
+
+            nomeTeamLabel.setText(dati[1]); // nome team
+
+        } else {
+            nomeTeamLabel.setText("Nessun team");
+        }
         aggiornaMembri();
 
     }
@@ -83,19 +100,23 @@ public class TeamGUI {
 
         aggiornaRichieste();
 
+    }
+
+    private void inizializzaListenerRichieste() {
+
         listRichiesteTeam.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
 
                 if (e.getClickCount() == 2) {
 
-                    int index = listRichiesteTeam.locationToIndex(e.getPoint());
+                    int index = listRichiesteTeam.getSelectedIndex();
 
                     if (index == -1) return;
 
-                    String utente = listRichiesteTeam.getModel().getElementAt(index);
+                    String utente = listRichiesteTeam.getSelectedValue();
 
-                    gestisciRichiesta(utente);
+                    gestisciRichiesta(utente, index);
                 }
             }
         });
@@ -108,7 +129,13 @@ public class TeamGUI {
         DefaultListModel<String> model = new DefaultListModel<>();
 
         if (richieste != null) {
+
             for (String r : richieste) {
+
+                String chiave = getChiaveRichiesta(r);
+
+                if (richiesteGestite.contains(chiave)) continue;
+
                 model.addElement(r);
             }
         }
@@ -116,7 +143,7 @@ public class TeamGUI {
         listRichiesteTeam.setModel(model);
     }
 
-    private void gestisciRichiesta(String nomeUtente) {
+    private void gestisciRichiesta(String nomeUtente, int index) {
 
         int scelta = JOptionPane.showOptionDialog(
                 mainPanel,
@@ -129,22 +156,27 @@ public class TeamGUI {
                 ACCETTA
         );
 
-        controlloRichiesta(scelta, nomeUtente);
-    }
-
-    private void controlloRichiesta(int scelta, String nomeUtente) {
+        if (scelta == JOptionPane.CLOSED_OPTION) return;
 
         boolean ok = false;
 
         if (scelta == 0) {
-            logger.info(ACCETTA);
             ok = controller.acceptRichiestaTeam(nomeUtente);
         } else if (scelta == 1) {
-            logger.info(RIFIUTA);
             ok = controller.refuseRichiestaTeam(nomeUtente);
         }
 
         if (ok) {
+
+            String chiave = getChiaveRichiesta(nomeUtente);
+            richiesteGestite.add(chiave);
+
+            DefaultListModel<String> model =
+                    (DefaultListModel<String>) listRichiesteTeam.getModel();
+
+            if (index >= 0 && index < model.size()) {
+                model.remove(index);
+            }
 
             JOptionPane.showMessageDialog(
                     mainPanel,
@@ -153,7 +185,6 @@ public class TeamGUI {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
-            aggiornaRichieste();
             aggiornaMembri();
 
         } else {
@@ -165,7 +196,6 @@ public class TeamGUI {
                     JOptionPane.ERROR_MESSAGE
             );
         }
-
     }
 
     /* ============================================================
@@ -187,6 +217,20 @@ public class TeamGUI {
         listPartecipantiTeam.setModel(model);
     }
 
+    private String getChiaveRichiesta(String nomeUtente) {
+
+        String team = controller.nomeTeamCorrente();
+
+        if (team == null) team = "NO_TEAM";
+
+        return nomeUtente + "_" + team;
+    }
+
+    public void refresh() {
+        inizializzaDati();
+        aggiornaRichieste();
+    }
+
     /* ============================================================
        =================== BOTTONI ============================
        ============================================================ */
@@ -198,7 +242,7 @@ public class TeamGUI {
         );
 
         progressiButton.addActionListener(e ->
-                parentFrame.showProgressiGUI(controller.idTeamCorrente())
+                parentFrame.showProgressiGUI()
         );
 
         lasciaTeamButton.addActionListener(e -> {
