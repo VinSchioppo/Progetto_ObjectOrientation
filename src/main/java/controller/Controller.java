@@ -469,7 +469,7 @@ public class Controller{
 
     //Questo metodo restituisce i dati dell'evento attualmente selezionato.
     //La stringa segue il formato: Titolo IndirizzoSede NCivicoSede DataInizio DataFine MaxIscritti MaxTeam
-    // DataInizioReg DataFineReg DescrizioneProblema
+    // DataInizioReg DataFineReg|DescrizioneProblema
 
     public String datiEventoCorrente() {
         if(partecipanteCorrente != null){
@@ -480,7 +480,7 @@ public class Controller{
                         + " " + evento.getDataInizio() + " " + evento.getDataFine()
                         + " " + evento.getMaxIscritti() + " " + evento.getMaxTeam()
                         + " " + evento.getDataInizioReg() + " " + evento.getDataFineReg()
-                        + " " + evento.getDescrizioneProblema();
+                        + "|" + evento.getDescrizioneProblema();
             }
         }
         return null;
