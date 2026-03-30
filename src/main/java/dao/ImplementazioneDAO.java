@@ -82,7 +82,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public Evento getEventoDB(int idEvento) throws SQLException{
         Evento evento = null;
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Evento WHERE IdEvento =" + idEvento + ";")) {
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT * FROM Evento WHERE IdEvento =" + idEvento + ";")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
                 evento = new Evento(idEvento);
@@ -563,8 +564,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void updateOrganizzatoreDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "UPDATE Organizzatore SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ? " +
-                    "WHERE NomeUtente = ?;")) {
+            "UPDATE Organizzatore SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ? " +
+                "WHERE NomeUtente = ?;")) {
             ps.setString(1, fNome);
             ps.setString(2, mNome);
             ps.setString(3, lNome);
@@ -668,8 +669,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public void updateGiudiceDB(String nomeUtente, String fNome, String mNome, String lNome, LocalDate dataNascita) throws SQLException{
         try (PreparedStatement ps = connection.prepareStatement(
-                "UPDATE Giudice SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ? " +
-                    "WHERE NomeUtente = ?;")) {
+            "UPDATE Giudice SET FNome = ?, MNome = ?, LNome = ?, DataNascita = ? " +
+                "WHERE NomeUtente = ?;")) {
             ps.setString(1, fNome);
             ps.setString(2, mNome);
             ps.setString(3, lNome);
@@ -787,8 +788,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     public int addTeamDB(Team team) throws SQLException {
         int idTeam = getIdTeamDB();
         try (PreparedStatement ps = connection.prepareStatement(
-        "INSERT INTO Team(IdTeam, Nome, TeamLeader, idEvento) VALUES(" + idTeam + ",'" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");" +
-            "INSERT INTO CompTeam(NomePartecipante, idTeam) VALUES('" + team.getTeamLeader() + "'," + idTeam + ");")) {
+            "INSERT INTO Team(IdTeam, Nome, TeamLeader, idEvento) VALUES(" + idTeam + ",'" + team.getNome() + "','" + team.getTeamLeader() + "'," + team.getEventoIscritto().getIdEvento() + ");" +
+                "INSERT INTO CompTeam(NomePartecipante, idTeam) VALUES('" + team.getTeamLeader() + "'," + idTeam + ");")) {
             ps.executeUpdate();
         }
         return idTeam;
@@ -864,32 +865,30 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             "SELECT t.IdTeam, p.IdProgresso, p.DataPubblicazione," +
                 "p.Testo AS TestoProgresso, c.NomeGiudice, c.Testo AS TestoCommento " +
                 "FROM Team AS t JOIN Progresso AS p ON t.IdTeam = p.idTeam " +
-                "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
+                "LEFT JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
                 "WHERE t.idEvento = " + evento.getIdEvento() +
                 " ORDER BY t.IdTeam, p.IdProgresso;")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
-                rs.next();
-                List<Progresso> progressi = new ArrayList<>();
-                List<Commento> commenti = new ArrayList<>();
-                Team team = evento.seekTeam(rs.getInt(IDTEAM));
-                Progresso progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
-                commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
-                while (rs.next()) {
-                    if (progresso.getIdProgresso() != rs.getInt(IDPROGRESSO)) {
-                        progresso.setCommenti(commenti);
-                        progressi.add(progresso);
-                        progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
-                    }
-                    if (team.getIdTeam() != rs.getInt(IDTEAM)) {
-                        team.setProgressi(progressi);
-                        team = evento.seekTeam(rs.getInt(IDTEAM));
-                    }
-                    commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
+                extractProgressiEvento(rs, evento);
+            }
+        }
+    }
+
+    private void extractProgressiEvento(ResultSet rs, Evento evento) throws SQLException{
+        rs.next();
+        Team team = null;
+        Progresso progresso = null;
+        while(rs.next()) {
+            if (team == null || rs.getInt(IDTEAM) != team.getIdTeam())
+                team = evento.seekTeam(rs.getInt(IDTEAM));
+            if (team != null && rs.getInt(IDTEAM) == team.getIdTeam()) {
+                if(progresso == null || rs.getInt(IDPROGRESSO) != progresso.getIdProgresso()) {
+                    progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
+                    team.addProgresso(progresso);
                 }
-                progresso.setCommenti(commenti);
-                progressi.add(progresso);
-                team.setProgressi(progressi);
+                if(rs.getInt(IDPROGRESSO) == progresso.getIdProgresso() && rs.getString(NOMEGIUDICE) != null)
+                    progresso.addCommento(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
             }
         }
     }
@@ -906,24 +905,27 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 "ORDER BY ct.idTeam, p.IdProgresso;")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
-                Team team = null;
-                Progresso progresso = null;
-                while(rs.next()) {
-                    if (team == null || rs.getInt(IDTEAM) != team.getIdTeam())
-                        team = partecipante.seekTeam(rs.getInt(IDTEAM));
-                    if (team != null && rs.getInt(IDTEAM) == team.getIdTeam()) {
-                        if(progresso == null || rs.getInt(IDPROGRESSO) != progresso.getIdProgresso()) {
-                            progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
-                            team.addProgresso(progresso);
-                        }
-                        if(rs.getInt(IDPROGRESSO) == progresso.getIdProgresso() && rs.getString(NOMEGIUDICE) != null)
-                            progresso.addCommento(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
-                    }
-                }
+                extractProgressiPartecipante(rs, partecipante);
             }
         }
     }
 
+    private void extractProgressiPartecipante(ResultSet rs, Partecipante partecipante) throws SQLException{
+        Team team = null;
+        Progresso progresso = null;
+        while(rs.next()) {
+            if (team == null || rs.getInt(IDTEAM) != team.getIdTeam())
+                team = partecipante.seekTeam(rs.getInt(IDTEAM));
+            if (team != null && rs.getInt(IDTEAM) == team.getIdTeam()) {
+                if(progresso == null || rs.getInt(IDPROGRESSO) != progresso.getIdProgresso()) {
+                    progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
+                    team.addProgresso(progresso);
+                }
+                if(rs.getInt(IDPROGRESSO) == progresso.getIdProgresso() && rs.getString(NOMEGIUDICE) != null)
+                    progresso.addCommento(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
+            }
+        }
+    }
 
     public int getIdProgressoDB() throws SQLException{
         int id = -1;
@@ -950,10 +952,12 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public List<Commento> getAllCommentiDB(String giudice) throws SQLException{
         List<Commento> commenti = null;
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Commento WHERE NomeGiudice = '" + giudice + "';")) {
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT IdProgresso, NomeGiudice, Testo AS TestoCommento " +
+                "FROM Commento WHERE NomeGiudice = '" + giudice + "';")) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Commento commento = new Commento(rs.getInt(IDPROGRESSO), giudice, rs.getString("testo"));
+                Commento commento = new Commento(rs.getInt(IDPROGRESSO), rs.getString(TESTOCOMMENTO), giudice);
                 if (commenti == null) {
                     commenti = new ArrayList<>();
                 }
@@ -982,7 +986,8 @@ public class ImplementazioneDAO implements InterfacciaDAO {
 
     public List<Voto> getAllVotiDB(String giudice) throws SQLException{
         List<Voto> voti = null;
-        try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM Voto WHERE NomeGiudice = '" + giudice + "';")) {
+        try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT * FROM Voto WHERE NomeGiudice = '" + giudice + "';")) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Voto voto = new Voto(rs.getInt(IDTEAM), rs.getInt(VALORE), giudice);
