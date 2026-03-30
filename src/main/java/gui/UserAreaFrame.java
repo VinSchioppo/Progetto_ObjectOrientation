@@ -22,6 +22,7 @@ public class UserAreaFrame extends JFrame {
     // NUOVI PANEL SELECT EVENTO
     private InvitaGiudice invitaGiudicePanel;
     private PartecipanteGUI partecipanteGUIPanel;
+    private OrganizzatoreGUI organizzatoreGUIPanel;
 
     public UserAreaFrame(Controller controller) {
 
@@ -59,7 +60,7 @@ public class UserAreaFrame extends JFrame {
 
         // ===== SELECT EVENTO =====
         SelectEvento selectEventoPanel = new SelectEvento(this);
-        OrganizzatoreGUI organizzatorePanel = new OrganizzatoreGUI(this, controller);
+        organizzatoreGUIPanel = new OrganizzatoreGUI(this, controller);
         invitaGiudicePanel = new InvitaGiudice(this, controller);
         partecipanteGUIPanel = new PartecipanteGUI(this, controller);
         GiudiceGUI giudicePanel = new GiudiceGUI(this, controller);
@@ -71,7 +72,7 @@ public class UserAreaFrame extends JFrame {
         container.add(creaEventoPanel.getMainPanel(), "CREA_EVENTO");
 
         container.add(selectEventoPanel.getMainPanel(), "SELECT_EVENTO");
-        container.add(organizzatorePanel.getMainPanel(), "ORGANIZZATORE");
+        container.add(organizzatoreGUIPanel.getMainPanel(), "ORGANIZZATORE");
         container.add(invitaGiudicePanel.getMainPanel(), INVITA_GIUDICE);
         container.add(partecipanteGUIPanel.getMainPanel(), "PARTECIPANTE");
         container.add(giudicePanel.getMainPanel(), "GIUDICE");
@@ -110,6 +111,9 @@ public class UserAreaFrame extends JFrame {
     }
 
     public void showOrganizzatoreGUI() {
+
+        organizzatoreGUIPanel.refresh();
+
         cardLayout.show(container, "ORGANIZZATORE");
     }
 

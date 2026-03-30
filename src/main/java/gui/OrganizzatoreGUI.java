@@ -31,7 +31,15 @@ public class OrganizzatoreGUI {
         this.controller = controller;
 
         inizializzaTabella();
+
+        configurazioneTabella();
+        centratura();
+        selezione();
+        doppioclick();
+
+        inizializzaTabella();
         inizializzaBottoni();
+
     }
 
     /* ============================================================
@@ -160,6 +168,32 @@ public class OrganizzatoreGUI {
                 "Dettagli evento",
                 JOptionPane.INFORMATION_MESSAGE
         );
+    }
+
+    public void refresh() {
+
+        DefaultTableModel model = (DefaultTableModel) table1.getModel();
+        model.setRowCount(0);
+
+        eventiOrganizzatore = controller.listaEventiOrganizzatore();
+
+        if (eventiOrganizzatore != null) {
+
+            for (String evento : eventiOrganizzatore) {
+
+                try {
+                    int spazio = evento.indexOf(" ");
+                    if (spazio == -1) continue;
+
+                    String titolo = evento.substring(spazio + 1);
+
+                    model.addRow(new Object[]{ titolo });
+
+                } catch (Exception _) {
+                    logger.info("Errore evento: " + evento);
+                }
+            }
+        }
     }
 
     /* ============================================================

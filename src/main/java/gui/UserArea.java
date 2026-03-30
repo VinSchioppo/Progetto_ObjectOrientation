@@ -32,7 +32,6 @@ public class UserArea {
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
 
-    // mantiene solo dati coerenti con la view (DEDUPLICATI)
     private List<String> invitiCompleti;
 
     private static final Logger logger = Logger.getLogger(UserArea.class.getName());
@@ -313,30 +312,49 @@ public class UserArea {
         List<String> invitiUnici = new java.util.ArrayList<>();
         java.util.HashSet<String> visti = new java.util.HashSet<>();
 
-        if (nuoviInviti != null) {
-            for (String invito : nuoviInviti) {
+        // ===== Inviti =====
+        inviti(visti, nuoviInviti, invitiUnici);
 
-                if (invito == null || !visti.add(invito)) continue;
+        // ===== POPOLAMENTO =====
+        popolamento(model, invitiUnici);
 
-                int spazio = invito.indexOf(" ");
-                if (spazio == -1) continue;
+        this.invitiCompleti = invitiUnici;
 
-                // ===== ESTRAI ID =====
-                int idEvento;
-                try {
-                    idEvento = Integer.parseInt(invito.substring(0, spazio));
-                } catch (Exception _) {
-                    continue;
-                }
+        listRichiestaGiudice.setModel(model);
+    }
 
-                // ===== FILTRO INVITI GIÀ GESTITI =====
-                if (invitiGestiti.contains(idEvento)) continue;
+    public void inviti(HashSet<String> visti, List<String> nuoviInviti, List<String> invitiUnici) {
 
+        if (nuoviInviti == null) return;
+
+        for (String invito : nuoviInviti) {
+
+            if (isInvitoValido(invito, visti)) {
                 invitiUnici.add(invito);
             }
         }
+    }
 
-        // ===== POPOLAMENTO =====
+    private boolean isInvitoValido(String invito, HashSet<String> visti) {
+
+        if (invito == null || !visti.add(invito)) return false;
+
+        int spazio = invito.indexOf(" ");
+        if (spazio == -1) return false;
+
+        int idEvento;
+
+        try {
+            idEvento = Integer.parseInt(invito.substring(0, spazio));
+        } catch (Exception _) {
+            return false;
+        }
+
+        return !invitiGestiti.contains(idEvento);
+    }
+
+    public void popolamento(DefaultListModel<String> model, List<String> invitiUnici ) {
+
         for (String invito : invitiUnici) {
 
             int spazio = invito.indexOf(" ");
@@ -348,9 +366,6 @@ public class UserArea {
             }
         }
 
-        this.invitiCompleti = invitiUnici;
-
-        listRichiestaGiudice.setModel(model);
     }
 
     public void refreshDatiUtente() {

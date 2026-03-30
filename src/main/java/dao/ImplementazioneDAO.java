@@ -77,7 +77,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             result = rs.getInt(1);
             rs.close();
         }
-        return result;
+        return result + 1;
     }
 
     public Evento getEventoDB(int idEvento) throws SQLException{
@@ -177,32 +177,34 @@ public class ImplementazioneDAO implements InterfacciaDAO {
     }
 
     public int addEventoDB(String titolo, String indirizzo, int nCivico, LocalDate dataInizio, LocalDate dataFine, int maxIscritti, int maxTeam, LocalDate dataInizioReg, LocalDate dataFineReg, String descrizioneProb) throws SQLException{
+        int idEvento = getIdEventoDB();
         try (PreparedStatement ps = connection.prepareStatement(
-            "INSERT INTO Evento(Titolo, IndirizzoSede, NCivicoSede, DataInizio, DataFine," +
+            "INSERT INTO Evento(IdEvento, Titolo, IndirizzoSede, NCivicoSede, DataInizio, DataFine," +
                 " MaxIscritti, MaxTeam, DataInizioReg, DataFineReg, DescrizioneProb)" +
-                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
-            ps.setString(1, titolo);
-            ps.setString(2, indirizzo);
+                " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")) {
+            ps.setInt(1, idEvento);
+            ps.setString(2, titolo);
+            ps.setString(3, indirizzo);
             if (nCivico == -1)
-                ps.setNull(3, Types.INTEGER);
+                ps.setNull(4, Types.INTEGER);
             else
-                ps.setInt(3, nCivico);
-            ps.setObject(4, dataInizio);
-            ps.setObject(5, dataFine);
+                ps.setInt(4, nCivico);
+            ps.setObject(5, dataInizio);
+            ps.setObject(6, dataFine);
             if (maxIscritti == -1)
-                ps.setNull(6, Types.INTEGER);
-            else
-                ps.setInt(6, maxIscritti);
-            if (maxTeam == -1)
                 ps.setNull(7, Types.INTEGER);
             else
-                ps.setInt(7, maxTeam);
-            ps.setObject(8, dataInizioReg);
-            ps.setObject(9, dataFineReg);
-            ps.setString(10, descrizioneProb);
+                ps.setInt(7, maxIscritti);
+            if (maxTeam == -1)
+                ps.setNull(8, Types.INTEGER);
+            else
+                ps.setInt(8, maxTeam);
+            ps.setObject(9, dataInizioReg);
+            ps.setObject(10, dataFineReg);
+            ps.setString(11, descrizioneProb);
             ps.executeUpdate();
         }
-        return getIdEventoDB();
+        return idEvento;
     }
 
     public void updateEventoDB(int idEvento, String indirizzo, int nCivico, int maxIscritti, int maxTeam) throws SQLException {
