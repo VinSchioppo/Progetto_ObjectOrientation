@@ -467,6 +467,25 @@ public class Controller{
 
     //Operazioni Partecipante
 
+    //Questo metodo restituisce i dati dell'evento attualmente selezionato.
+    //La stringa segue il formato: Titolo IndirizzoSede NCivicoSede DataInizio DataFine MaxIscritti MaxTeam
+    // DataInizioReg DataFineReg DescrizioneProblema
+
+    public String datiEventoCorrente() {
+        if(partecipanteCorrente != null){
+            Evento evento = partecipanteCorrente.getEvento();
+            if (evento != null) {
+                return evento.getTitolo() + " "
+                        + evento.getIndirizzoSede() + " " + evento.getnCivicoSede()
+                        + " " + evento.getDataInizio() + " " + evento.getDataFine()
+                        + " " + evento.getMaxIscritti() + " " + evento.getMaxTeam()
+                        + " " + evento.getDataInizioReg() + " " + evento.getDataFineReg()
+                        + " " + evento.getDescrizioneProblema();
+            }
+        }
+        return null;
+    }
+
     //Questo metodo restituisce una stringa con l'id e il nome del team con cui il partecipante è iscritto all'evento.
     //La stringa è fromattata come: IdTeam Nome TeamLeader
 
@@ -705,7 +724,7 @@ public class Controller{
 
     public boolean pubblicaProgresso(String testo){
         Progresso progresso;
-        if (partecipanteCorrente != null) {
+        if (partecipanteCorrente != null && partecipanteCorrente.getEvento().getDataInizio().isBefore(LocalDate.now())) {
             Team team = partecipanteCorrente.getTeam();
             if (team != null && team.getTeamLeader().equals(partecipanteCorrente.getNomeUtente())) {
                     try {
@@ -998,16 +1017,14 @@ public class Controller{
     public boolean giveVotoTeam(int idTeam, int valore){
         if(giudiceCorrente != null) {
             Evento evento = giudiceCorrente.getEvento();
-            if (evento != null) {
-                Team team = evento.seekTeam(idTeam);
-                if (team != null && team.seekVoto(giudiceCorrente.getNomeUtente()) == null) {
-                    Voto voto = new Voto(team.getIdTeam(), valore, giudiceCorrente.getNomeUtente());
-                    team.addVoto(voto);
-                    if (addVoti == null)
-                        addVoti = new ArrayList<>();
-                    addVoti.add(voto);
-                    return true;
-                }
+            Team team = evento.seekTeam(idTeam);
+            if (team != null && team.seekVoto(giudiceCorrente.getNomeUtente()) == null) {
+                Voto voto = new Voto(team.getIdTeam(), valore, giudiceCorrente.getNomeUtente());
+                team.addVoto(voto);
+                if (addVoti == null)
+                    addVoti = new ArrayList<>();
+                addVoti.add(voto);
+                return true;
             }
         }
         return false;

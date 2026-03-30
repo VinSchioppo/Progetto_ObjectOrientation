@@ -802,6 +802,7 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 if(team.getTeamLeader() == null){
                     codiceSQL.append("DELETE FROM CompTeam WHERE idTeam = ").append(team.getIdTeam()).append(";");
                     codiceSQL.append("DELETE FROM Team WHERE IdTeam = ").append(team.getIdTeam()).append(";");
+                    codiceSQL.append("DELETE FROM RichiestaTeam WHERE idTeam = ").append(team.getIdTeam()).append(";");
                 }
                 else{
                     codiceSQL.append("DELETE FROM CompTeam WHERE idTeam = ").append(team.getIdTeam()).append(" AND NomePartecipante = '").append(nomePartecipante).append("';");
@@ -819,16 +820,15 @@ public class ImplementazioneDAO implements InterfacciaDAO {
             "SELECT * FROM RichiestaTeam " +
                 "WHERE Risposta IS NULL AND idTeam IN(" +
                 "SELECT idTeam FROM CompTeam " +
-                "WHERE NomePartecipante = '" + partecipante.getNomeUtente() + "');")) {
+                "WHERE NomePartecipante = '" + partecipante.getNomeUtente() + "')" +
+                "ORDER BY idTeam;")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
-                rs.next();
-                Team team = partecipante.seekTeam(rs.getInt(IDTEAM));
-                if(team != null) {
-                    team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString(NOMEPARTECIPANTE)));
-                    while (rs.next()) {
-                        if (team.getIdTeam() != rs.getInt(IDTEAM))
-                            team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                Team team = null;
+                while(rs.next()) {
+                    if (team == null || rs.getInt(IDTEAM) != team.getIdTeam())
+                        team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                    if (team != null && rs.getInt(IDTEAM) == team.getIdTeam()) {
                         team.addRichiesta(team.getEventoIscritto().seekPartecipante(rs.getString(NOMEPARTECIPANTE)));
                     }
                 }
@@ -901,32 +901,25 @@ public class ImplementazioneDAO implements InterfacciaDAO {
                 "FROM Team AS t JOIN CompTeam AS ct ON t.IdTeam = ct.idTeam " +
                 "JOIN Evento AS e ON t.idEvento = e.IdEvento " +
                 "JOIN Progresso AS p ON ct.idTeam = p.idTeam " +
-                "JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
+                "LEFT JOIN Commento AS c ON p.IdProgresso = c.idProgresso " +
                 "WHERE e.DataFine >= NOW() AND ct.NomePartecipante = '" + partecipante.getNomeUtente() + "' " +
                 "ORDER BY ct.idTeam, p.IdProgresso;")) {
             ResultSet rs = ps.executeQuery();
             if (rs.isBeforeFirst()) {
-                rs.next();
-                List<Progresso> progressi = new ArrayList<>();
-                List<Commento> commenti = new ArrayList<>();
-                Team team = partecipante.seekTeam(rs.getInt(IDTEAM));
-                Progresso progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
-                commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
-                while (rs.next()) {
-                    if (progresso.getIdProgresso() != rs.getInt(IDPROGRESSO)) {
-                        progresso.setCommenti(commenti);
-                        progressi.add(progresso);
-                        progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
-                    }
-                    if (team.getIdTeam() != rs.getInt(IDTEAM)) {
-                        team.setProgressi(progressi);
+                Team team = null;
+                Progresso progresso = null;
+                while(rs.next()) {
+                    if (team == null || rs.getInt(IDTEAM) != team.getIdTeam())
                         team = partecipante.seekTeam(rs.getInt(IDTEAM));
+                    if (team != null && rs.getInt(IDTEAM) == team.getIdTeam()) {
+                        if(progresso == null || rs.getInt(IDPROGRESSO) != progresso.getIdProgresso()) {
+                            progresso = new Progresso(rs.getInt(IDPROGRESSO), team.getIdTeam(), rs.getObject(DATAPUBBLICAZIONE, LocalDate.class), rs.getString(TESTOPROGRESSO));
+                            team.addProgresso(progresso);
+                        }
+                        if(rs.getInt(IDPROGRESSO) == progresso.getIdProgresso() && rs.getString(NOMEGIUDICE) != null)
+                            progresso.addCommento(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
                     }
-                    commenti.add(new Commento(progresso.getIdProgresso(), rs.getString(TESTOCOMMENTO), rs.getString(NOMEGIUDICE)));
                 }
-                progresso.setCommenti(commenti);
-                progressi.add(progresso);
-                team.setProgressi(progressi);
             }
         }
     }
