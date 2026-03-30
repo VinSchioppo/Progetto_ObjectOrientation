@@ -596,7 +596,7 @@ public class Controller{
     }
 
     //Questo metodo restiuisce una lista contenente tutti i membri di un team.
-    //Ogni elemento della lista segue il formato: NomeUtente FNome MNome LNome
+    //Ogni elemento della lista segue il formato: NomeUtente
 
     public List<String> listaMembriTeam(){
         List<String> listaMembri = null;
@@ -605,7 +605,7 @@ public class Controller{
             if (membro != null) {
                 listaMembri = new ArrayList<>();
                 while (membro != null) {
-                    listaMembri.add(membro.getNomeUtente() + " " + membro.getFNome() + " " + membro.getMNome() + " " + membro.getLNome());
+                    listaMembri.add(membro.getNomeUtente());
                     membro = partecipanteCorrente.getTeam().nextMembroTeam();
                 }
             }
