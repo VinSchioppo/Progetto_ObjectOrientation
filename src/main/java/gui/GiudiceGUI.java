@@ -23,6 +23,8 @@ public class GiudiceGUI {
     private JButton pubblicaProblemaButton;
     private JButton commentiPassatiButton;
 
+    private static final String ERRORE = "Errore";
+
     private Controller controller;
     private UserAreaFrame parentFrame;
 
@@ -228,7 +230,7 @@ public class GiudiceGUI {
             }
         }
 
-        // 🔥 Lista visualizzazione
+        // Lista visualizzazione
         JList<String> list = new JList<>(model);
 
         JScrollPane scrollPane = new JScrollPane(list);
@@ -262,62 +264,76 @@ public class GiudiceGUI {
             return;
         }
 
-        boolean ok = true;
+        boolean votoOk = salvaVoto(idTeam);
+        if (!votoOk) return;
 
-        // ===== VOTO =====
-        salvaVoto(idTeam);
+        boolean commentoOk = salvaCommento(idProg);
+        if (!commentoOk) return;
 
-        // ===== COMMENTO =====
-        salvaCommento(idProg);
+        JOptionPane.showMessageDialog(
+                mainPanel,
+                "Operazione completata",
+                "Successo",
+                JOptionPane.INFORMATION_MESSAGE
+        );
 
-        messaggioRisultato(ok, idTeam);
+        aggiornaVoti(idTeam);
     }
 
-    private void salvaVoto(int idTeam){
+    private boolean salvaVoto(int idTeam){
 
         if (abilitaVoto.isSelected()) {
+
             int votoVal = (Integer) voto.getValue();
-            controller.giveVotoTeam(idTeam, votoVal);
+
+            boolean ok = controller.giveVotoTeam(idTeam, votoVal);
+
+            if (!ok) {
+                JOptionPane.showMessageDialog(
+                        mainPanel,
+                        "Puoi inserire un solo voto per team",
+                        ERRORE,
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+
+            return ok;
         }
+
+        return true;
     }
 
-    private void salvaCommento(Integer idProg) {
+    private boolean salvaCommento(Integer idProg) {
 
         if (abilitaGiudizio.isSelected()) {
 
             if (idProg == null) {
                 mostraErrore("Seleziona un progresso");
-                return;
+                return false;
             }
 
             String testo = giudizio.getText().trim();
 
             if (testo.isEmpty()) {
                 mostraErrore("Scrivi un commento");
-                return;
+                return false;
             }
 
-            controller.commentaProgresso(idProg, testo);
-        }
-    }
+            boolean ok = controller.commentaProgresso(idProg, testo);
 
-    private void messaggioRisultato(boolean ok, int idTeam) {
+            if (!ok) {
+                JOptionPane.showMessageDialog(
+                        mainPanel,
+                        "Hai già inserito un commento per questo progresso",
+                        ERRORE,
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
 
-        if (ok) {
-
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Salvato",
-                    "Successo",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-
-            aggiornaVoti(idTeam);
-
-        } else {
-            mostraErrore("Errore durante il salvataggio");
+            return ok;
         }
 
+        return true;
     }
 
     /* ================= UTILITY ================= */
@@ -335,7 +351,7 @@ public class GiudiceGUI {
     }
 
     private void mostraErrore(String msg) {
-        JOptionPane.showMessageDialog(mainPanel, msg, "Errore", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(mainPanel, msg, ERRORE, JOptionPane.ERROR_MESSAGE);
     }
 
     public JPanel getMainPanel() {

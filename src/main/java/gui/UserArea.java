@@ -28,7 +28,6 @@ public class UserArea {
     private Set<Integer> invitiGestiti = new HashSet<>();
 
     private static final String CAMPO = "Campo";
-    private static final String DATO = "Dato";
 
     private gui.UserAreaFrame parentFrame;
     private Controller controller;
@@ -56,7 +55,7 @@ public class UserArea {
         String ruolo = setRuolo();
 
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{CAMPO, DATO}, 0
+                new String[]{CAMPO, "Dato"}, 0
         ) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -137,7 +136,7 @@ public class UserArea {
 
     public void updateDatiUtente(String nome, String secondoNome, String cognome, String dataNascita) {
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{CAMPO, DATO}, 0
+                new String[]{CAMPO, "Dato"}, 0
         ) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -289,6 +288,9 @@ public class UserArea {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
+            refreshInvitiGiudice();
+            refreshDatiUtente();
+
         } else {
 
             JOptionPane.showMessageDialog(
@@ -302,7 +304,7 @@ public class UserArea {
         refreshInvitiGiudice();
     }
 
-    private void refreshInvitiGiudice() {
+    public void refreshInvitiGiudice() {
 
         DefaultListModel<String> model = new DefaultListModel<>();
 
@@ -354,7 +356,7 @@ public class UserArea {
     public void refreshDatiUtente() {
 
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{CAMPO, DATO}, 0
+                new String[]{CAMPO, "Dato"}, 0
         ) {
             @Override
             public boolean isCellEditable(int r, int c) {

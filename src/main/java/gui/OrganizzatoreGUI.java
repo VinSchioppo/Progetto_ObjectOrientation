@@ -39,7 +39,7 @@ public class OrganizzatoreGUI {
        ============================================================ */
     private void inizializzaTabella() {
 
-        String[] colonne = { "Titolo", "Stato" };
+        String[] colonne = { "Titolo" };
 
         DefaultTableModel model = new DefaultTableModel(colonne, 0) {
             @Override
@@ -55,28 +55,12 @@ public class OrganizzatoreGUI {
             for (String evento : eventiOrganizzatore) {
 
                 try {
-                    // ===== ID =====
                     int spazio = evento.indexOf(" ");
                     if (spazio == -1) continue;
 
-                    int idEvento = Integer.parseInt(evento.substring(0, spazio));
-
-                    // ===== TITOLO =====
                     String titolo = evento.substring(spazio + 1);
 
-                    // ===== DATI COMPLETI =====
-                    controller.selectEvento(idEvento, Role.ORGANIZZATORE);
-                    String dati = controller.datiEvento();
-
-                    // ===== STATO =====
-                    String stato;
-                    if (dati == null || dati.contains("null")) {
-                        stato = "❌";
-                    } else {
-                        stato = "✅";
-                    }
-
-                    model.addRow(new Object[]{ titolo, stato });
+                    model.addRow(new Object[]{ titolo });
 
                 } catch (Exception _) {
                     logger.info("Errore evento: " + evento);
@@ -86,16 +70,9 @@ public class OrganizzatoreGUI {
 
         table1.setModel(model);
 
-        // ===== CONFIG TABELLA =====
         configurazioneTabella();
-
-        // ===== CENTRATURA =====
         centratura();
-
-        // ===== SELEZIONE =====
         selezione();
-
-        // ===== DOPPIO CLICK =====
         doppioclick();
     }
 
@@ -196,9 +173,20 @@ public class OrganizzatoreGUI {
         backButton.addActionListener(e -> parentFrame.showHome());
 
         setDatiEventoButton.addActionListener(e -> {
-            if (table1.getSelectedRow() != -1) {
-                parentFrame.showSetDatiEvento();
-            }
+
+            int row = table1.getSelectedRow();
+            if (row == -1) return;
+
+            selezionaEvento(row);
+
+            String evento = eventiOrganizzatore.get(row);
+
+            int spazio = evento.indexOf(" ");
+            if (spazio == -1) return;
+
+            int idEvento = Integer.parseInt(evento.substring(0, spazio));
+
+            parentFrame.showSetDatiEvento(idEvento);
         });
 
         invitaGiudiceButton.addActionListener(e -> {

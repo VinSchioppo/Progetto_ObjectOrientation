@@ -1,6 +1,7 @@
 package gui;
 
 import controller.Controller;
+import controller.Role;
 
 import javax.swing.*;
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public class SetDatiEvento {
     private JSpinner numeroCivicospinner;
     private JTextArea descrizioneproblema;
 
+
     private static final String DATEFORMAT = "yyyy-MM-dd";
 
     private UserAreaFrame parentFrame;
@@ -36,9 +38,11 @@ public class SetDatiEvento {
 
     private static final Logger logger = Logger.getLogger(SetDatiEvento.class.getName());
 
-    public SetDatiEvento(UserAreaFrame parentFrame, Controller controller) {
+    public SetDatiEvento(UserAreaFrame parentFrame, Controller controller, int idEvento) {
         this.parentFrame = parentFrame;
         this.controller = controller;
+
+        controller.selectEvento(idEvento, Role.ORGANIZZATORE);
 
         inizializzaSpinnerDate();
         inizializzaSpinnerDate();
@@ -122,9 +126,8 @@ public class SetDatiEvento {
                     dataFineReg
             );
 
-        } catch (Exception e) {
-            logger.info(e.getMessage());
-            logger.log(Level.SEVERE, Arrays.toString(e.getStackTrace()));
+        } catch (Exception ex) {
+            ex.printStackTrace();
             mostraErrore();
         }
     }

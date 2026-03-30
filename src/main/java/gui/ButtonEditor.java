@@ -59,6 +59,10 @@ public class ButtonEditor extends AbstractCellEditor
         // La descrizione è l'ultimo campo
         String descrizione = dati[dati.length - 1];
 
+        if (descrizione == null || descrizione.equalsIgnoreCase("null")) {
+            descrizione = "Dettagli non disponibili";
+        }
+
         JOptionPane.showMessageDialog(
                 table,
                 descrizione,

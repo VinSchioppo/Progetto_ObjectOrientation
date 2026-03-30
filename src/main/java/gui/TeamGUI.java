@@ -8,7 +8,6 @@ import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 public class TeamGUI {
 
@@ -21,6 +20,8 @@ public class TeamGUI {
     private JButton progressiButton;
     private JLabel nomeTeamLabel;
     private JList<String> listRichiesteTeam;
+    private JLabel nomeTeamLeader;
+    private JTextArea descrizioneProblema;
     private Set<String> richiesteGestite = new HashSet<>();
 
     private static final String ACCETTA = "Accetta";
@@ -35,10 +36,14 @@ public class TeamGUI {
         this.parentFrame = parentFrame;
         this.controller = controller;
 
+        configuraDescrizione();
+
         inizializzaDati();
         inizializzaBottoni();
         inizializzaRichieste();
         inizializzaListenerRichieste();
+
+
     }
 
     /* ============================================================
@@ -47,49 +52,79 @@ public class TeamGUI {
 
     private void inizializzaDati() {
 
-        if (controller.datiEvento() == null) {
-            nomeEvento.setText("Nessun evento selezionato");
-            nomeTeamLabel.setText("Nessun team");
+        String datiEvento = controller.datiEventoCorrente();
+
+        if (datiEvento == null) {
+            nomeEvento.setText("-");
+            descrizioneEvento.setText("-");
             return;
         }
 
-        // ===== EVENTO =====
-        String datiEvento = controller.datiEvento();
+        // ===== SPLIT PRINCIPALE (STRUTTURA | DESCRIZIONE) =====
+        String[] parti = datiEvento.split("\\|", 2);
 
-        if (datiEvento != null) {
-            String[] dati = datiEvento.split(" ");
+        String parteDati = parti[0];
+        String descrizione = (parti.length > 1) ? parti[1].trim() : "descrizione ancora non disponibili";
 
-            try {
-                nomeEvento.setText(dati[0]);
+        if (descrizione.isEmpty() || descrizione.equalsIgnoreCase("null")) {
+            descrizione = "descrizione ancora non disponibili";
+        }
 
-                StringBuilder descrizione = new StringBuilder();
-                for (int i = 10; i < dati.length; i++) {
-                    descrizione.append(dati[i]).append(" ");
+        // ===== PARSING DATI =====
+        String[] dati = parteDati.split(" ");
+
+        // ===== NOME EVENTO =====
+        nomeEvento.setText(dati[0]);
+
+        // ===== DATE EVENTO =====
+        String dataInizio = "-";
+        String dataFine = "-";
+
+        int dateTrovate = 0;
+
+        for (String d : dati) {
+            if (d.matches("\\d{4}-\\d{2}-\\d{2}")) {
+
+                if (dateTrovate == 0) {
+                    dataInizio = d;
+                } else if (dateTrovate == 1) {
+                    dataFine = d;
+                    break;
                 }
 
-                descrizioneEvento.setText(descrizione.toString().trim());
-
-            } catch (Exception _) {
-                nomeEvento.setText(ERRORE);
-                descrizioneEvento.setText("Errore parsing");
+                dateTrovate++;
             }
         }
 
-        // ===== TEAM =====
+        // DATE
+        descrizioneEvento.setText(dataInizio + " - " + dataFine);
 
+        // DESCRIZIONE PROBLEMA
+        descrizioneProblema.setText(descrizione);
+
+        // ===== TEAM =====
         String infoTeam = controller.teamPartecipante();
 
         if (infoTeam != null) {
 
-            String[] dati = infoTeam.split(" ");
+            String[] datiTeam = infoTeam.split(" ");
 
-            nomeTeamLabel.setText(dati[1]); // nome team
+            nomeTeamLabel.setText(datiTeam[1]);
+
+            String leader = controller.teamLeaderCorrente();
+
+            if (leader != null) {
+                nomeTeamLeader.setText(leader);
+            } else {
+                nomeTeamLeader.setText("-");
+            }
 
         } else {
             nomeTeamLabel.setText("Nessun team");
+            nomeTeamLeader.setText("-");
         }
-        aggiornaMembri();
 
+        aggiornaMembri();
     }
 
     /* ============================================================
@@ -100,6 +135,13 @@ public class TeamGUI {
 
         aggiornaRichieste();
 
+    }
+
+    private void configuraDescrizione() {
+        descrizioneProblema.setLineWrap(true);
+        descrizioneProblema.setWrapStyleWord(true);
+        descrizioneProblema.setEditable(false);
+        descrizioneProblema.setOpaque(false);
     }
 
     private void inizializzaListenerRichieste() {

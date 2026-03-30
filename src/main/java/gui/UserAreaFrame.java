@@ -14,15 +14,14 @@ public class UserAreaFrame extends JFrame {
     private JPanel container;
     private Controller controller;
 
+    private static final String INVITA_GIUDICE = "INVITA_GIUDICE";
+
     private UserArea userAreaPanel;
     private IscriviEvento iscriviEventoPanel;
-
-    private static final String INVITA_GIUDICE = "INVITA_GIUDICE";
 
     // NUOVI PANEL SELECT EVENTO
     private InvitaGiudice invitaGiudicePanel;
     private PartecipanteGUI partecipanteGUIPanel;
-    private TeamGUI teamGUIPanel;
 
     public UserAreaFrame(Controller controller) {
 
@@ -63,7 +62,6 @@ public class UserAreaFrame extends JFrame {
         OrganizzatoreGUI organizzatorePanel = new OrganizzatoreGUI(this, controller);
         invitaGiudicePanel = new InvitaGiudice(this, controller);
         partecipanteGUIPanel = new PartecipanteGUI(this, controller);
-        SetDatiEvento setDatiEventoPanel = new SetDatiEvento(this, controller);
         GiudiceGUI giudicePanel = new GiudiceGUI(this, controller);
 
         // ===== AGGIUNTA =====
@@ -75,16 +73,11 @@ public class UserAreaFrame extends JFrame {
         container.add(selectEventoPanel.getMainPanel(), "SELECT_EVENTO");
         container.add(organizzatorePanel.getMainPanel(), "ORGANIZZATORE");
         container.add(invitaGiudicePanel.getMainPanel(), INVITA_GIUDICE);
-        container.add(setDatiEventoPanel.getMainPanel(), "SET_DATI_EVENTO");
         container.add(partecipanteGUIPanel.getMainPanel(), "PARTECIPANTE");
         container.add(giudicePanel.getMainPanel(), "GIUDICE");
     }
 
-    public void forceReloadPartecipanteArea() {
 
-        showPartecipanteGUI();
-
-    }
 
     // ================= NAVIGAZIONE =================
 
@@ -92,6 +85,7 @@ public class UserAreaFrame extends JFrame {
 
         userAreaPanel.refreshDatiUtente();
         userAreaPanel.refreshEventiIscritti();
+        userAreaPanel.refreshInvitiGiudice();
 
         cardLayout.show(container, "HOME");
     }
@@ -130,7 +124,7 @@ public class UserAreaFrame extends JFrame {
 
     public void showInvitaGiudice(int idEvento) {
 
-        controller.selectEvento(idEvento, Role.ORGANIZZATORE); // oppure ORGANIZZATORE
+        controller.selectEvento(idEvento, Role.ORGANIZZATORE);
 
         invitaGiudicePanel = new InvitaGiudice(this, controller);
 
@@ -139,18 +133,21 @@ public class UserAreaFrame extends JFrame {
         cardLayout.show(container, INVITA_GIUDICE);
     }
 
-    public void showSetDatiEvento() {
+    public void showSetDatiEvento(int idEvento) {
+
+        controller.selectEvento(idEvento, Role.ORGANIZZATORE);
+
+        SetDatiEvento panel = new SetDatiEvento(this, controller, idEvento);
+
+        container.add(panel.getMainPanel(), "SET_DATI_EVENTO");
+
         cardLayout.show(container, "SET_DATI_EVENTO");
     }
-
     public void showTeamGUI() {
 
-        if (teamGUIPanel == null) {
-            teamGUIPanel = new TeamGUI(this, controller);
-            container.add(teamGUIPanel.getMainPanel(), "TEAM");
-        }
+        TeamGUI teamGUIPanel = new TeamGUI(this, controller);
 
-        teamGUIPanel.refresh();
+        container.add(teamGUIPanel.getMainPanel(), "TEAM");
 
         cardLayout.show(container, "TEAM");
     }
